@@ -1,5 +1,7 @@
-package dizzybrawl.verticles;
+package dizzybrawl;
 
+import dizzybrawl.api.HttpServerVerticle;
+import dizzybrawl.database.DatabaseVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
@@ -14,7 +16,7 @@ public class MainVerticle extends AbstractVerticle {
         log.info("Main Verticle starts deploying.");
 
         Promise<String> pgDatabaseVerticleDeployment = Promise.promise();
-        vertx.deployVerticle(new PgDatabaseVerticle(), pgDatabaseVerticleDeployment);
+        vertx.deployVerticle(new DatabaseVerticle(), pgDatabaseVerticleDeployment);
 
         pgDatabaseVerticleDeployment.future().compose(asyncResult -> {
             Promise<String> httpVerticleDeployment = Promise.promise();

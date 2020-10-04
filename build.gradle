@@ -13,7 +13,6 @@ repositories {
 dependencies {
     compile group: 'io.vertx', name: 'vertx-core', version: '4.0.0-milestone5'
     compile group: 'io.vertx', name: 'vertx-web', version: '4.0.0-milestone5'
-
     compile group: 'io.vertx', name: 'vertx-pg-client', version: '4.0.0-milestone5'
     compile group: 'com.ongres.scram', name: 'client', version: '2.1'
 
@@ -23,5 +22,5 @@ dependencies {
 }
 
 vertx {
-    mainVerticle = 'dizzybrawl.verticles.MainVerticle'
+    mainVerticle = 'dizzybrawl.MainVerticle'
 }
