@@ -1,6 +1,9 @@
 # IDEA ignore
 .idea
 
+# log files
+*.log
+
 # Gradle ignore
 .gradle
 **/build/
