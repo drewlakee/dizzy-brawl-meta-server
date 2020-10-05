@@ -1,11 +1,12 @@
 package dizzybrawl;
 
-import dizzybrawl.api.HttpServerVerticle;
+import dizzybrawl.http.HttpServerVerticle;
 import dizzybrawl.database.DatabaseVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 
 public class MainVerticle extends AbstractVerticle {
 

@@ -1,11 +1,12 @@
-package dizzybrawl.api;
+package dizzybrawl.http;
 
+import dizzybrawl.http.api.EndPoints;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
@@ -19,15 +20,26 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        Router router = Router.router(vertx);
-        router.mountSubRouter(EndPoints.MOUNT_SUB_API, router);
+        Router apiRouter = Router.router(vertx);
+        apiRouter.mountSubRouter("/api/v1", apiRouter);
+        apiRouter.route().handler(rh -> {
+            rh.response().putHeader("content-type", "application/json");
+            rh.next();
+        });
 
-        // handlers
-        router.get(EndPoints.GET_HERO_BY_ID).handler(this::getHeroById);
+        // api end points handlers
+        apiRouter.get(EndPoints.GET_HERO_BY_ID).handler(this::getHeroById);
 
         vertx.createHttpServer()
-             .requestHandler(router)
-             .listen(config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080));
+             .requestHandler(apiRouter)
+             .listen(config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080), launchResult -> {
+                 if (launchResult.succeeded()) {
+                     startPromise.complete();
+                 } else {
+                     log.error("Could not launch http server " + launchResult.cause());
+                     startPromise.fail(launchResult.cause());
+                 }
+             });
     }
 
     private void getHeroById(RoutingContext context) {
@@ -42,7 +54,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         vertx.eventBus().request(dizzyBrawlDbQueue, request, options, reply -> {
            if (reply.succeeded()) {
                JsonObject responseBody = (JsonObject) reply.result().body();
-               context.end(responseBody.encodePrettily());
+               context.response().end(responseBody.encodePrettily());
            } else {
                context.fail(reply.cause());
            }

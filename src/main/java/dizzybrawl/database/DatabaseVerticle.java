@@ -1,12 +1,12 @@
 package dizzybrawl.database;
 
+import dizzybrawl.database.sql.SqlQuery;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.*;
@@ -33,10 +33,6 @@ public class DatabaseVerticle extends AbstractVerticle {
     private PgPool pgPool;
 
     private final HashMap<SqlQuery, String> sqlQueries = new HashMap<>();
-
-    private enum SqlQuery {
-        GET_HERO_BY_ID
-    }
 
     public enum ErrorCodes {
         NO_ACTION_SPECIFIED,
@@ -76,13 +72,13 @@ public class DatabaseVerticle extends AbstractVerticle {
     }
 
     private void loadSqlQueries() throws IOException {
-        InputStream queriesInputStream = getClass().getResourceAsStream("/db-queries.properties");
+        InputStream queriesInputStream = getClass().getResourceAsStream("/hero-db-queries.properties");
 
         Properties queriesProps = new Properties();
         queriesProps.load(queriesInputStream);
         queriesInputStream.close();
 
-        sqlQueries.put(SqlQuery.GET_HERO_BY_ID, queriesProps.getProperty("get-hero-by-id"));
+        sqlQueries.put(SqlQuery.GET_OBJECT_BY_ID, queriesProps.getProperty("get-hero-by-id"));
     }
 
     public void onMessageReceive(Message<JsonObject> message) {
@@ -111,7 +107,7 @@ public class DatabaseVerticle extends AbstractVerticle {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
                 connection
-                        .preparedQuery(sqlQueries.get(SqlQuery.GET_HERO_BY_ID))
+                        .preparedQuery(sqlQueries.get(SqlQuery.GET_OBJECT_BY_ID))
                         .execute(Tuple.of(requestedHeroId), ar2 -> {
                             RowSet<Row> resultQuery = ar2.result();
 
