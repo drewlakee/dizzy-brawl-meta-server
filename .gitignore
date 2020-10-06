@@ -4,6 +4,9 @@
 # log files
 *.log
 
+# vertx generated proxies
+src/generated
+
 # Gradle ignore
 .gradle
 **/build/

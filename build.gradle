@@ -10,6 +10,11 @@ repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_14
+}
+
 dependencies {
     compile 'io.vertx:vertx-core:3.9.3'
     compile 'io.vertx:vertx-web:3.9.3'
