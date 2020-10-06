@@ -113,11 +113,12 @@ public class DatabaseVerticle extends AbstractVerticle {
 
                             if (resultQuery.iterator().hasNext()) {
                                 Row heroRow = resultQuery.iterator().next();
+                                response.put("found", true);
                                 response.put("hero_id", heroRow.getInteger("hero_id"));
                                 response.put("name", heroRow.getString("name"));
                                 response.put("level", heroRow.getInteger("level"));
                             } else {
-                                response.put("message", "not found");
+                                response.put("found", false);
                             }
 
                             message.reply(response);
