@@ -1,15 +1,15 @@
 package dizzybrawl.database;
 
-import dizzybrawl.database.sql.SqlQuery;
+import dizzybrawl.database.services.HeroService;
+import dizzybrawl.database.sql.HeroSqlQuery;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.*;
+import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.sqlclient.PoolOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,21 +24,13 @@ public class DatabaseVerticle extends AbstractVerticle {
     private static final String CONFIG_PG_USERNAME = "postgresql.username";
     private static final String CONFIG_PG_PASSWORD = "postgresql.password";
     private static final String CONFIG_PG_POOL_MAX_SIZE = "postgresql.pool.maxsize";
-
-    // Event bus address, that verticle will listen
     public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseVerticle.class);
 
     private PgPool pgPool;
 
-    private final HashMap<SqlQuery, String> sqlQueries = new HashMap<>();
-
-    public enum ErrorCodes {
-        NO_ACTION_SPECIFIED,
-        BAD_ACTION,
-        DB_ERROR
-    }
+    private final HashMap<HeroSqlQuery, String> sqlQueries = new HashMap<>();
 
     @Override
     public void start(Promise<Void> startPromise) throws IOException {
@@ -60,15 +52,30 @@ public class DatabaseVerticle extends AbstractVerticle {
         // Create the client pool
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        // TODO: Add tables creation
-        pgPool.getConnection(asyncResult -> {
-            if (asyncResult.succeeded()) {
-                vertx.eventBus().consumer(CONFIG_DIZZYBRAWL_DB_QUEUE, this::onMessageReceive);
+        pgPool.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
                 startPromise.complete();
             } else {
-                startPromise.fail(asyncResult.cause());
+                startPromise.fail(ar1.cause());
+                log.error("Can't connect to Database.", ar1.cause());
             }
         });
+
+        // Bind hero service
+        HeroService.create(pgPool, sqlQueries, ar1 -> {
+           if (ar1.succeeded()) {
+               ServiceBinder binder = new ServiceBinder(vertx);
+               binder
+                       .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE)
+                       .register(HeroService.class, ar1.result());
+               startPromise.complete();
+           } else {
+               log.error("Hero service can't be binded.", ar1.cause());
+               startPromise.fail(ar1.cause());
+           }
+        });
+
+        // TODO: create default tables creation
     }
 
     private void loadSqlQueries() throws IOException {
@@ -78,56 +85,7 @@ public class DatabaseVerticle extends AbstractVerticle {
         queriesProps.load(queriesInputStream);
         queriesInputStream.close();
 
-        sqlQueries.put(SqlQuery.GET_OBJECT_BY_ID, queriesProps.getProperty("get-hero-by-id"));
-    }
-
-    public void onMessageReceive(Message<JsonObject> message) {
-        if (!message.headers().contains("action")) {
-            message.fail(ErrorCodes.NO_ACTION_SPECIFIED.ordinal(), "No action header specified");
-            return;
-        }
-
-        String action = message.headers().get("action");
-
-        switch (action) {
-            case "get-hero-by-id":
-                getHeroById(message);
-                break;
-            default:
-                message.fail(ErrorCodes.BAD_ACTION.ordinal(), "Bad action: " + action);
-        }
-    }
-
-    private void getHeroById(Message<JsonObject> message) {
-        // body of request on event bus
-        Integer requestedHeroId = Integer.parseInt(message.body().getString("hero"));
-        JsonObject response = new JsonObject();
-
-        pgPool.getConnection(ar1 -> {
-            if (ar1.succeeded()) {
-                SqlConnection connection = ar1.result();
-                connection
-                        .preparedQuery(sqlQueries.get(SqlQuery.GET_OBJECT_BY_ID))
-                        .execute(Tuple.of(requestedHeroId), ar2 -> {
-                            RowSet<Row> resultQuery = ar2.result();
-
-                            if (resultQuery.iterator().hasNext()) {
-                                Row heroRow = resultQuery.iterator().next();
-                                response.put("found", true);
-                                response.put("hero_id", heroRow.getInteger("hero_id"));
-                                response.put("name", heroRow.getString("name"));
-                                response.put("level", heroRow.getInteger("level"));
-                            } else {
-                                response.put("found", false);
-                            }
-
-                            message.reply(response);
-                        });
-            } else {
-                log.error("Could not connect: " + ar1.cause().getMessage());
-                response.put("message", "could not connect " + ar1.cause().getMessage());
-            }
-        });
+        sqlQueries.put(HeroSqlQuery.GET_HERO_BY_ID, queriesProps.getProperty("get-hero-by-id"));
     }
 
     @Override

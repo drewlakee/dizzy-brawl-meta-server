@@ -1,7 +1,7 @@
 package dizzybrawl;
 
-import dizzybrawl.http.HttpServerVerticle;
 import dizzybrawl.database.DatabaseVerticle;
+import dizzybrawl.http.HttpServerVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;

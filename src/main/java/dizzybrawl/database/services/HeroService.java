@@ -1,7 +1,7 @@
 package dizzybrawl.database.services;
 
 import dizzybrawl.database.services.impls.PgHeroService;
-import dizzybrawl.database.sql.SqlQuery;
+import dizzybrawl.database.sql.HeroSqlQuery;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -19,7 +19,8 @@ import java.util.HashMap;
 public interface HeroService {
 
     @GenIgnore
-    static HeroService create(SqlClient dbClient, HashMap<SqlQuery, String> sqlQueries, Handler<AsyncResult<HeroService>> readyHandler) {
+    static HeroService create(SqlClient dbClient, HashMap<HeroSqlQuery, String> sqlQueries, Handler<AsyncResult<HeroService>> readyHandler) {
+        // TODO: use switch for different kind of service and enum
         return new PgHeroService(dbClient, sqlQueries, readyHandler);
     }
 
