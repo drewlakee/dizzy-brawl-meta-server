@@ -52,15 +52,6 @@ public class DatabaseVerticle extends AbstractVerticle {
         // Create the client pool
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        pgPool.getConnection(ar1 -> {
-            if (ar1.succeeded()) {
-                startPromise.complete();
-            } else {
-                startPromise.fail(ar1.cause());
-                log.error("Can't connect to Database.", ar1.cause());
-            }
-        });
-
         // Bind hero service
         HeroService.create(pgPool, sqlQueries, ar1 -> {
            if (ar1.succeeded()) {
