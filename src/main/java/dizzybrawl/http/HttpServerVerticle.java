@@ -49,6 +49,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         // api end points handlers
         router.post("/auth/login").handler(AccountApi.OnLogin(accountService));
+        router.post("/account/register").handler(AccountApi.OnRegistration(accountService));
 
         return router;
     }

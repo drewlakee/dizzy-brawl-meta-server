@@ -1,6 +1,7 @@
 package dizzybrawl.database.services.impls;
 
 import dizzybrawl.database.models.Account;
+import dizzybrawl.database.models.PreRegistrationAccount;
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.AccountSqlQuery;
@@ -51,7 +52,8 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
         try (InputStream queriesInputStream = getClass().getResourceAsStream("/account-db-queries.properties")) {
             queriesProps.load(queriesInputStream);
 
-            loadedSqlQueries.put(AccountSqlQuery.GET_ACCOUNT_BY_USERNAME_OR_EMAIL, queriesProps.getProperty("get-account-by-username-or-email"));
+            loadedSqlQueries.put(AccountSqlQuery.SELECT_ACCOUNT_BY_USERNAME_OR_EMAIL, queriesProps.getProperty("select-account-by-username-or-email"));
+            loadedSqlQueries.put(AccountSqlQuery.INSERT_ACCOUNT_WITH_RETURNING, queriesProps.getProperty("insert-account-with-returning"));
         } catch (IOException e) {
             log.error("Can't load sql queries.", e.getCause());
         }
@@ -66,7 +68,7 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                 SqlConnection connection = ar1.result();
 
                 connection
-                        .preparedQuery(sqlQueries.get(AccountSqlQuery.GET_ACCOUNT_BY_USERNAME_OR_EMAIL))
+                        .preparedQuery(sqlQueries.get(AccountSqlQuery.SELECT_ACCOUNT_BY_USERNAME_OR_EMAIL))
                         .execute(Tuple.of(UsernameOrEmail), ar2 -> {
                             if (ar2.succeeded()) {
                                 RowSet<Row> queryResult = ar2.result();
@@ -80,10 +82,41 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
 
                                 resultHandler.handle(Future.succeededFuture(response));
                             } else {
-                                log.warn("Can't query to database.");
+                                log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
                         });
+            } else {
+                log.error("Can't connect to database.", ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+        });
+
+        return this;
+    }
+
+    @Override
+    public AccountService registerAccount(PreRegistrationAccount preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
+        pgClient.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
+            SqlConnection connection = ar1.result();
+
+            connection
+                    .preparedQuery(sqlQueries.get(AccountSqlQuery.INSERT_ACCOUNT_WITH_RETURNING))
+                    .execute(Tuple.of(
+                            preRegistrationAccount.username,
+                            preRegistrationAccount.email,
+                            preRegistrationAccount.password), ar2 -> {
+
+                        Account account = Account.createEmpty();
+                        if (ar2.succeeded()) {
+                            account = new Account(ar2.result().iterator().next());
+                        } else {
+                            log.warn("Can't query to database cause " + ar2.cause());
+                        }
+
+                        resultHandler.handle(Future.succeededFuture(account));
+                    });
             } else {
                 log.error("Can't connect to database.", ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
