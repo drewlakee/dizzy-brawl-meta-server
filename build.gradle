@@ -35,8 +35,9 @@ vertx {
 }
 
 sourceSets {
-    generated{
-        java.srcDir "${projectDir}/src/generated/java"
+    generated {
+        java.srcDir "${projectDir}/src/generated"
+        java.srcDir "${projectDir}/src/main/asciidoc"
     }
 }
 
