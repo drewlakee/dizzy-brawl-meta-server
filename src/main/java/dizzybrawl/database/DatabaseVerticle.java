@@ -1,7 +1,6 @@
 package dizzybrawl.database;
 
-import dizzybrawl.database.services.HeroService;
-import dizzybrawl.database.sql.HeroSqlQuery;
+import dizzybrawl.database.services.AccountService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -11,13 +10,9 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.sqlclient.PoolOptions;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Properties;
-
 
 public class DatabaseVerticle extends AbstractVerticle {
+
     private static final String CONFIG_PG_HOST = "postgresql.host";
     private static final String CONFIG_PG_PORT = "postgresql.port";
     private static final String CONFIG_PG_DATABASE = "postgresql.database";
@@ -30,13 +25,8 @@ public class DatabaseVerticle extends AbstractVerticle {
 
     private PgPool pgPool;
 
-    private final HashMap<HeroSqlQuery, String> sqlQueries = new HashMap<>();
-
     @Override
-    public void start(Promise<Void> startPromise) throws IOException {
-        // Block Loop Event, but start() calls only at application launch
-        loadSqlQueries();
-
+    public void start(Promise<Void> startPromise) {
         // Configure connection to database
         PgConnectOptions connectOptions = new PgConnectOptions()
                 .setHost(config().getString(CONFIG_PG_HOST, "localhost"))
@@ -52,31 +42,21 @@ public class DatabaseVerticle extends AbstractVerticle {
         // Create the client pool
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        // Bind hero service
-        HeroService.create(pgPool, sqlQueries, ar1 -> {
-           if (ar1.succeeded()) {
-               ServiceBinder binder = new ServiceBinder(vertx);
-               binder
-                       .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE)
-                       .register(HeroService.class, ar1.result());
-               startPromise.complete();
-           } else {
-               log.error("Hero service can't be binded.", ar1.cause());
-               startPromise.fail(ar1.cause());
-           }
+        // Binding service handling on event bus by address
+        AccountService.create(pgPool, ar1 -> {
+            if (ar1.succeeded()) {
+                ServiceBinder binder = new ServiceBinder(vertx);
+                binder
+                        .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.account")
+                        .register(AccountService.class, ar1.result());
+                startPromise.complete();
+            } else {
+                log.error("Account service can't be binded.", ar1.cause());
+                startPromise.fail(ar1.cause());
+            }
         });
 
         // TODO: create default tables creation
-    }
-
-    private void loadSqlQueries() throws IOException {
-        InputStream queriesInputStream = getClass().getResourceAsStream("/hero-db-queries.properties");
-
-        Properties queriesProps = new Properties();
-        queriesProps.load(queriesInputStream);
-        queriesInputStream.close();
-
-        sqlQueries.put(HeroSqlQuery.GET_HERO_BY_ID, queriesProps.getProperty("get-hero-by-id"));
     }
 
     @Override

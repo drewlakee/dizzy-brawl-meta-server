@@ -4,8 +4,9 @@
 # log files
 *.log
 
-# vertx generated proxies
+# vertx generated
 src/generated
+**/asciidoc/**
 
 # Gradle ignore
 .gradle
@@ -20,6 +21,3 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
-
-# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
-# gradle/wrapper/gradle-wrapper.properties
