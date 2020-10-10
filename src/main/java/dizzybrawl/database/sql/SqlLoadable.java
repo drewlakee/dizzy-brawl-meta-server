@@ -1,4 +1,4 @@
-package dizzybrawl.database.services;
+package dizzybrawl.database.sql;
 
 import java.util.HashMap;
 

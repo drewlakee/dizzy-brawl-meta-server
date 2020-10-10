@@ -2,7 +2,7 @@ package dizzybrawl.database.services.impls;
 
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.services.AccountService;
-import dizzybrawl.database.services.SqlLoadable;
+import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.AccountSqlQuery;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
