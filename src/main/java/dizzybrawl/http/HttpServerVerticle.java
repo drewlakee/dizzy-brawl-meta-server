@@ -1,7 +1,9 @@
 package dizzybrawl.http;
 
 import dizzybrawl.database.services.AccountService;
+import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.http.api.AccountApi;
+import dizzybrawl.http.api.CharacterApi;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -18,6 +20,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(HttpServerVerticle.class);
 
     private AccountService accountService;
+    private CharacterService characterService;
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -51,6 +54,8 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.post("/auth/login").handler(AccountApi.OnLogin(accountService));
         router.post("/account/register").handler(AccountApi.OnRegistration(accountService));
 
+        router.get("/characters/:accountuuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+
         return router;
     }
 
@@ -58,5 +63,6 @@ public class HttpServerVerticle extends AbstractVerticle {
         // Create async services
         String dbQueueAddress = config().getString(CONFIG_DIZZYBRAWL_DB_QUEUE, "dizzybrawl.db.queue");
         accountService = AccountService.createProxy(vertx, dbQueueAddress + ".service.account");
+        characterService = CharacterService.createProxy(vertx, dbQueueAddress + ".service.character");
     }
 }

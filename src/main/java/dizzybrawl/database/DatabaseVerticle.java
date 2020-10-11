@@ -1,6 +1,7 @@
 package dizzybrawl.database;
 
 import dizzybrawl.database.services.AccountService;
+import dizzybrawl.database.services.CharacterService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -49,9 +50,21 @@ public class DatabaseVerticle extends AbstractVerticle {
                 binder
                         .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.account")
                         .register(AccountService.class, ar1.result());
-                startPromise.complete();
             } else {
                 log.error("Account service can't be binded.", ar1.cause());
+                startPromise.fail(ar1.cause());
+            }
+        });
+
+        CharacterService.create(pgPool, ar1 -> {
+            if (ar1.succeeded()) {
+                ServiceBinder binder = new ServiceBinder(vertx);
+                binder
+                        .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.character")
+                        .register(CharacterService.class, ar1.result());
+                startPromise.complete();
+            } else {
+                log.error("Character service can't be binded.", ar1.cause());
                 startPromise.fail(ar1.cause());
             }
         });
