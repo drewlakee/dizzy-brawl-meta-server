@@ -6,7 +6,7 @@ API List:
 - [POST {host}/api/v1/account/register](#post-hostapiv1accountregister)
 - [GET {host}/api/v1/characters/:accountuuid](#get-hostapiv1charactersaccountuuid)
 
-###### POST {host}/api/v1/auth/login
+###### `POST {host}/api/v1/auth/login`
 
 Request params:
 
@@ -42,7 +42,7 @@ Response examples:
 }
 ```
 
-###### POST {host}/api/v1/account/register
+###### `POST {host}/api/v1/account/register`
 
 Request params:
 
@@ -76,7 +76,7 @@ Response examples:
 }
 ```
 
-###### GET {host}/api/v1/characters/:accountuuid
+###### `GET {host}/api/v1/characters/:accountuuid`
 
 Request params:
 
