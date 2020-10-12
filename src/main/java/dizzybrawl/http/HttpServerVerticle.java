@@ -51,8 +51,8 @@ public class HttpServerVerticle extends AbstractVerticle {
         });
 
         // api end points handlers
-        router.post("/auth/login").handler(AccountApi.OnLogin(accountService));
-        router.post("/account/register").handler(AccountApi.OnRegistration(accountService));
+        router.post("/auth/login").handler(AccountApi.onLogin(accountService));
+        router.post("/account/register").handler(AccountApi.onRegistration(accountService));
 
         router.get("/characters/:accountuuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 

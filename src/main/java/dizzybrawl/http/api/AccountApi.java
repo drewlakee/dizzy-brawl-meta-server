@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class AccountApi {
 
-    public static Handler<RoutingContext> OnLogin(AccountService accountService) {
+    public static Handler<RoutingContext> onLogin(AccountService accountService) {
         return context -> {
             String usernameOrEmail = context.request().getParam("usernameoremail");
             String password = context.request().getParam("password");
@@ -43,7 +43,7 @@ public class AccountApi {
         };
     }
 
-    public static Handler<RoutingContext> OnRegistration(AccountService accountService) {
+    public static Handler<RoutingContext> onRegistration(AccountService accountService) {
         return context -> {
             PreRegistrationAccount preRegistrationAccount = new PreRegistrationAccount();
             preRegistrationAccount.username = context.request().getParam("username");
