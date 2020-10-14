@@ -12,7 +12,7 @@
 2. [Account](#account)
     * [POST /account/register](#post-accountregister)
 3. [Characters](#characters)
-    * [GET /characters/{accountuuid}](#get-charactersaccount_uuid)
+    * [GET /characters/{account_uuid}](#get-charactersaccount_uuid)
 
 ### API Documentation
 
