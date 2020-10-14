@@ -54,7 +54,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.post("/auth/login").handler(AccountApi.onLogin(accountService));
         router.post("/account/register").handler(AccountApi.onRegistration(accountService));
 
-        router.get("/characters/:accountuuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+        router.get("/characters/:account_uuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
         return router;
     }

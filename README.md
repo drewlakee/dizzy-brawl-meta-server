@@ -18,15 +18,15 @@
 
 > Sub-route for all end-points `/api/v1`
 
-## Auth
+### Auth
 
-##### POST `/auth/login`
+### POST `/auth/login`
 
 **Query parameters**
 
 Name                | Description
 ------------        | -------------
-usernameoremail     |  User's username or email
+username_or_email   |  User's username or email
 password            |  User's password
 
 **JSON Response**
@@ -39,9 +39,9 @@ email               | String        | User's email
 found               | Boolean       | Database have or doesn't have information about user
 valid               | Boolean       | Correct username/email and password enter
 
-## Account
+### Account
 
-##### POST `/account/register`
+### POST `/account/register`
 
 **Query parameters**
 
@@ -62,13 +62,13 @@ success             | Boolean       | Operation's result
 
 ## Characters
 
-##### GET `/characters/{accountuuid}`
+### GET `/characters/{accountuuid}`
 
 **Path parameters**
 
 Name                | Description
 ------------        | -------------
-accountuuid         |  Account's UUID
+account_uuid        |  Account's UUID
 
 **JSON Response**
 
@@ -79,7 +79,7 @@ Name                | Data Type     |Description
 character_uuid      | UUID          | Character's UUID
 character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
-message             | String        | Optional. Fact of wrong parameter format in path query
+error               | String        | Optional. Fact of wrong query execution or incorrect path parameter format
 
 
 

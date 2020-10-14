@@ -14,12 +14,12 @@ public class CharacterApi {
 
     public static Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterService characterService) {
         return context -> {
-            String accountUUID = context.request().getParam("accountuuid");
+            String accountUUID = context.request().getParam("account_uuid");
 
             try {
                 UUID.fromString(accountUUID);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("message", "wrong account uuid format").encodePrettily());
+                context.response().end(new JsonObject().put("error", "Wrong account uuid format").encodePrettily());
                 return;
             }
 

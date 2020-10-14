@@ -11,7 +11,7 @@ public class AccountApi {
 
     public static Handler<RoutingContext> onLogin(AccountService accountService) {
         return context -> {
-            String usernameOrEmail = context.request().getParam("usernameoremail");
+            String usernameOrEmail = context.request().getParam("username_or_email");
             String password = context.request().getParam("password");
 
             accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
