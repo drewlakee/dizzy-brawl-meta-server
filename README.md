@@ -16,7 +16,7 @@
 
 ### API Documentation
 
-:exclamation: Prefix for all end-points `/api/v1`
+:exclamation: Prefix for all end-points `/api/v1` :exclamation:
 
 ## Auth
 
