@@ -18,8 +18,8 @@
 
 > Sub-route for all end-points `/api/v1`
 
-#### Auth
-    
+## Auth
+
 ##### POST `/auth/login`
 
 **Query parameters**
@@ -39,7 +39,7 @@ email               | String        | User's email
 found               | Boolean       | Database have or doesn't have information about user
 valid               | Boolean       | Correct username/email and password enter
 
-#### Account
+## Account
 
 ##### POST `/account/register`
 
@@ -60,7 +60,7 @@ username            | String        | User's in game username
 email               | String        | User's email
 success             | Boolean       | Operation's result
 
-#### Characters
+## Characters
 
 ##### GET `/characters/{accountuuid}`
 
