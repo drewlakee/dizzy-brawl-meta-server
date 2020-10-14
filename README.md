@@ -79,7 +79,7 @@ Name                | Data Type     |Description
 character_uuid      | UUID          | Character's UUID
 character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
-error               | String        | Optional. Fact of wrong query execution or incorrect path parameter format
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 
 
