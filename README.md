@@ -1,122 +1,85 @@
-# Dizzy Brawl Database Server APIv1
+# Dizzy Brawl Database Server
 
-API List:
+### Content
 
-- [POST {host}/api/v1/auth/login](#post-hostapiv1authlogin)
-- [POST {host}/api/v1/account/register](#post-hostapiv1accountregister)
-- [GET {host}/api/v1/characters/:accountuuid](#get-hostapiv1charactersaccountuuid)
+1. [API Navigation](#api-navigation)
+2. [API Documentation](#api-documentation)
 
-###### `POST {host}/api/v1/auth/login`
+### API Navigation
 
-Request params:
+1. [Auth](#auth)
+    * [POST /auth/login](#post-authlogin)
+2. [Account](#account)
+    * [POST /account/register](#post-accountregister)
+3. [Characters](#characters)
+    * [GET /characters/{accountuuid}](#get-hostapiv1charactersaccountuuid)
 
-- usernameoremail: username or email
-- password: user password
+### API Documentation
 
-Response:
+> Sub-route for all end-points `/api/v1`
 
-- user_account_info
-- valid: correct username/email and password enter
-- found: database have or doesn't have information about user
+#### Auth
+    
+##### POST `/auth/login`
 
-Response examples:
+**Query parameters**
 
-- Correct enter
+Name                | Description
+------------        | -------------
+usernameoremail     |  User's username or email
+password            |  User's password
 
-```json
-{
-    "account_uuid": "cd318932-745f-4c4d-9462-c1a42d455860",
-    "username": "User1",
-    "email": "user1@gmail.com",
-    "found": true,
-    "valid": true
-}
-```
+**JSON Response**
 
-- Was founded, but incorrect password
+Name                | Data Type     |Description
+------------        |-------------  |-------------
+account_uuid        | UUID          | Account's UUID
+username            | String        | User's in game username
+email               | String        | User's email
+found               | Boolean       | Database have or doesn't have information about user
+valid               | Boolean       | Correct username/email and password enter
 
-```json
-{
-    "found": true,
-    "valid": false
-}
-```
+#### Account
 
-###### `POST {host}/api/v1/account/register`
+##### POST `/account/register`
 
-Request params:
+**Query parameters**
 
-- username
-- email
-- password
+Name                | Description
+------------        | -------------
+username            |  User's username or email
+email               |  User's email
+password            |  User's password
 
-Response:
+**JSON Response**
 
-- user_account_info
-- success: result of registration
+Name                | Data Type     |Description
+------------        |-------------  |-------------
+account_uuid        | UUID          | Account's UUID
+username            | String        | User's in game username
+email               | String        | User's email
+success             | Boolean       | Operation's result
 
-Response examples:
+#### Characters
 
-- Successful registration
+##### GET `/characters/{accountuuid}`
 
-```json
-{
-    "account_uuid": "04759d99-913a-4982-9860-6b7a29f7333d",
-    "username": "testReg4",
-    "email": "testReg4@gmail.com",
-    "success": true
-}
-```
+**Path parameters**
 
-- Username or email already registered
+Name                | Description
+------------        | -------------
+accountuuid         |  Account's UUID
 
-```json
-{
-    "success": false
-}
-```
+**JSON Response**
 
-###### `GET {host}/api/v1/characters/:accountuuid`
+Response wrapped into JSON Array
 
-Request params:
-
-- accountuuid: uuid of user's account
-
-Response:
-
-- character_info
-
-Response examples:
-
-- Successful fetch
-
-```json
-[
-    {
-        "character_uuid": "bbe94cf4-1beb-46ca-8604-c62ccdebedf0",
-        "character_type_id": 3,
-        "is_enabled": false
-    },
-    {
-        "character_uuid": "84a77243-2c88-4d10-a9d7-a6bcd37a140c",
-        "character_type_id": 2,
-        "is_enabled": true
-    },
-    {
-        "character_uuid": "9870d39f-bd41-4315-96e1-680f07a00209",
-        "character_type_id": 1,
-        "is_enabled": true
-    }
-]
-```
-
-- Wrong parameter
-
-```json
-{
-    "message": "wrong account uuid format"
-}
-```
+Name                | Data Type     |Description
+------------        |-------------  |-------------
+character_uuid      | UUID          | Character's UUID
+character_type_id   | int           | Character's type of pawn
+is_enabled          | Boolean       | Available 
+message             | String        | Optional. Fact of wrong parameter format in path query
 
 
 
