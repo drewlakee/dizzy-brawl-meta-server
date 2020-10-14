@@ -12,7 +12,7 @@
 2. [Account](#account)
     * [POST /account/register](#post-accountregister)
 3. [Characters](#characters)
-    * [GET /characters/{accountuuid}](#get-hostapiv1charactersaccountuuid)
+    * [GET /characters/{accountuuid}](#get-charactersaccount_uuid)
 
 ### API Documentation
 
@@ -62,7 +62,7 @@ success             | Boolean       | Operation's result
 
 ## Characters
 
-### GET `/characters/{accountuuid}`
+### GET `/characters/{account_uuid}`
 
 **Path parameters**
 
