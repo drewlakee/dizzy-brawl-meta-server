@@ -16,9 +16,9 @@
 
 ### API Documentation
 
-> Sub-route for all end-points `/api/v1`
+:exclamation: Prefix for all end-points `/api/v1`
 
-### Auth
+## Auth
 
 ### POST `/auth/login`
 
@@ -39,7 +39,7 @@ email               | String        | User's email
 found               | Boolean       | Database have or doesn't have information about user
 valid               | Boolean       | Correct username/email and password enter
 
-### Account
+## Account
 
 ### POST `/account/register`
 
