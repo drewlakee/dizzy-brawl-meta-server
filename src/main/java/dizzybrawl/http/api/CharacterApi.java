@@ -30,7 +30,6 @@ public class CharacterApi {
 
                     for (Character character : characters) {
                         JsonObject jsonCharacter = character.toJson();
-                        jsonCharacter.remove("account_uuid");
                         jsonCharactersResponse.add(jsonCharacter);
                     }
 

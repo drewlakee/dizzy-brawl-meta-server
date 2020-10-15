@@ -2,8 +2,10 @@ package dizzybrawl.http;
 
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.database.services.CharacterService;
+import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
+import dizzybrawl.http.api.TaskApi;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -13,14 +15,15 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 
-public class HttpServerVerticle extends AbstractVerticle {
+public class HttpDatabaseServerVerticle extends AbstractVerticle {
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
     public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServerVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpDatabaseServerVerticle.class);
 
     private AccountService accountService;
     private CharacterService characterService;
+    private TaskService taskService;
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -56,6 +59,8 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         router.get("/characters/:account_uuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
+        router.get("/tasks/:account_uuid").handler(TaskApi.getTasksByAccountUUIDWithIntervalInMinutes(taskService));
+
         return router;
     }
 
@@ -64,5 +69,6 @@ public class HttpServerVerticle extends AbstractVerticle {
         String dbQueueAddress = config().getString(CONFIG_DIZZYBRAWL_DB_QUEUE, "dizzybrawl.db.queue");
         accountService = AccountService.createProxy(vertx, dbQueueAddress + ".service.account");
         characterService = CharacterService.createProxy(vertx, dbQueueAddress + ".service.character");
+        taskService = TaskService.createProxy(vertx, dbQueueAddress + ".service.task");
     }
 }

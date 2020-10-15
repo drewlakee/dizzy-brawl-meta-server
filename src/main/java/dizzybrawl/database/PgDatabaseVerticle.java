@@ -2,6 +2,7 @@ package dizzybrawl.database;
 
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.database.services.CharacterService;
+import dizzybrawl.database.services.TaskService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -12,7 +13,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.sqlclient.PoolOptions;
 
 
-public class DatabaseVerticle extends AbstractVerticle {
+public class PgDatabaseVerticle extends AbstractVerticle {
 
     private static final String CONFIG_PG_HOST = "postgresql.host";
     private static final String CONFIG_PG_PORT = "postgresql.port";
@@ -22,7 +23,7 @@ public class DatabaseVerticle extends AbstractVerticle {
     private static final String CONFIG_PG_POOL_MAX_SIZE = "postgresql.pool.maxsize";
     public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
-    private static final Logger log = LoggerFactory.getLogger(DatabaseVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(PgDatabaseVerticle.class);
 
     private PgPool pgPool;
 
@@ -51,7 +52,7 @@ public class DatabaseVerticle extends AbstractVerticle {
                         .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.account")
                         .register(AccountService.class, ar1.result());
             } else {
-                log.error("Account service can't be binded.", ar1.cause());
+                log.error("Service can't be binded.", ar1.cause());
                 startPromise.fail(ar1.cause());
             }
         });
@@ -62,11 +63,23 @@ public class DatabaseVerticle extends AbstractVerticle {
                 binder
                         .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.character")
                         .register(CharacterService.class, ar1.result());
-                startPromise.complete();
             } else {
-                log.error("Character service can't be binded.", ar1.cause());
+                log.error("Service can't be binded.", ar1.cause());
                 startPromise.fail(ar1.cause());
             }
+        });
+
+        TaskService.create(pgPool, ar1 -> {
+           if (ar1.succeeded()) {
+               ServiceBinder binder = new ServiceBinder(vertx);
+               binder
+                       .setAddress(CONFIG_DIZZYBRAWL_DB_QUEUE + ".service.task")
+                       .register(TaskService.class, ar1.result());
+               startPromise.complete();
+           } else {
+               log.error("Service can't be binded.", ar1.cause());
+               startPromise.fail(ar1.cause());
+           }
         });
 
         // TODO: create default tables creation
