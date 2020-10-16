@@ -1,5 +1,11 @@
 # Dizzy Brawl Database Server
 
+### TODO
+
+- Add "reason" to response where can be error at execution
+- HTTP Methods - define correct methods for all apis
+
+
 ### Content
 
 1. [API Navigation](#api-navigation)
