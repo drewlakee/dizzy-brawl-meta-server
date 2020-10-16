@@ -63,10 +63,7 @@ password            |  User's password
 
 Name                | Data Type     |Description
 ------------        |-------------  |-------------
-account_uuid        | UUID          | Account's UUID
-username            | String        | User's in game username
-email               | String        | User's email
-success             | Boolean       | Operation's result
+account_uuid        | UUID          | Generated UUID for registered account
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 

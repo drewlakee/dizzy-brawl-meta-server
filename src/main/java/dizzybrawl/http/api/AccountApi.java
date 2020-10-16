@@ -59,14 +59,12 @@ public class AccountApi {
             accountService.registerAccount(preRegistrationAccount, ar1 -> {
                 if (ar1.succeeded()) {
                     Account account = ar1.result();
-                    JsonObject response;
+                    JsonObject response = new JsonObject();
 
                     if (account.isEmpty()) {
-                        response = new JsonObject();
                         response.put("success", false);
                     } else {
-                        response = account.toJson();
-                        response.remove("password");
+                        response.put("account_uuid", account.getAccountUUID().toString());
                         response.put("success", true);
                     }
 
