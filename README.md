@@ -40,6 +40,8 @@ username            | String        | User's in game username
 email               | String        | User's email
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
+**Error reasons**
+
 Error Name                  |Description
 ------------                |-------------
 EMPTY_BODY                  | Empty json body request
@@ -93,11 +95,12 @@ character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
+**Error reasons**
+
 Error Name                      |Description
 ------------                    |-------------
 EMPTY_BODY                      | Empty json body request
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
-ALREADY_EXIST_AT_DATABASE       | Account already exist at database
 
 ## Task
 
@@ -126,6 +129,8 @@ current_state       | int           | Current value of task
 goal_state          | int           | Goal value for task complete
 time_spends         | int           | Time spends after generation in **minutes** 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+**Error reasons**
 
 Error Name                      |Description
 ------------                    |-------------
