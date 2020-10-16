@@ -132,5 +132,9 @@ goal_state          | int           | Goal value for task complete
 time_spends         | int           | Time spends after generation in **minutes** 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
+Error Name                      |Description
+------------                    |-------------
+EMPTY_BODY                      | Empty json body request
+INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 

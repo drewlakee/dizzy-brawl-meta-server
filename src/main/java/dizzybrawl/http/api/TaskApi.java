@@ -2,6 +2,7 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
+import dizzybrawl.http.Error;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -36,7 +37,7 @@ public class TaskApi {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -46,7 +47,7 @@ public class TaskApi {
             try {
                 UUID.fromString(accountUUIDParam);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", "Wrong account uuid format").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
@@ -54,12 +55,12 @@ public class TaskApi {
             try {
                 intervalInMinutes = Integer.parseInt(intervalInMinutesParam);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", "Wrong interval format").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
             if (intervalInMinutes < 0) {
-                context.response().end(new JsonObject().put("error", "Wrong interval " + intervalInMinutes).encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
