@@ -14,7 +14,14 @@ public class CharacterApi {
 
     public static Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterService characterService) {
         return context -> {
-            String accountUUID = context.request().getParam("account_uuid");
+            JsonObject requestBodyAsJson = context.getBodyAsJson();
+
+            if (requestBodyAsJson.isEmpty()) {
+                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                return;
+            }
+
+            String accountUUID = requestBodyAsJson.getString("account_uuid");
 
             try {
                 UUID.fromString(accountUUID);

@@ -33,8 +33,15 @@ public class TaskApi {
 
     public static Handler<RoutingContext> getTasksByAccountUUIDWithIntervalInMinutes(TaskService taskService) {
         return context -> {
-            String accountUUIDParam = context.request().getParam("account_uuid");
-            String intervalInMinutesParam = context.request().getParam("interval");
+            JsonObject requestBodyAsJson = context.getBodyAsJson();
+
+            if (requestBodyAsJson.isEmpty()) {
+                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                return;
+            }
+
+            String accountUUIDParam = requestBodyAsJson.getString("account_uuid");
+            String intervalInMinutesParam = requestBodyAsJson.getString("interval");
 
             try {
                 UUID.fromString(accountUUIDParam);
@@ -52,7 +59,7 @@ public class TaskApi {
             }
 
             if (intervalInMinutes < 0) {
-                context.response().end(new JsonObject().put("error", "Wrong interval - " + intervalInMinutes).encodePrettily());
+                context.response().end(new JsonObject().put("error", "Wrong interval " + intervalInMinutes).encodePrettily());
                 return;
             }
 

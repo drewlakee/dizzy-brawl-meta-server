@@ -30,7 +30,7 @@
 
 ### POST `/auth/login`
 
-**Query parameters**
+**JSON Query Parameters**
 
 Name                | Description
 ------------        | -------------
@@ -46,12 +46,13 @@ username            | String        | User's in game username
 email               | String        | User's email
 found               | Boolean       | Database have or doesn't have information about user
 valid               | Boolean       | Correct username/email and password enter
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 ## Account
 
 ### POST `/account/register`
 
-**JSON Query**
+**JSON Query Parameters**
 
 Name                | Description
 ------------        | -------------
@@ -71,7 +72,7 @@ error               | String        | **Optional.** Fact of wrong query executio
 
 ### GET `/character/all`
 
-**Query parameters**
+**JSON Query Parameters**
 
 Name                | Description
 ------------        | -------------
@@ -93,7 +94,7 @@ error               | String        | **Optional.** Fact of wrong query executio
 
 ### GET `/task/all`
 
-**Query parameters**
+**JSON Query Parameters**
 
 Name                | Description
 ------------        | -------------

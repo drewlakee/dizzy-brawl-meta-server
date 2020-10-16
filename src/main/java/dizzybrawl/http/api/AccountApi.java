@@ -11,8 +11,15 @@ public class AccountApi {
 
     public static Handler<RoutingContext> onLogin(AccountService accountService) {
         return context -> {
-            String usernameOrEmail = context.request().getParam("username_or_email");
-            String password = context.request().getParam("password");
+            JsonObject requestBodyAsJson = context.getBodyAsJson();
+
+            if (requestBodyAsJson.isEmpty()) {
+                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                return;
+            }
+
+            String usernameOrEmail = requestBodyAsJson.getString("username_or_email");
+            String password = requestBodyAsJson.getString("password");
 
             accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
                if (ar1.succeeded()) {
@@ -46,6 +53,12 @@ public class AccountApi {
     public static Handler<RoutingContext> onRegistration(AccountService accountService) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
+
+            if (requestBodyAsJson.isEmpty()) {
+                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                return;
+            }
+
             PreRegistrationAccount preRegistrationAccount = new PreRegistrationAccount();
             preRegistrationAccount.username = requestBodyAsJson.getString("username");
             preRegistrationAccount.email = requestBodyAsJson.getString("email");
@@ -62,10 +75,9 @@ public class AccountApi {
                     JsonObject response = new JsonObject();
 
                     if (account.isEmpty()) {
-                        response.put("success", false);
+                        response.put("error", "Account already exist");
                     } else {
                         response.put("account_uuid", account.getAccountUUID().toString());
-                        response.put("success", true);
                     }
 
                     context.response().end(response.encodePrettily());

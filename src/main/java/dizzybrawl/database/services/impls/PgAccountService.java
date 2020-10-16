@@ -108,10 +108,11 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                             preRegistrationAccount.email,
                             preRegistrationAccount.password), ar2 -> {
 
-                        Account account = Account.createEmpty();
+                        Account account;
                         if (ar2.succeeded()) {
                             account = new Account(ar2.result().iterator().next());
                         } else {
+                            account = Account.createEmpty();
                             log.warn("Can't query to database cause " + ar2.cause());
                         }
 
