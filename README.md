@@ -11,10 +11,10 @@
     * [POST /auth/login](#post-authlogin)
 2. [Account](#account)
     * [POST /account/register](#post-accountregister)
-3. [Characters](#characters)
-    * [GET /characters/{account_uuid}](#get-charactersaccount_uuid)
-4. [Tasks](#tasks)
-    * [GET /tasks/{account_uuid}](#get-tasksaccount_uuid)
+3. [Character](#character)
+    * [GET /character/all](#get-characterall)
+4. [Task](#task)
+    * [GET /task/all](#get-taskall)
 
 ### API Documentation
 
@@ -62,11 +62,11 @@ username            | String        | User's in game username
 email               | String        | User's email
 success             | Boolean       | Operation's result
 
-## Characters
+## Character
 
-### GET `/characters/{account_uuid}`
+### GET `/character/all`
 
-**Path parameters**
+**Query parameters**
 
 Name                | Description
 ------------        | -------------
@@ -84,20 +84,15 @@ character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-## Tasks
+## Task
 
-### GET `/tasks/{account_uuid}`
-
-**Path parameters**
-
-Name                | Description
-------------        | -------------
-account_uuid        |  Task's owner account UUID
+### GET `/task/all`
 
 **Query parameters**
 
 Name                | Description
 ------------        | -------------
+account_uuid        |  Task's owner account UUID
 interval            |  Time interval since generation in **minutes**
 
 **JSON Response**
@@ -114,7 +109,6 @@ account_uuid        | UUID          | Owner's account UUID
 task_type_id        | int           | Task type id
 current_state       | int           | Current value of task
 goal_state          | int           | Goal value for task complete
-generated_date      | Timestamp     | Generation date time
 time_spends         | int           | Time spends after generation in **minutes** 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 

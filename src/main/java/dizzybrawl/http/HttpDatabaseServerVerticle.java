@@ -14,6 +14,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 
 public class HttpDatabaseServerVerticle extends AbstractVerticle {
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
@@ -53,13 +54,15 @@ public class HttpDatabaseServerVerticle extends AbstractVerticle {
             rh.next();
         });
 
+        router.route().handler(BodyHandler.create());
+
         // api end points handlers
         router.post("/auth/login").handler(AccountApi.onLogin(accountService));
         router.post("/account/register").handler(AccountApi.onRegistration(accountService));
 
-        router.get("/characters/:account_uuid").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+        router.get("/character/all").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
-        router.get("/tasks/:account_uuid").handler(TaskApi.getTasksByAccountUUIDWithIntervalInMinutes(taskService));
+        router.get("/task/all").handler(TaskApi.getTasksByAccountUUIDWithIntervalInMinutes(taskService));
 
         return router;
     }

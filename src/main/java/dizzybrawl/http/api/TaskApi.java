@@ -73,6 +73,7 @@ public class TaskApi {
                             taskService.deleteTaskByTaskUUID(task.getTaskUUID().toString(), ar2 -> {});
                         } else {
                             JsonObject jsonTask = task.toJson();
+                            jsonTask.remove("generated_date");
                             jsonTask.put("time_spends", deltaInMinutes);
                             jsonTasksInIntervalResponse.add(jsonTask);
                         }
