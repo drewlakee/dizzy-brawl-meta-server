@@ -2,6 +2,7 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.services.CharacterService;
+import dizzybrawl.http.Error;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,7 +18,7 @@ public class CharacterApi {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -26,7 +27,7 @@ public class CharacterApi {
             try {
                 UUID.fromString(accountUUID);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", "Wrong account uuid format").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
