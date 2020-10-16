@@ -5,7 +5,6 @@
 - Add "reason" to response where can be error at execution
 - HTTP Methods - define correct methods for all apis
 
-
 ### Content
 
 1. [API Navigation](#api-navigation)
@@ -30,7 +29,7 @@
 
 ### POST `/auth/login`
 
-**JSON Query Parameters**
+**JSON Query**
 
 Name                | Description
 ------------        | -------------
@@ -44,15 +43,19 @@ Name                | Data Type     |Description
 account_uuid        | UUID          | Account's UUID
 username            | String        | User's in game username
 email               | String        | User's email
-found               | Boolean       | Database have or doesn't have information about user
-valid               | Boolean       | Correct username/email and password enter
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+Error Name                  |Description
+------------                |-------------
+EMPTY_BODY                  | Empty json body request
+DOESNT_EXIST_AT_DATABASE    | User's account doesn't exist at database
+INVALID_PASSWORD            | Incorrect password enter
 
 ## Account
 
 ### POST `/account/register`
 
-**JSON Query Parameters**
+**JSON Query**
 
 Name                | Description
 ------------        | -------------
@@ -67,12 +70,17 @@ Name                | Data Type     |Description
 account_uuid        | UUID          | Generated UUID for registered account
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
+Error Name                      |Description
+------------                    |-------------
+EMPTY_BODY                      | Empty json body request
+INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+ALREADY_EXIST_AT_DATABASE       | Account already exist at database
 
 ## Character
 
 ### GET `/character/all`
 
-**JSON Query Parameters**
+**JSON Query**
 
 Name                | Description
 ------------        | -------------
@@ -94,7 +102,7 @@ error               | String        | **Optional.** Fact of wrong query executio
 
 ### GET `/task/all`
 
-**JSON Query Parameters**
+**JSON Query**
 
 Name                | Description
 ------------        | -------------

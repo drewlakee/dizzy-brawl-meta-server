@@ -3,6 +3,7 @@ package dizzybrawl.http.api;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.PreRegistrationAccount;
 import dizzybrawl.database.services.AccountService;
+import dizzybrawl.http.Error;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -14,7 +15,7 @@ public class AccountApi {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -28,17 +29,15 @@ public class AccountApi {
 
                    if (account.isEmpty()) {
                        response = new JsonObject();
-                       response.put("found", false);
+                       response.put("error", Error.DOESNT_EXIST_AT_DATABASE);
                    } else {
                        response = account.toJson();
+
                        if (account.getPassword().equals(password)) {
-                           response.put("found", true);
-                           response.put("valid", true);
                            response.remove("password");
                        } else {
                            response.clear();
-                           response.put("found", true);
-                           response.put("valid", false);
+                           response.put("error", Error.INVALID_PASSWORD);
                        }
                    }
 
@@ -55,7 +54,7 @@ public class AccountApi {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", "Empty body").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -65,7 +64,7 @@ public class AccountApi {
             preRegistrationAccount.password = requestBodyAsJson.getString("password");
 
             if (preRegistrationAccount.isEmpty()) {
-                context.response().end(new JsonObject().put("error", "Not valid data").encodePrettily());
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
@@ -75,7 +74,7 @@ public class AccountApi {
                     JsonObject response = new JsonObject();
 
                     if (account.isEmpty()) {
-                        response.put("error", "Account already exist");
+                        response.put("error", Error.ALREADY_EXIST_AT_DATABASE);
                     } else {
                         response.put("account_uuid", account.getAccountUUID().toString());
                     }
