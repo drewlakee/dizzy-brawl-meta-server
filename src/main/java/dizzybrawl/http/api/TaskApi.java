@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -88,6 +89,47 @@ public class TaskApi {
                     }
 
                     context.response().end(jsonTasksInIntervalResponse.encodePrettily());
+                } else {
+                    context.fail(ar1.cause());
+                }
+            });
+        };
+    }
+
+    public static Handler<RoutingContext> addTasks(TaskService taskService) {
+        return context -> {
+            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
+
+            if (requestBodyAsJsonArray.isEmpty()) {
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                return;
+            }
+
+            List<Task> tasks = new ArrayList<>();
+            try {
+                for (Object taskObject : requestBodyAsJsonArray) {
+                    JsonObject jsonTask = (JsonObject) taskObject;
+                    UUID.fromString(jsonTask.getString("account_uuid"));
+
+                    tasks.add(new Task(jsonTask));
+                }
+            } catch (Exception e) {
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                return;
+            }
+
+            taskService.addTasks(tasks, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<Task> tasksResult = ar1.result();
+                    JsonArray jsonTasksResponse = new JsonArray();
+
+                    for (Task task : tasksResult) {
+                        JsonObject jsonResponse = new JsonObject();
+                        jsonResponse.put("task_uuid", task.getTaskUUID().toString());
+                        jsonTasksResponse.add(jsonResponse);
+                    }
+
+                    context.response().end(jsonTasksResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }

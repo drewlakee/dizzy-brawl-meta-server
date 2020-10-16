@@ -42,12 +42,12 @@ public class Task {
 
     public Task(Row sqlRowTask) {
         this(
-                sqlRowTask.getUUID("task_uuid"),
-                sqlRowTask.getUUID("account_uuid"),
-                sqlRowTask.getInteger("task_type_id"),
-                sqlRowTask.getInteger("current_state"),
-                sqlRowTask.getInteger("goal_state"),
-                Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date"))
+                sqlRowTask.getUUID("task_uuid") == null ? null : sqlRowTask.getUUID("task_uuid"),
+                sqlRowTask.getUUID("account_uuid") == null ? null : sqlRowTask.getUUID("account_uuid"),
+                sqlRowTask.getInteger("task_type_id") == null ? 0 : sqlRowTask.getInteger("task_type_id"),
+                sqlRowTask.getInteger("current_state") == null ? 0 : sqlRowTask.getInteger("current_state"),
+                sqlRowTask.getInteger("goal_state") == null ? 0 : sqlRowTask.getInteger("goal_state"),
+                sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date"))
         );
     }
 

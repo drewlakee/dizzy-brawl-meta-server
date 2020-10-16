@@ -15,6 +15,7 @@
     * [GET /character/all](#get-characterall)
 4. [Task](#task)
     * [GET /task/all](#get-taskall)
+    * [POST /task/add](#post-taskadd)
 
 ### API Documentation
 
@@ -26,10 +27,10 @@
 
 **JSON Query**
 
-Name                | Description
-------------        | -------------
-username_or_email   |  User's username or email
-password            |  User's password
+Name                | Data Type     | Description
+------------        | ------------- | -------------
+username_or_email   |  String       |  User's username or email
+password            |  String       |  User's password
 
 **JSON Response**
 
@@ -54,11 +55,11 @@ INVALID_PASSWORD            | Incorrect password enter
 
 **JSON Query**
 
-Name                | Description
-------------        | -------------
-username            |  User's username or email
-email               |  User's email
-password            |  User's password
+Name                |   Data Type   | Description
+------------        | ------------- | -------------
+username            |  String       |  User's username or email
+email               |  String       |  User's email
+password            |  String       |  User's password
 
 **JSON Response**
 
@@ -79,9 +80,9 @@ ALREADY_EXIST_AT_DATABASE       | Account already exist at database
 
 **JSON Query**
 
-Name                | Description
-------------        | -------------
-account_uuid        |  Account's UUID
+Name                |Data Type      | Description
+------------        | ------------- | -------------
+account_uuid        | String        |  Account's UUID
 
 **JSON Response**
 
@@ -108,10 +109,10 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 **JSON Query**
 
-Name                | Description
-------------        | -------------
-account_uuid        |  Task's owner account UUID
-interval            |  Time interval since generation in **minutes**
+Name                |   Data type   | Description
+------------        | ------------- | -------------
+account_uuid        | String        |  Task's owner account UUID
+interval            | int           |  Time interval since generation in **minutes**
 
 **JSON Response**
 
@@ -125,7 +126,7 @@ Name                | Data Type     | Description
 task_uuid           | UUID          | Task's UUID
 account_uuid        | UUID          | Owner's account UUID
 task_type_id        | int           | Task type id
-current_state       | int           | Current value of task
+current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
 time_spends         | int           | Time spends after generation in **minutes** 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
@@ -137,4 +138,32 @@ Error Name                      |Description
 EMPTY_BODY                      | Empty json body request
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
+### POST `/task/add`
 
+**JSON Query**
+
+Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
+
+Name                | Data Type     | Description
+------------        | ------------- | -------------
+account_uuid        |   String      |  Task's owner account UUID
+task_type_id        |   int         |  Task's type
+current_state       |   int         |  Current progress of task
+goal_state          |   int         |  Goal value for task complete
+
+**JSON Response**
+
+Response has same sequenced as request JSON, so UUIDs in same place
+as added tasks before
+
+Name                | Data Type     | Description
+------------        |-------------  |-------------
+task_uuid           | UUID          | Generated task's UUID
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+**Error reasons**
+
+Error Name                      |Description
+------------                    |-------------
+EMPTY_BODY                      | Empty json body request
+INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format

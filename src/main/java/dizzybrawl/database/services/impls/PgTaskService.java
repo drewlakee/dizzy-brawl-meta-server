@@ -4,17 +4,26 @@ import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.TaskSqlQuery;
+import dizzybrawl.http.Error;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
 
@@ -52,6 +61,7 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
 
             loadedSqlQueries.put(TaskSqlQuery.SELECT_ALL_TASKS_BY_ACCOUNT_UUID, queriesProps.getProperty("select-all-tasks-by-account-uuid"));
             loadedSqlQueries.put(TaskSqlQuery.DELETE_TASK_BY_TASK_UUID, queriesProps.getProperty("delete-task-by-task-uuid"));
+            loadedSqlQueries.put(TaskSqlQuery.INSERT_TASK_BY_ACCOUNT_UUID, queriesProps.getProperty("insert-task-by-account-uuid"));
         } catch (IOException e) {
             log.error("Can't load sql queries.", e.getCause());
         }
@@ -104,6 +114,70 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                         .execute(Tuple.of(UUID.fromString(taskUUID)), ar2 -> {
                             if (ar2.succeeded()) {
                                 resultHandler.handle(Future.succeededFuture());
+                            } else {
+                                log.warn("Can't query to database cause " + ar2.cause());
+                                resultHandler.handle(Future.failedFuture(ar2.cause()));
+                            }
+                        });
+            } else {
+                log.error("Can't connect to database.", ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+        });
+
+        return this;
+    }
+
+    @Override
+    public TaskService addTasks(List<Task> tasks, Handler<AsyncResult<List<Task>>> resultHandler) {
+        pgClient.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
+                SqlConnection connection = ar1.result();
+
+                List<Tuple> batch = new ArrayList<>();
+                for (Task task : tasks) {
+                    batch.add(Tuple.of(
+                                task.getAccountUUID(),
+                                task.getTaskTypeId(),
+                                task.getCurrentState(),
+                                task.getGoalState()
+                            )
+                    );
+                }
+
+                Transaction transaction = connection.begin();
+                transaction
+                        .preparedQuery(sqlQueries.get(TaskSqlQuery.INSERT_TASK_BY_ACCOUNT_UUID))
+                        .execute(batch.get(0), ar2 -> {
+                            if (ar2.succeeded()) {
+                                List<Task> tasksResult = new ArrayList<>();
+
+                                if (ar2.result().rowCount() > 0) {
+                                    tasksResult.add(new Task(ar2.result().iterator().next()));
+                                }
+
+                                for (int batchIndex = 1; batchIndex < batch.size(); batchIndex++) {
+                                    transaction
+                                            .preparedQuery(sqlQueries.get(TaskSqlQuery.INSERT_TASK_BY_ACCOUNT_UUID))
+                                            .execute(batch.get(batchIndex), ar3 -> {
+                                                if (ar3.succeeded()) {
+                                                    if (ar3.result().rowCount() > 0) {
+                                                        tasksResult.add(new Task(ar3.result().iterator().next()));
+                                                    }
+                                                } else {
+                                                    log.warn("Can't query to database cause " + ar2.cause());
+                                                    resultHandler.handle(Future.failedFuture(ar2.cause()));
+                                                }
+                                            });
+                                }
+
+                                transaction.commit(ar4 -> {
+                                    if (ar4.succeeded()) {
+                                        resultHandler.handle(Future.succeededFuture(tasksResult));
+                                    } else {
+                                        resultHandler.handle(Future.failedFuture(ar4.cause()));
+                                    }
+                                });
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
