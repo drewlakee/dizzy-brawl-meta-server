@@ -10,8 +10,10 @@ import io.vertx.ext.web.RoutingContext;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class TaskApi {
 
@@ -63,9 +65,9 @@ public class TaskApi {
                     for (Task task : tasks) {
                         Timestamp generatedDateTimestamp = task.getGeneratedDate();
 
-                        LocalDateTime now = LocalDateTime.now(Clock.systemUTC());
-                        LocalDateTime generatedTime = generatedDateTimestamp.toLocalDateTime();
-                        int deltaInMinutes = now.getMinute() - generatedTime.getMinute();
+                        long nowFromEpochSeconds = LocalDateTime.now(Clock.systemUTC()).toEpochSecond(ZoneOffset.UTC);
+                        long generatedMomentFromEpochSeconds = generatedDateTimestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
+                        long deltaInMinutes = TimeUnit.SECONDS.toMinutes(nowFromEpochSeconds - generatedMomentFromEpochSeconds);
 
                         if (deltaInMinutes > finalIntervalInMinutes) {
                             taskService.deleteTaskByTaskUUID(task.getTaskUUID().toString(), ar2 -> {});
