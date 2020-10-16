@@ -27,6 +27,13 @@ public class PreRegistrationAccount {
                 .put("password", password);
     }
 
+    public boolean isEmpty() {
+        return
+                username == null || username.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                password == null || password.trim().isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

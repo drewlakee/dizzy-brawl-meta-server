@@ -45,10 +45,16 @@ public class AccountApi {
 
     public static Handler<RoutingContext> onRegistration(AccountService accountService) {
         return context -> {
+            JsonObject requestBodyAsJson = context.getBodyAsJson();
             PreRegistrationAccount preRegistrationAccount = new PreRegistrationAccount();
-            preRegistrationAccount.username = context.request().getParam("username");
-            preRegistrationAccount.email = context.request().getParam("email");
-            preRegistrationAccount.password = context.request().getParam("password");
+            preRegistrationAccount.username = requestBodyAsJson.getString("username");
+            preRegistrationAccount.email = requestBodyAsJson.getString("email");
+            preRegistrationAccount.password = requestBodyAsJson.getString("password");
+
+            if (preRegistrationAccount.isEmpty()) {
+                context.response().end(new JsonObject().put("error", "Not valid data").encodePrettily());
+                return;
+            }
 
             accountService.registerAccount(preRegistrationAccount, ar1 -> {
                 if (ar1.succeeded()) {

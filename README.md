@@ -51,7 +51,7 @@ valid               | Boolean       | Correct username/email and password enter
 
 ### POST `/account/register`
 
-**Query parameters**
+**JSON Query**
 
 Name                | Description
 ------------        | -------------
@@ -67,6 +67,8 @@ account_uuid        | UUID          | Account's UUID
 username            | String        | User's in game username
 email               | String        | User's email
 success             | Boolean       | Operation's result
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
 
 ## Character
 
