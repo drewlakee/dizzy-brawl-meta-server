@@ -43,7 +43,6 @@ public class TaskApi {
             }
 
             String accountUUIDParam = requestBodyAsJson.getString("account_uuid");
-            String intervalInMinutesParam = requestBodyAsJson.getString("interval");
 
             try {
                 UUID.fromString(accountUUIDParam);
@@ -52,23 +51,10 @@ public class TaskApi {
                 return;
             }
 
-            int intervalInMinutes;
-            try {
-                intervalInMinutes = Integer.parseInt(intervalInMinutesParam);
-            } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                return;
-            }
-
-            if (intervalInMinutes < 0) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                return;
-            }
-
-            int finalIntervalInMinutes = intervalInMinutes;
             taskService.getAllTasksByAccountUUID(accountUUIDParam, ar1 -> {
                 if (ar1.succeeded()) {
                     List<Task> tasks = ar1.result();
+                    List<Task> tasksToDelete = new ArrayList<>();
                     JsonArray jsonTasksInIntervalResponse = new JsonArray();
 
                     for (Task task : tasks) {
@@ -78,8 +64,8 @@ public class TaskApi {
                         long generatedMomentFromEpochSeconds = generatedDateTimestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
                         long deltaInMinutes = TimeUnit.SECONDS.toMinutes(nowFromEpochSeconds - generatedMomentFromEpochSeconds);
 
-                        if (deltaInMinutes > finalIntervalInMinutes) {
-                            taskService.deleteTaskByTaskUUID(task.getTaskUUID().toString(), ar2 -> {});
+                        if (deltaInMinutes > task.getActiveInterval()) {
+                            tasksToDelete.add(task);
                         } else {
                             JsonObject jsonTask = task.toJson();
                             jsonTask.remove("generated_date");
@@ -87,6 +73,8 @@ public class TaskApi {
                             jsonTasksInIntervalResponse.add(jsonTask);
                         }
                     }
+
+                    taskService.deleteTasks(tasksToDelete, ar2 -> {});
 
                     context.response().end(jsonTasksInIntervalResponse.encodePrettily());
                 } else {

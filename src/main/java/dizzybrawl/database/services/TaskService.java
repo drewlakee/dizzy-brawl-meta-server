@@ -31,7 +31,7 @@ public interface TaskService {
     TaskService getAllTasksByAccountUUID(String accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);
 
     @Fluent
-    TaskService deleteTaskByTaskUUID(String taskUUID, Handler<AsyncResult<Void>> resultHandler);
+    TaskService deleteTasks(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
 
     @Fluent
     TaskService addTasks(List<Task> tasks, Handler<AsyncResult<List<Task>>> resultHandler);

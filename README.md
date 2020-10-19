@@ -112,14 +112,15 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 Name                |   Data type   | Description
 ------------        | ------------- | -------------
 account_uuid        | String        |  Task's owner account UUID
-interval            | int           |  Time interval since generation in **minutes**
 
 **JSON Response**
 
 Response wrapped into JSON Array
 
-If at request moment task spend time after generation MORE than interval parameter 
+If at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
+
+If no active task at user's account, response will be empty JSON Array
 
 Name                | Data Type     | Description
 ------------        |-------------  |-------------
@@ -129,6 +130,7 @@ task_type_id        | int           | Task type id
 current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
 time_spends         | int           | Time spends after generation in **minutes** 
+active_interval     | int           | Time of active status interval in **minutes**
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 **Error reasons**
@@ -150,6 +152,7 @@ account_uuid        |   String      |  Task's owner account UUID
 task_type_id        |   int         |  Task's type
 current_state       |   int         |  Current progress of task
 goal_state          |   int         |  Goal value for task complete
+active_interval     |   int         |  Time interval in that task will be active. Time in **minutes**
 
 **JSON Response**
 

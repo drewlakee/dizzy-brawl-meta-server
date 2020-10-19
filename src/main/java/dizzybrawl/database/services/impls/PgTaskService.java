@@ -4,26 +4,17 @@ import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.TaskSqlQuery;
-import dizzybrawl.http.Error;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
 
@@ -104,14 +95,19 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
     }
 
     @Override
-    public TaskService deleteTaskByTaskUUID(String taskUUID, Handler<AsyncResult<Void>> resultHandler) {
+    public TaskService deleteTasks(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
+                List<Tuple> batch = new ArrayList<>();
+                for (Task task : tasks) {
+                    batch.add(Tuple.of(task.getTaskUUID()));
+                }
+
                 connection
                         .preparedQuery(sqlQueries.get(TaskSqlQuery.DELETE_TASK_BY_TASK_UUID))
-                        .execute(Tuple.of(UUID.fromString(taskUUID)), ar2 -> {
+                        .executeBatch(batch, ar2 -> {
                             if (ar2.succeeded()) {
                                 resultHandler.handle(Future.succeededFuture());
                             } else {
@@ -140,7 +136,8 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                 task.getAccountUUID(),
                                 task.getTaskTypeId(),
                                 task.getCurrentState(),
-                                task.getGoalState()
+                                task.getGoalState(),
+                                task.getActiveInterval()
                             )
                     );
                 }

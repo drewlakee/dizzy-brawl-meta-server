@@ -17,16 +17,19 @@ public class Task {
     private final int currentState;
     private final int goalState;
     private final Timestamp generatedDate;
+    private final int activeInterval;
 
     public Task(UUID taskUUID, UUID accountUUID,
                 int taskTypeId, int currentState,
-                int goalState, Timestamp generatedDate) {
+                int goalState, Timestamp generatedDate,
+                int activeInterval) {
         this.taskUUID = taskUUID;
         this.accountUUID = accountUUID;
         this.taskTypeId = taskTypeId;
         this.currentState = currentState;
         this.goalState = goalState;
         this.generatedDate = generatedDate;
+        this.activeInterval = activeInterval;
     }
 
     public Task(JsonObject jsonTask) {
@@ -36,7 +39,8 @@ public class Task {
                 jsonTask.getInteger("task_type_id"),
                 jsonTask.getInteger("current_state"),
                 jsonTask.getInteger("goal_state"),
-                jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date"))
+                jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date")),
+                jsonTask.getInteger("active_interval")
         );
     }
 
@@ -47,12 +51,13 @@ public class Task {
                 sqlRowTask.getInteger("task_type_id") == null ? 0 : sqlRowTask.getInteger("task_type_id"),
                 sqlRowTask.getInteger("current_state") == null ? 0 : sqlRowTask.getInteger("current_state"),
                 sqlRowTask.getInteger("goal_state") == null ? 0 : sqlRowTask.getInteger("goal_state"),
-                sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date"))
+                sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date")),
+                sqlRowTask.getInteger("active_interval") == null ? 0 : sqlRowTask.getInteger("active_interval")
         );
     }
 
     public static Task createEmpty() {
-        return new Task(null, null, 0, 0, 0, null);
+        return new Task(null, null, 0, 0, 0, null, 0);
     }
 
     public boolean isEmpty() {
@@ -62,7 +67,8 @@ public class Task {
                 this.taskTypeId == 0 &&
                 this.currentState == 0 &&
                 this.goalState == 0 &&
-                this.generatedDate == null;
+                this.generatedDate == null &&
+                this.activeInterval == 0;
     }
 
     public JsonObject toJson() {
@@ -72,7 +78,8 @@ public class Task {
                 .put("task_type_id", taskTypeId)
                 .put("current_state", currentState)
                 .put("goal_state", goalState)
-                .put("generated_date", generatedDate == null ? null : generatedDate.toString());
+                .put("generated_date", generatedDate == null ? null : generatedDate.toString())
+                .put("active_interval", activeInterval);
     }
 
     public UUID getTaskUUID() {
@@ -99,6 +106,10 @@ public class Task {
         return generatedDate;
     }
 
+    public int getActiveInterval() {
+        return activeInterval;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,6 +118,7 @@ public class Task {
         return taskTypeId == task.taskTypeId &&
                 currentState == task.currentState &&
                 goalState == task.goalState &&
+                activeInterval == task.activeInterval &&
                 Objects.equals(taskUUID, task.taskUUID) &&
                 Objects.equals(accountUUID, task.accountUUID) &&
                 Objects.equals(generatedDate, task.generatedDate);
@@ -114,7 +126,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskUUID, accountUUID, taskTypeId, currentState, goalState, generatedDate);
+        return Objects.hash(taskUUID, accountUUID, taskTypeId, currentState, goalState, generatedDate, activeInterval);
     }
 
     @Override
@@ -126,6 +138,7 @@ public class Task {
                 ", currentState=" + currentState +
                 ", goalState=" + goalState +
                 ", generatedDate=" + generatedDate +
+                ", activeInterval=" + activeInterval +
                 '}';
     }
 }
