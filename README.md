@@ -174,6 +174,8 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 ### PUT `/task/update/progress`
 
+**Transactional operation**. If some task will not update from a query - other too will be not update
+
 **JSON Query**
 
 Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
@@ -195,7 +197,7 @@ error               | String        | **Optional.** Fact of wrong query executio
 Code                | Description
 ------------        |-------------
 200                 | If all was updated - means OK
-419                 | Means that some was not updated, because DB doesn't store inputted Task UUID
+419                 | Means that some can't be updated, because DB doesn't store inputted Task UUID
 
 **Error reasons**
 

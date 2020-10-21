@@ -205,17 +205,27 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                     ));
                 }
 
-                connection
+                Transaction transaction = connection.begin();
+                transaction
                         .preparedQuery(sqlQueries.get(TaskSqlQuery.UPDATE_TASK_PROGRESS_BY_TASK_UUID))
                         .executeBatch(batch, ar2 -> {
                             if (ar2.succeeded()) {
 
-                                // no one was updated or some was not updated
-                                if (ar2.result().rowCount() != batch.size()) {
-                                    resultHandler.handle(Future.failedFuture(ar2.cause()));
+                                int updatedRows = 0;
+                                RowSet<Row> currentSetOfTupleInBatch = ar2.result();
+                                while (currentSetOfTupleInBatch != null) {
+                                    updatedRows += currentSetOfTupleInBatch.rowCount();
+                                    currentSetOfTupleInBatch = currentSetOfTupleInBatch.next();
                                 }
 
-                                resultHandler.handle(Future.succeededFuture());
+                                if (updatedRows != batch.size()) {
+
+                                    transaction.rollback();
+                                    resultHandler.handle(Future.failedFuture(ar2.cause()));
+                                } else {
+                                    transaction.commit();
+                                    resultHandler.handle(Future.succeededFuture());
+                                }
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
