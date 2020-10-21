@@ -143,6 +143,8 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 ### POST `/task/add`
 
+**Transactional operation**. If some task will be not added - other tasks also will be not added
+
 **JSON Query**
 
 Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
