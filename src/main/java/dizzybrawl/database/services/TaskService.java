@@ -36,4 +36,7 @@ public interface TaskService {
     @Fluent
     TaskService addTasks(List<Task> tasks, Handler<AsyncResult<List<Task>>> resultHandler);
 
+    @Fluent
+    TaskService updateTasksProgress(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
+
 }

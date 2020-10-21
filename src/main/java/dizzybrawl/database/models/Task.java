@@ -36,11 +36,11 @@ public class Task {
         this(
                 jsonTask.getString("task_uuid") == null ? null : UUID.fromString(jsonTask.getString("task_uuid")),
                 jsonTask.getString("account_uuid") == null ? null : UUID.fromString(jsonTask.getString("account_uuid")),
-                jsonTask.getInteger("task_type_id"),
-                jsonTask.getInteger("current_state"),
-                jsonTask.getInteger("goal_state"),
+                jsonTask.getInteger("task_type_id") == null ? 0 : jsonTask.getInteger("task_type_id"),
+                jsonTask.getInteger("current_state") == null ? 0 : jsonTask.getInteger("current_state"),
+                jsonTask.getInteger("goal_state") == null ? 0 : jsonTask.getInteger("goal_state"),
                 jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date")),
-                jsonTask.getInteger("active_interval")
+                jsonTask.getInteger("active_interval")  == null ? 0 : jsonTask.getInteger("active_interval")
         );
     }
 

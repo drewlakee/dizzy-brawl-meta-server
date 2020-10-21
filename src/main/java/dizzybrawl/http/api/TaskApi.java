@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TaskApi {
 
@@ -120,6 +121,36 @@ public class TaskApi {
                     context.response().end(jsonTasksResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
+                }
+            });
+        };
+    }
+
+    public static Handler<RoutingContext> updateTasks(TaskService taskService) {
+        return context -> {
+            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
+
+            if (requestBodyAsJsonArray.isEmpty()) {
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                return;
+            }
+
+            List<Task> tasksToUpdate = new ArrayList<>();
+            try {
+                requestBodyAsJsonArray.stream()
+                        .map(o -> new Task((JsonObject) o))
+                        .forEach(tasksToUpdate::add);
+            } catch (Exception e) {
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                return;
+            }
+
+            taskService.updateTasksProgress(tasksToUpdate, ar1 -> {
+                if (ar1.succeeded()) {
+                    context.response().setStatusCode(200).end();
+                } else {
+                    // maybe server hasn't any user's input tasks
+                    context.response().setStatusCode(412).end();
                 }
             });
         };

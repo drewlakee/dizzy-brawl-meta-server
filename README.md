@@ -16,6 +16,7 @@
 4. [Task](#task)
     * [GET /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
+    * [PUT /task/update/progress](#put-taskupdateprogress)
 
 ### API Documentation
 
@@ -163,6 +164,38 @@ Name                | Data Type     | Description
 ------------        |-------------  |-------------
 task_uuid           | UUID          | Generated task's UUID
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+**Error reasons**
+
+Error Name                      |Description
+------------                    |-------------
+EMPTY_BODY                      | Empty json body request
+INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+
+### PUT `/task/update/progress`
+
+**JSON Query**
+
+Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
+
+Name                | Data Type     | Description
+------------        | ------------- | -------------
+task_uuid           |   String      |  Task's UUID that will be updated
+current_state       |   int         |  Current progress to update
+goal_state          |   int         |  Goal value to update
+
+**JSON Response**
+
+Name                | Data Type     | Description
+------------        |-------------  |-------------
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+**HTTP Response Codes**
+
+Code                | Description
+------------        |-------------
+200                 | If all was updated - means OK
+419                 | Means that some was not updated, because DB doesn't store inputted Task UUID
 
 **Error reasons**
 

@@ -2,9 +2,6 @@ package dizzybrawl.http;
 
 public enum Error {
 
-    // Application error reasons
-    INTERNAL_ERROR,
-
     // JSON error reasons
     EMPTY_BODY,
 

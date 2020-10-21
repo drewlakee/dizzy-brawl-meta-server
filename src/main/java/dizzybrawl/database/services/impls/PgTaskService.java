@@ -53,6 +53,7 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
             loadedSqlQueries.put(TaskSqlQuery.SELECT_ALL_TASKS_BY_ACCOUNT_UUID, queriesProps.getProperty("select-all-tasks-by-account-uuid"));
             loadedSqlQueries.put(TaskSqlQuery.DELETE_TASK_BY_TASK_UUID, queriesProps.getProperty("delete-task-by-task-uuid"));
             loadedSqlQueries.put(TaskSqlQuery.INSERT_TASK_BY_ACCOUNT_UUID, queriesProps.getProperty("insert-task-by-account-uuid"));
+            loadedSqlQueries.put(TaskSqlQuery.UPDATE_TASK_PROGRESS_BY_TASK_UUID, queriesProps.getProperty("update-task-progress-by-task-uuid"));
         } catch (IOException e) {
             log.error("Can't load sql queries.", e.getCause());
         }
@@ -175,6 +176,46 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                         resultHandler.handle(Future.failedFuture(ar4.cause()));
                                     }
                                 });
+                            } else {
+                                log.warn("Can't query to database cause " + ar2.cause());
+                                resultHandler.handle(Future.failedFuture(ar2.cause()));
+                            }
+                        });
+            } else {
+                log.error("Can't connect to database.", ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+        });
+
+        return this;
+    }
+
+    @Override
+    public TaskService updateTasksProgress(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler) {
+        pgClient.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
+                SqlConnection connection = ar1.result();
+
+                List<Tuple> batch = new ArrayList<>();
+                for (Task task : tasks) {
+                    batch.add(Tuple.of(
+                            task.getCurrentState(),
+                            task.getGoalState(),
+                            task.getTaskUUID()
+                    ));
+                }
+
+                connection
+                        .preparedQuery(sqlQueries.get(TaskSqlQuery.UPDATE_TASK_PROGRESS_BY_TASK_UUID))
+                        .executeBatch(batch, ar2 -> {
+                            if (ar2.succeeded()) {
+
+                                // no one was updated or some was not updated
+                                if (ar2.result().rowCount() != batch.size()) {
+                                    resultHandler.handle(Future.failedFuture(ar2.cause()));
+                                }
+
+                                resultHandler.handle(Future.succeededFuture());
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));

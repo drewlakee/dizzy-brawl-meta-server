@@ -64,6 +64,7 @@ public class HttpDatabaseServerVerticle extends AbstractVerticle {
 
         router.get("/task/all").handler(TaskApi.getTasksByAccountUUIDWithIntervalInMinutes(taskService));
         router.post("/task/add").handler(TaskApi.addTasks(taskService));
+        router.put("/task/update/progress").handler(TaskApi.updateTasks(taskService));
 
         return router;
     }
