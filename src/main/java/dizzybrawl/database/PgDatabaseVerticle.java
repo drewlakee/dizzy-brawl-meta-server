@@ -20,6 +20,7 @@ public class PgDatabaseVerticle extends AbstractVerticle {
     private static final String CONFIG_PG_USERNAME = "postgresql.username";
     private static final String CONFIG_PG_PASSWORD = "postgresql.password";
     private static final String CONFIG_PG_POOL_MAX_SIZE = "postgresql.pool.maxsize";
+
     public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
     private static final Logger log = LoggerFactory.getLogger(PgDatabaseVerticle.class);

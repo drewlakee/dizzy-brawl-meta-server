@@ -17,8 +17,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
 public class RestServerVerticle extends AbstractVerticle {
+
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
-    public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
+    public static final String DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
     private static final Logger log = LoggerFactory.getLogger(RestServerVerticle.class);
 
@@ -50,7 +51,10 @@ public class RestServerVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.mountSubRouter("/api/v1", router);
         router.route().handler(rh -> {
-            rh.response().putHeader("content-type", "application/json");
+            rh.response()
+                    .setChunked(true)
+                    .putHeader("content-type", "application/json");
+
             rh.next();
         });
 
@@ -62,7 +66,7 @@ public class RestServerVerticle extends AbstractVerticle {
 
         router.get("/character/all").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
-        router.get("/task/all").handler(TaskApi.getTasksByAccountUUIDWithIntervalInMinutes(taskService));
+        router.get("/task/all").handler(TaskApi.getTasksByAccountUUID(taskService));
         router.post("/task/add").handler(TaskApi.addTasks(taskService));
         router.put("/task/update/progress").handler(TaskApi.updateTasks(taskService));
 
@@ -70,10 +74,8 @@ public class RestServerVerticle extends AbstractVerticle {
     }
 
     private void initializeServices() {
-        // Create async services
-        String dbQueueAddress = config().getString(CONFIG_DIZZYBRAWL_DB_QUEUE, "dizzybrawl.db.queue");
-        accountService = AccountService.createProxy(vertx, dbQueueAddress + ".service.account");
-        characterService = CharacterService.createProxy(vertx, dbQueueAddress + ".service.character");
-        taskService = TaskService.createProxy(vertx, dbQueueAddress + ".service.task");
+        accountService = AccountService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.account");
+        characterService = CharacterService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.character");
+        taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
     }
 }

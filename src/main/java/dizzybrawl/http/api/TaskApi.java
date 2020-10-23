@@ -3,6 +3,7 @@ package dizzybrawl.http.api;
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.Error;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -16,30 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class TaskApi {
 
-    /**
-     *  Interval computing.
-     *
-     *  Example:
-     *
-     *      Generated date of task is 25.08 23:30
-     *      In next day user comes and takes his tasks in 26.08 8:30
-     *
-     *      Time spends - 9 hours = 540 minutes
-     *
-     *      If (Time spends > IntervalInMinutes) then delete task in DB
-     *                                           else return in response
-     */
-
-    public static Handler<RoutingContext> getTasksByAccountUUIDWithIntervalInMinutes(TaskService taskService) {
-        return context -> {
+    public static Handler<RoutingContext> getTasksByAccountUUID(TaskService taskService) {
+        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                future.complete(context);
                 return;
             }
 
@@ -48,22 +35,24 @@ public class TaskApi {
             try {
                 UUID.fromString(accountUUIDParam);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                future.complete(context);
                 return;
             }
 
-            taskService.getAllTasksByAccountUUID(accountUUIDParam, ar1 -> {
-                if (ar1.succeeded()) {
-                    List<Task> tasks = ar1.result();
+            taskService.getAllTasksByAccountUUID(accountUUIDParam, ar2 -> {
+                if (ar2.succeeded()) {
+                    List<Task> tasks = ar2.result();
                     List<Task> tasksToDelete = new ArrayList<>();
-                    JsonArray jsonTasksInIntervalResponse = new JsonArray();
+                    JsonArray jsonTasksToResponse = new JsonArray();
 
                     for (Task task : tasks) {
                         Timestamp generatedDateTimestamp = task.getGeneratedDate();
 
-                        long nowFromEpochSeconds = LocalDateTime.now(Clock.systemUTC()).toEpochSecond(ZoneOffset.UTC);
-                        long generatedMomentFromEpochSeconds = generatedDateTimestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
-                        long deltaInMinutes = TimeUnit.SECONDS.toMinutes(nowFromEpochSeconds - generatedMomentFromEpochSeconds);
+                        long nowUTCFromEpochSeconds = LocalDateTime.now(Clock.systemUTC()).toEpochSecond(ZoneOffset.UTC);
+                        long generatedUTCMomentFromEpochSeconds = generatedDateTimestamp.toLocalDateTime().toEpochSecond(ZoneOffset.UTC);
+
+                        long deltaInMinutes = TimeUnit.SECONDS.toMinutes(nowUTCFromEpochSeconds - generatedUTCMomentFromEpochSeconds);
 
                         if (deltaInMinutes > task.getActiveInterval()) {
                             tasksToDelete.add(task);
@@ -71,45 +60,55 @@ public class TaskApi {
                             JsonObject jsonTask = task.toJson();
                             jsonTask.remove("generated_date");
                             jsonTask.put("time_spends", deltaInMinutes);
-                            jsonTasksInIntervalResponse.add(jsonTask);
+                            jsonTasksToResponse.add(jsonTask);
                         }
                     }
 
-                    taskService.deleteTasks(tasksToDelete, ar2 -> {});
+                    taskService.deleteTasks(tasksToDelete, ar3 -> {});
 
-                    context.response().end(jsonTasksInIntervalResponse.encodePrettily());
+                    context.response().write(jsonTasksToResponse.encodePrettily());
+
+                    future.complete(context);
                 } else {
-                    context.fail(ar1.cause());
+                    future.fail(ar2.cause());
                 }
             });
-        };
+        }, ar1 -> {
+            if (ar1.succeeded()) {
+                ar1.result().response().end();
+            } else {
+                ar1.result().fail(ar1.cause());
+            }
+        });
     }
 
     public static Handler<RoutingContext> addTasks(TaskService taskService) {
-        return context -> {
+        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
             if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                future.complete(context);
                 return;
             }
 
-            List<Task> tasks = new ArrayList<>();
+            List<Task> tasksToAdd = new ArrayList<>();
             try {
                 for (Object taskObject : requestBodyAsJsonArray) {
                     JsonObject jsonTask = (JsonObject) taskObject;
                     UUID.fromString(jsonTask.getString("account_uuid"));
 
-                    tasks.add(new Task(jsonTask));
+                    tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                future.complete(context);
                 return;
             }
 
-            taskService.addTasks(tasks, ar1 -> {
-                if (ar1.succeeded()) {
-                    List<Task> tasksResult = ar1.result();
+            taskService.addTasks(tasksToAdd, ar2 -> {
+                if (ar2.succeeded()) {
+                    List<Task> tasksResult = ar2.result();
                     JsonArray jsonTasksResponse = new JsonArray();
 
                     for (Task task : tasksResult) {
@@ -118,20 +117,29 @@ public class TaskApi {
                         jsonTasksResponse.add(jsonResponse);
                     }
 
-                    context.response().end(jsonTasksResponse.encodePrettily());
+                    context.response().write(jsonTasksResponse.encodePrettily());
+
+                    future.complete(context);
                 } else {
-                    context.fail(ar1.cause());
+                    future.fail(ar2.cause());
                 }
             });
-        };
+        }, ar1 -> {
+            if (ar1.succeeded()) {
+                ar1.result().response().end();
+            } else {
+                ar1.result().fail(ar1.cause());
+            }
+        });
     }
 
     public static Handler<RoutingContext> updateTasks(TaskService taskService) {
-        return context -> {
+        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
             if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+                future.complete(context);
                 return;
             }
 
@@ -141,18 +149,28 @@ public class TaskApi {
                         .map(o -> new Task((JsonObject) o))
                         .forEach(tasksToUpdate::add);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                future.complete(context);
                 return;
             }
 
-            taskService.updateTasksProgress(tasksToUpdate, ar1 -> {
-                if (ar1.succeeded()) {
-                    context.response().setStatusCode(200).end();
+            taskService.updateTasksProgress(tasksToUpdate, ar2 -> {
+                if (ar2.succeeded()) {
+                    // All was updated
+                    context.response().setStatusCode(HttpResponseStatus.OK.code());
                 } else {
-                    // maybe server hasn't any user's input tasks
-                    context.response().setStatusCode(412).end();
+                    // Error cause DB doesn't store tasks from request
+                    context.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code());
                 }
+
+                future.complete(context);
             });
-        };
+        }, ar1 -> {
+            if (ar1.succeeded()) {
+                ar1.result().response().end();
+            } else {
+                ar1.result().fail(ar1.cause());
+            }
+        });
     }
 }

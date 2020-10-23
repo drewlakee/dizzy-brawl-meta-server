@@ -2,13 +2,14 @@ package dizzybrawl;
 
 import dizzybrawl.database.PgDatabaseVerticle;
 import dizzybrawl.http.RestServerVerticle;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 
 public class MainVerticle extends AbstractVerticle {
+
+    public static String CONFIG_SHARED_WORKERS_SIZE = "vertx.rest.server.workers.size";
 
     private static final Logger log = LoggerFactory.getLogger(MainVerticle.class);
 
@@ -16,21 +17,39 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         log.info("Main Verticle starts deploying.");
 
-        vertx.deployVerticle(new PgDatabaseVerticle(), ar1 -> {
-            if (ar1.succeeded()) {
-                vertx.deployVerticle(new RestServerVerticle(), ar2 -> {
-                    if (ar2.succeeded()) {
-                        log.error("Main Verticle successfully deployed.");
-                        startPromise.complete();
-                    } else {
-                        log.error("Main Verticle deploying fail.", ar2.cause());
-                        startPromise.fail(ar2.cause());
-                    }
-                });
-            } else {
-                log.error("Main Verticle deploying fail.", ar1.cause());
-                startPromise.fail(ar1.cause());
-            }
+        DeploymentOptions restServerOptions = new DeploymentOptions()
+                .setWorkerPoolName("rest-server-workers-pool")
+                .setWorkerPoolSize(config().getInteger(CONFIG_SHARED_WORKERS_SIZE, 5));
+
+        CompositeFuture.all(
+                deploy(new PgDatabaseVerticle()),
+                deploy(new RestServerVerticle(), restServerOptions)
+        ).onComplete(ar1 -> {
+            log.info("Main Verticle successfully deployed.");
+            startPromise.complete();
+        }).onFailure(ar2 -> {
+            log.error("Main Verticle deploying fail.", ar2.getCause());
+            startPromise.fail(ar2.getCause());
         });
+    }
+
+    private Future<Verticle> deploy(Verticle verticle) {
+        return Future.future(promise -> vertx.deployVerticle(verticle, ar -> {
+            if (ar.succeeded()) {
+                promise.complete(verticle);
+            } else {
+                promise.fail(ar.cause());
+            }
+        }));
+    }
+
+    private Future<Verticle> deploy(Verticle verticle, DeploymentOptions options) {
+        return Future.future(promise -> vertx.deployVerticle(verticle, options, ar -> {
+            if (ar.succeeded()) {
+                promise.complete(verticle);
+            } else {
+                promise.fail(ar.cause());
+            }
+        }));
     }
 }
