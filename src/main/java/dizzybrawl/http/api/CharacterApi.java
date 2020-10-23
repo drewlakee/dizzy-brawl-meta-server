@@ -14,12 +14,11 @@ import java.util.UUID;
 public class CharacterApi {
 
     public static Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterService characterService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -28,14 +27,13 @@ public class CharacterApi {
             try {
                 UUID.fromString(accountUUID);
             } catch (Exception e) {
-                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
-            characterService.getAllCharactersByAccountUUID(accountUUID, ar2 -> {
-                if (ar2.succeeded()) {
-                    List<Character> characters = ar2.result();
+            characterService.getAllCharactersByAccountUUID(accountUUID, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<Character> characters = ar1.result();
                     JsonArray jsonCharactersResponse = new JsonArray();
 
                     for (Character character : characters) {
@@ -43,19 +41,11 @@ public class CharacterApi {
                         jsonCharactersResponse.add(jsonCharacter);
                     }
 
-                    context.response().write(jsonCharactersResponse.encodePrettily());
-
-                    future.complete(context);
+                    context.response().end(jsonCharactersResponse.encodePrettily());
                 } else {
-                    future.fail(ar2.cause());
+                    context.fail(ar1.cause());
                 }
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 }

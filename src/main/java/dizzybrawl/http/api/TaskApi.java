@@ -21,12 +21,11 @@ import java.util.concurrent.TimeUnit;
 public class TaskApi {
 
     public static Handler<RoutingContext> getTasksByAccountUUID(TaskService taskService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -35,14 +34,13 @@ public class TaskApi {
             try {
                 UUID.fromString(accountUUIDParam);
             } catch (Exception e) {
-                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
-            taskService.getAllTasksByAccountUUID(accountUUIDParam, ar2 -> {
-                if (ar2.succeeded()) {
-                    List<Task> tasks = ar2.result();
+            taskService.getAllTasksByAccountUUID(accountUUIDParam, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<Task> tasks = ar1.result();
                     List<Task> tasksToDelete = new ArrayList<>();
                     JsonArray jsonTasksToResponse = new JsonArray();
 
@@ -64,31 +62,22 @@ public class TaskApi {
                         }
                     }
 
-                    taskService.deleteTasks(tasksToDelete, ar3 -> {});
+                    taskService.deleteTasks(tasksToDelete, ar2 -> {});
 
-                    context.response().write(jsonTasksToResponse.encodePrettily());
-
-                    future.complete(context);
+                    context.response().end(jsonTasksToResponse.encodePrettily());
                 } else {
-                    future.fail(ar2.cause());
+                    context.fail(ar1.cause());
                 }
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 
     public static Handler<RoutingContext> addTasks(TaskService taskService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
             if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -101,14 +90,13 @@ public class TaskApi {
                     tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
-                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
-            taskService.addTasks(tasksToAdd, ar2 -> {
-                if (ar2.succeeded()) {
-                    List<Task> tasksResult = ar2.result();
+            taskService.addTasks(tasksToAdd, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<Task> tasksResult = ar1.result();
                     JsonArray jsonTasksResponse = new JsonArray();
 
                     for (Task task : tasksResult) {
@@ -117,29 +105,20 @@ public class TaskApi {
                         jsonTasksResponse.add(jsonResponse);
                     }
 
-                    context.response().write(jsonTasksResponse.encodePrettily());
-
-                    future.complete(context);
+                    context.response().end(jsonTasksResponse.encodePrettily());
                 } else {
-                    future.fail(ar2.cause());
+                    context.fail(ar1.cause());
                 }
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 
     public static Handler<RoutingContext> updateTasks(TaskService taskService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
             if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -149,13 +128,12 @@ public class TaskApi {
                         .map(o -> new Task((JsonObject) o))
                         .forEach(tasksToUpdate::add);
             } catch (Exception e) {
-                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
-            taskService.updateTasksProgress(tasksToUpdate, ar2 -> {
-                if (ar2.succeeded()) {
+            taskService.updateTasksProgress(tasksToUpdate, ar1 -> {
+                if (ar1.succeeded()) {
                     // All was updated
                     context.response().setStatusCode(HttpResponseStatus.OK.code());
                 } else {
@@ -163,14 +141,8 @@ public class TaskApi {
                     context.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code());
                 }
 
-                future.complete(context);
+                context.response().end();
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 }

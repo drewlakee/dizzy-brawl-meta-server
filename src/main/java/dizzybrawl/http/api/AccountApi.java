@@ -11,21 +11,20 @@ import io.vertx.ext.web.RoutingContext;
 public class AccountApi {
 
     public static Handler<RoutingContext> onLogin(AccountService accountService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
             String usernameOrEmail = requestBodyAsJson.getString("username_or_email");
             String password = requestBodyAsJson.getString("password");
 
-            accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar2 -> {
-               if (ar2.succeeded()) {
-                   Account account = ar2.result();
+            accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
+               if (ar1.succeeded()) {
+                   Account account = ar1.result();
                    JsonObject response;
 
                    if (account.isEmpty()) {
@@ -42,29 +41,20 @@ public class AccountApi {
                        }
                    }
 
-                   context.response().write(response.encodePrettily());
-
-                   future.complete(context);
+                   context.response().end(response.encodePrettily());
                } else {
-                   future.fail(ar2.cause());
+                   context.fail(ar1.cause());
                }
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 
     public static Handler<RoutingContext> onRegistration(AccountService accountService) {
-        return context -> context.vertx().<RoutingContext>executeBlocking(future -> {
+        return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
             if (requestBodyAsJson.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
@@ -74,8 +64,7 @@ public class AccountApi {
             preRegistrationAccount.password = requestBodyAsJson.getString("password");
 
             if (preRegistrationAccount.isEmpty()) {
-                context.response().write(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                future.complete(context);
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
@@ -90,19 +79,11 @@ public class AccountApi {
                         response.put("account_uuid", account.getAccountUUID().toString());
                     }
 
-                    context.response().write(response.encodePrettily());
-
-                    future.complete(context);
+                    context.response().end(response.encodePrettily());
                 } else {
-                    future.fail(ar1.cause());
+                    context.fail(ar1.cause());
                 }
             });
-        }, ar1 -> {
-            if (ar1.succeeded()) {
-                ar1.result().response().end();
-            } else {
-                ar1.result().fail(ar1.cause());
-            }
-        });
+        };
     }
 }

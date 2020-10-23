@@ -18,6 +18,7 @@ public class MainVerticle extends AbstractVerticle {
         log.info("Main Verticle starts deploying.");
 
         DeploymentOptions restServerOptions = new DeploymentOptions()
+                .setWorker(true)
                 .setWorkerPoolName("rest-server-workers-pool")
                 .setWorkerPoolSize(config().getInteger(CONFIG_SHARED_WORKERS_SIZE, 5));
 
