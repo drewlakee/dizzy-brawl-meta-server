@@ -16,11 +16,11 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
-public class HttpDatabaseServerVerticle extends AbstractVerticle {
+public class RestServerVerticle extends AbstractVerticle {
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
     public static final String CONFIG_DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
-    private static final Logger log = LoggerFactory.getLogger(HttpDatabaseServerVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(RestServerVerticle.class);
 
     private AccountService accountService;
     private CharacterService characterService;

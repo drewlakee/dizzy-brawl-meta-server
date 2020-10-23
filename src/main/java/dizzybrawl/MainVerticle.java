@@ -1,7 +1,7 @@
 package dizzybrawl;
 
 import dizzybrawl.database.PgDatabaseVerticle;
-import dizzybrawl.http.HttpDatabaseServerVerticle;
+import dizzybrawl.http.RestServerVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -16,19 +16,21 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         log.info("Main Verticle starts deploying.");
 
-        Promise<String> pgDatabaseVerticleDeployment = Promise.promise();
-        vertx.deployVerticle(new PgDatabaseVerticle(), pgDatabaseVerticleDeployment);
-
-        pgDatabaseVerticleDeployment.future().compose(asyncResult -> {
-            Promise<String> httpVerticleDeployment = Promise.promise();
-            vertx.deployVerticle(new HttpDatabaseServerVerticle(), httpVerticleDeployment);
-
-            return httpVerticleDeployment.future();
-        }).onComplete(asyncResult -> {
-            startPromise.complete();
-        }).onFailure(asyncResult -> {
-            log.error("Main Verticle deployment failed.");
-            startPromise.fail(asyncResult.getCause());
+        vertx.deployVerticle(new PgDatabaseVerticle(), ar1 -> {
+            if (ar1.succeeded()) {
+                vertx.deployVerticle(new RestServerVerticle(), ar2 -> {
+                    if (ar2.succeeded()) {
+                        log.error("Main Verticle successfully deployed.");
+                        startPromise.complete();
+                    } else {
+                        log.error("Main Verticle deploying fail.", ar2.cause());
+                        startPromise.fail(ar2.cause());
+                    }
+                });
+            } else {
+                log.error("Main Verticle deploying fail.", ar1.cause());
+                startPromise.fail(ar1.cause());
+            }
         });
     }
 }

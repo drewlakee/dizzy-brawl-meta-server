@@ -12,7 +12,6 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.sqlclient.PoolOptions;
 
-
 public class PgDatabaseVerticle extends AbstractVerticle {
 
     private static final String CONFIG_PG_HOST = "postgresql.host";
@@ -39,7 +38,7 @@ public class PgDatabaseVerticle extends AbstractVerticle {
 
         // Workers pool options
         PoolOptions poolOptions = new PoolOptions()
-                .setMaxSize(config().getInteger(CONFIG_PG_POOL_MAX_SIZE, 2));
+                .setMaxSize(config().getInteger(CONFIG_PG_POOL_MAX_SIZE, 5));
 
         // Create the client pool
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
