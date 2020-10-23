@@ -85,6 +85,8 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());
@@ -117,6 +119,8 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                         }
 
                         resultHandler.handle(Future.succeededFuture(account));
+
+                        connection.close();
                     });
             } else {
                 log.error("Can't connect to database.", ar1.cause());

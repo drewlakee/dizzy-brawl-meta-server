@@ -78,6 +78,8 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
                                 }
 
                                 resultHandler.handle(Future.succeededFuture(characters));
+
+                                connection.close();
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));

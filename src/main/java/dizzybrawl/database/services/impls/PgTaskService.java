@@ -85,6 +85,8 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());
@@ -115,6 +117,8 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());
@@ -167,6 +171,8 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());
@@ -216,6 +222,8 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());

@@ -39,7 +39,7 @@ public class PgDatabaseVerticle extends AbstractVerticle {
 
         // Workers pool options
         PoolOptions poolOptions = new PoolOptions()
-                .setMaxSize(config().getInteger(CONFIG_PG_POOL_MAX_SIZE, 30));
+                .setMaxSize(config().getInteger(CONFIG_PG_POOL_MAX_SIZE, 2));
 
         // Create the client pool
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
