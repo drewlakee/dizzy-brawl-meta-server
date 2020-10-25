@@ -193,7 +193,6 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
                 for (Task task : tasks) {
                     batch.add(Tuple.of(
                             task.getCurrentState(),
-                            task.getGoalState(),
                             task.getTaskUUID()
                     ));
                 }

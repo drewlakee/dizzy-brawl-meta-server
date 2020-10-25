@@ -113,7 +113,7 @@ public class TaskApi {
         };
     }
 
-    public static Handler<RoutingContext> updateTasks(TaskService taskService) {
+    public static Handler<RoutingContext> updateTasksProgress(TaskService taskService) {
         return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 

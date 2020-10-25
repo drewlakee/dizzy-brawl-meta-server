@@ -68,7 +68,7 @@ public class RestServerVerticle extends AbstractVerticle {
 
         router.get("/task/all").handler(TaskApi.getTasksByAccountUUID(taskService));
         router.post("/task/add").handler(TaskApi.addTasks(taskService));
-        router.put("/task/update/progress").handler(TaskApi.updateTasks(taskService));
+        router.put("/task/update/progress").handler(TaskApi.updateTasksProgress(taskService));
 
         return router;
     }
