@@ -98,7 +98,7 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
     }
 
     @Override
-    public AccountService registerAccount(PreRegistrationAccount preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
+    public AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
             SqlConnection connection = ar1.result();
@@ -106,9 +106,9 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
             connection
                     .preparedQuery(sqlQueries.get(AccountSqlQuery.INSERT_ACCOUNT_WITH_RETURNING))
                     .execute(Tuple.of(
-                            preRegistrationAccount.username,
-                            preRegistrationAccount.email,
-                            preRegistrationAccount.password), ar2 -> {
+                            preRegistrationAccount.getUsername(),
+                            preRegistrationAccount.getEmail(),
+                            preRegistrationAccount.getPassword()), ar2 -> {
 
                         Account account;
                         if (ar2.succeeded()) {

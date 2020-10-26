@@ -58,10 +58,7 @@ public class AccountApi {
                 return;
             }
 
-            PreRegistrationAccount preRegistrationAccount = new PreRegistrationAccount();
-            preRegistrationAccount.username = requestBodyAsJson.getString("username");
-            preRegistrationAccount.email = requestBodyAsJson.getString("email");
-            preRegistrationAccount.password = requestBodyAsJson.getString("password");
+            Account preRegistrationAccount = new Account(requestBodyAsJson);
 
             if (preRegistrationAccount.isEmpty()) {
                 context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());

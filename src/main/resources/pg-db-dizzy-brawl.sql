@@ -112,6 +112,25 @@ create trigger insert_default_characters_to_new_account
     for each row
 execute procedure insert_default_characters_to_new_account();
 
+create table if not exists game_server
+(
+    game_server_id serial  not null
+        constraint game_server_pk
+            primary key,
+    name           varchar,
+    ip_v4          varchar not null
+);
+
+create unique index if not exists game_server_game_server_id_uindex
+    on game_server (game_server_id);
+
+create unique index if not exists game_server_ip_v4_uindex
+    on game_server (ip_v4);
+
+create unique index if not exists game_server_name_uindex
+    on game_server (name);
+
+
 --- DATA AT BEGIN STATE
 
 -- CHARACTERS

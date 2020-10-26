@@ -30,5 +30,5 @@ public interface AccountService {
     AccountService getAccountByUsernameOrEmail(String UsernameOrEmail, Handler<AsyncResult<Account>> resultHandler);
 
     @Fluent
-    AccountService registerAccount(PreRegistrationAccount preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler);
+    AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler);
 }
