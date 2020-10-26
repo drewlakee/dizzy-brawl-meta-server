@@ -186,7 +186,6 @@ Name                | Data Type     | Description
 ------------        | ------------- | -------------
 task_uuid           |   String      |  Task's UUID that will be updated
 current_state       |   int         |  Current progress to update
-goal_state          |   int         |  Goal value to update
 
 **JSON Response**
 
