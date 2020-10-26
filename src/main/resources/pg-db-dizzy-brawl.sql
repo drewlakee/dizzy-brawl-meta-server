@@ -112,3 +112,13 @@ create trigger insert_default_characters_to_new_account
     for each row
 execute procedure insert_default_characters_to_new_account();
 
+--- DATA AT BEGIN STATE
+
+-- CHARACTERS
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (1, 'SHIELD_WARRIOR', true) ON CONFLICT DO NOTHING;
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (2, 'SAMURAI', true) ON CONFLICT DO NOTHING;
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (3, 'SHINOBI', false) ON CONFLICT DO NOTHING;
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (4, 'FIRE_WIZARD', false) ON CONFLICT DO NOTHING;
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (5, 'WIND_WIZARD', false) ON CONFLICT DO NOTHING;
+INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (6, 'HEALER_WIZARD', true) ON CONFLICT DO NOTHING;
+
