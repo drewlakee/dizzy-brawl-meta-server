@@ -130,10 +130,25 @@ create unique index if not exists game_server_ip_v4_uindex
 create unique index if not exists game_server_name_uindex
     on game_server (name);
 
+create table if not exists character_mesh
+(
+    character_mesh_id serial            not null
+        constraint character_mesh_pk
+            primary key,
+    name              varchar,
+    cost              integer default 0 not null
+);
 
---- DATA AT BEGIN STATE
+create unique index if not exists character_mesh_character_mesh_id_uindex
+    on character_mesh (character_mesh_id);
 
--- CHARACTERS
+create unique index if not exists character_mesh_name_uindex
+    on character_mesh (name);
+
+-- DATA AT BEGIN STATE
+
+--- CHARACTERS
+
 INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (1, 'SHIELD_WARRIOR', true) ON CONFLICT DO NOTHING;
 INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (2, 'SAMURAI', true) ON CONFLICT DO NOTHING;
 INSERT INTO character_type (character_type_id, name, is_enabled_at_begin) VALUES (3, 'SHINOBI', false) ON CONFLICT DO NOTHING;
