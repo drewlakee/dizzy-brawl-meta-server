@@ -1,7 +1,6 @@
 package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Account;
-import dizzybrawl.database.models.PreRegistrationAccount;
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.http.Error;
 import io.vertx.core.Handler;

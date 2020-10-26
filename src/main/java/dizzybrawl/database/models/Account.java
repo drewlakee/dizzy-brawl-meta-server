@@ -26,18 +26,18 @@ public class Account {
     public Account(JsonObject jsonAccount) {
         this(
                 jsonAccount.getString("account_uuid") == null ? null : UUID.fromString(jsonAccount.getString("account_uuid")),
-                jsonAccount.getString("username"),
-                jsonAccount.getString("password"),
-                jsonAccount.getString("email")
+                jsonAccount.getString("username") == null ? null : jsonAccount.getString("username"),
+                jsonAccount.getString("password") == null ? null : jsonAccount.getString("password"),
+                jsonAccount.getString("email") == null ? null : jsonAccount.getString("email")
         );
     }
 
     public Account(Row sqlRowAccount) {
         this(
-                sqlRowAccount.getUUID("account_uuid"),
-                sqlRowAccount.getString("username"),
-                sqlRowAccount.getString("password"),
-                sqlRowAccount.getString("email")
+                sqlRowAccount.getUUID("account_uuid") == null ? null : sqlRowAccount.getUUID("account_uuid"),
+                sqlRowAccount.getString("username") == null ? null : sqlRowAccount.getString("username"),
+                sqlRowAccount.getString("password") == null ? null : sqlRowAccount.getString("password"),
+                sqlRowAccount.getString("email") == null ? null : sqlRowAccount.getString("email")
         );
     }
 

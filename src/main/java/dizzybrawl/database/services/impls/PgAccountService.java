@@ -1,7 +1,6 @@
 package dizzybrawl.database.services.impls;
 
 import dizzybrawl.database.models.Account;
-import dizzybrawl.database.models.PreRegistrationAccount;
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.AccountSqlQuery;
