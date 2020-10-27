@@ -131,10 +131,12 @@ public class PgDatabaseVerticle extends AbstractVerticle {
                             .execute(ar2 -> {
                                 if (ar2.succeeded()) {
                                     transaction.commit();
-                                    connection.close();
                                 } else {
                                     log.error("SQL Script can't be executed.", ar2.cause());
+                                    transaction.rollback();
                                 }
+
+                                connection.close();
                             });
                 } else {
                     log.error("Can't connect to database.", ar1.cause());
