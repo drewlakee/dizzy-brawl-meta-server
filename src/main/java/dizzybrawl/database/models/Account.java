@@ -3,10 +3,13 @@ package dizzybrawl.database.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import java.util.Objects;
 import java.util.UUID;
 
+@Data
+@AllArgsConstructor
 @DataObject
 public class Account {
 
@@ -15,30 +18,18 @@ public class Account {
     private final String password;
     private final String email;
 
-    public Account(UUID accountUUID, String username,
-                   String password, String email) {
-        this.accountUUID = accountUUID;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-    }
-
     public Account(JsonObject jsonAccount) {
-        this(
-                jsonAccount.getString("account_uuid") == null ? null : UUID.fromString(jsonAccount.getString("account_uuid")),
-                jsonAccount.getString("username") == null ? null : jsonAccount.getString("username"),
-                jsonAccount.getString("password") == null ? null : jsonAccount.getString("password"),
-                jsonAccount.getString("email") == null ? null : jsonAccount.getString("email")
-        );
+        this.accountUUID = jsonAccount.getString("account_uuid") == null ? null : UUID.fromString(jsonAccount.getString("account_uuid"));
+        this.username = jsonAccount.getString("username") == null ? null : jsonAccount.getString("username");
+        this.password = jsonAccount.getString("password") == null ? null : jsonAccount.getString("password");
+        this.email = jsonAccount.getString("email") == null ? null : jsonAccount.getString("email");
     }
 
     public Account(Row sqlRowAccount) {
-        this(
-                sqlRowAccount.getUUID("account_uuid") == null ? null : sqlRowAccount.getUUID("account_uuid"),
-                sqlRowAccount.getString("username") == null ? null : sqlRowAccount.getString("username"),
-                sqlRowAccount.getString("password") == null ? null : sqlRowAccount.getString("password"),
-                sqlRowAccount.getString("email") == null ? null : sqlRowAccount.getString("email")
-        );
+        this.accountUUID =sqlRowAccount.getUUID("account_uuid") == null ? null : sqlRowAccount.getUUID("account_uuid");
+        this.username = sqlRowAccount.getString("username") == null ? null : sqlRowAccount.getString("username");
+        this.password = sqlRowAccount.getString("password") == null ? null : sqlRowAccount.getString("password");
+        this.email = sqlRowAccount.getString("email") == null ? null : sqlRowAccount.getString("email");
     }
 
     public static Account createEmpty() {
@@ -59,47 +50,5 @@ public class Account {
                 .put("username", username)
                 .put("password", password)
                 .put("email", email);
-    }
-
-    public UUID getAccountUUID() {
-        return accountUUID;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Account account = (Account) o;
-        return Objects.equals(accountUUID, account.accountUUID) &&
-                Objects.equals(username, account.username) &&
-                Objects.equals(password, account.password) &&
-                Objects.equals(email, account.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(accountUUID, username, password, email);
-    }
-
-    @Override
-    public String toString() {
-        return "Account{" +
-                "accountId=" + accountUUID +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                '}';
     }
 }

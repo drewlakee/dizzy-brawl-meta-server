@@ -3,11 +3,14 @@ package dizzybrawl.database.models;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.sql.Timestamp;
-import java.util.Objects;
 import java.util.UUID;
 
+@Data
+@AllArgsConstructor
 @DataObject
 public class Task {
 
@@ -19,41 +22,24 @@ public class Task {
     private final Timestamp generatedDate;
     private final int activeInterval;
 
-    public Task(UUID taskUUID, UUID accountUUID,
-                int taskTypeId, int currentState,
-                int goalState, Timestamp generatedDate,
-                int activeInterval) {
-        this.taskUUID = taskUUID;
-        this.accountUUID = accountUUID;
-        this.taskTypeId = taskTypeId;
-        this.currentState = currentState;
-        this.goalState = goalState;
-        this.generatedDate = generatedDate;
-        this.activeInterval = activeInterval;
-    }
-
     public Task(JsonObject jsonTask) {
-        this(
-                jsonTask.getString("task_uuid") == null ? null : UUID.fromString(jsonTask.getString("task_uuid")),
-                jsonTask.getString("account_uuid") == null ? null : UUID.fromString(jsonTask.getString("account_uuid")),
-                jsonTask.getInteger("task_type_id") == null ? 0 : jsonTask.getInteger("task_type_id"),
-                jsonTask.getInteger("current_state") == null ? 0 : jsonTask.getInteger("current_state"),
-                jsonTask.getInteger("goal_state") == null ? 0 : jsonTask.getInteger("goal_state"),
-                jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date")),
-                jsonTask.getInteger("active_interval")  == null ? 0 : jsonTask.getInteger("active_interval")
-        );
+        this.taskUUID = jsonTask.getString("task_uuid") == null ? null : UUID.fromString(jsonTask.getString("task_uuid"));
+        this.accountUUID = jsonTask.getString("account_uuid") == null ? null : UUID.fromString(jsonTask.getString("account_uuid"));
+        this.taskTypeId = jsonTask.getInteger("task_type_id") == null ? 0 : jsonTask.getInteger("task_type_id");
+        this.currentState = jsonTask.getInteger("current_state") == null ? 0 : jsonTask.getInteger("current_state");
+        this.goalState = jsonTask.getInteger("goal_state") == null ? 0 : jsonTask.getInteger("goal_state");
+        this.generatedDate = jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date"));
+        this.activeInterval = jsonTask.getInteger("active_interval")  == null ? 0 : jsonTask.getInteger("active_interval");
     }
 
     public Task(Row sqlRowTask) {
-        this(
-                sqlRowTask.getUUID("task_uuid") == null ? null : sqlRowTask.getUUID("task_uuid"),
-                sqlRowTask.getUUID("account_uuid") == null ? null : sqlRowTask.getUUID("account_uuid"),
-                sqlRowTask.getInteger("task_type_id") == null ? 0 : sqlRowTask.getInteger("task_type_id"),
-                sqlRowTask.getInteger("current_state") == null ? 0 : sqlRowTask.getInteger("current_state"),
-                sqlRowTask.getInteger("goal_state") == null ? 0 : sqlRowTask.getInteger("goal_state"),
-                sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date")),
-                sqlRowTask.getInteger("active_interval") == null ? 0 : sqlRowTask.getInteger("active_interval")
-        );
+        this.taskUUID = sqlRowTask.getUUID("task_uuid") == null ? null : sqlRowTask.getUUID("task_uuid");
+        this.accountUUID = sqlRowTask.getUUID("account_uuid") == null ? null : sqlRowTask.getUUID("account_uuid");
+        this.taskTypeId = sqlRowTask.getInteger("task_type_id") == null ? 0 : sqlRowTask.getInteger("task_type_id");
+        this.currentState = sqlRowTask.getInteger("current_state") == null ? 0 : sqlRowTask.getInteger("current_state");
+        this.goalState = sqlRowTask.getInteger("goal_state") == null ? 0 : sqlRowTask.getInteger("goal_state");
+        this.generatedDate = sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date"));
+        this.activeInterval = sqlRowTask.getInteger("active_interval") == null ? 0 : sqlRowTask.getInteger("active_interval");
     }
 
     public static Task createEmpty() {
@@ -80,65 +66,5 @@ public class Task {
                 .put("goal_state", goalState)
                 .put("generated_date", generatedDate == null ? null : generatedDate.toString())
                 .put("active_interval", activeInterval);
-    }
-
-    public UUID getTaskUUID() {
-        return taskUUID;
-    }
-
-    public UUID getAccountUUID() {
-        return accountUUID;
-    }
-
-    public int getTaskTypeId() {
-        return taskTypeId;
-    }
-
-    public int getCurrentState() {
-        return currentState;
-    }
-
-    public int getGoalState() {
-        return goalState;
-    }
-
-    public Timestamp getGeneratedDate() {
-        return generatedDate;
-    }
-
-    public int getActiveInterval() {
-        return activeInterval;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return taskTypeId == task.taskTypeId &&
-                currentState == task.currentState &&
-                goalState == task.goalState &&
-                activeInterval == task.activeInterval &&
-                Objects.equals(taskUUID, task.taskUUID) &&
-                Objects.equals(accountUUID, task.accountUUID) &&
-                Objects.equals(generatedDate, task.generatedDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(taskUUID, accountUUID, taskTypeId, currentState, goalState, generatedDate, activeInterval);
-    }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "taskUUID=" + taskUUID +
-                ", accountUUID=" + accountUUID +
-                ", taskTypeId=" + taskTypeId +
-                ", currentState=" + currentState +
-                ", goalState=" + goalState +
-                ", generatedDate=" + generatedDate +
-                ", activeInterval=" + activeInterval +
-                '}';
     }
 }
