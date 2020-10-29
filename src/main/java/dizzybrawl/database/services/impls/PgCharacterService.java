@@ -1,6 +1,7 @@
 package dizzybrawl.database.services.impls;
 
 import dizzybrawl.database.models.Character;
+import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.database.sql.CharacterSqlQuery;
 import dizzybrawl.database.sql.SqlLoadable;
@@ -51,6 +52,7 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
             queriesProps.load(queriesInputStream);
 
             loadedSqlQueries.put(CharacterSqlQuery.SELECT_ALL_CHARACTERS_BY_ACCOUNT_UUID, queriesProps.getProperty("select-all-characters-by-account-uuid"));
+            loadedSqlQueries.put(CharacterSqlQuery.SELECT_ALL_CHARACTER_MESHES_BY_CHARACTER_UUID, queriesProps.getProperty("select-all-character-meshes-by-character-uuid"));
         } catch (IOException e) {
             log.error("Can't load sql queries.", e.getCause());
         }
@@ -78,12 +80,47 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
                                 }
 
                                 resultHandler.handle(Future.succeededFuture(characters));
-
-                                connection.close();
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
+                        });
+            } else {
+                log.error("Can't connect to database.", ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+        });
+
+        return this;
+    }
+
+
+    @Override
+    public CharacterService getAllCharacterMeshesByCharacterUUID(String characterUUID, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
+        pgClient.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
+                SqlConnection connection = ar1.result();
+
+                connection
+                        .preparedQuery(sqlQueries.get(CharacterSqlQuery.SELECT_ALL_CHARACTER_MESHES_BY_CHARACTER_UUID))
+                        .execute(Tuple.of(UUID.fromString(characterUUID)), ar2 -> {
+                           if (ar2.succeeded()) {
+                               RowSet<Row> queryResult = ar2.result();
+
+                               List<CharacterMesh> meshes = new ArrayList<>();
+                               for (Row row : queryResult) {
+                                   meshes.add(new CharacterMesh(row));
+                               }
+
+                               resultHandler.handle(Future.succeededFuture(meshes));
+                           } else {
+                               log.warn("Can't query to database cause " + ar2.cause());
+                               resultHandler.handle(Future.failedFuture(ar2.cause()));
+                           }
+
+                           connection.close();
                         });
             } else {
                 log.error("Can't connect to database.", ar1.cause());

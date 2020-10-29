@@ -1,6 +1,7 @@
 package dizzybrawl.database.services;
 
 import dizzybrawl.database.models.Character;
+import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.impls.PgCharacterService;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
@@ -29,4 +30,7 @@ public interface CharacterService {
 
     @Fluent
     CharacterService getAllCharactersByAccountUUID(String accountUUID, Handler<AsyncResult<List<Character>>> resultHandler);
+
+    @Fluent
+    CharacterService getAllCharacterMeshesByCharacterUUID(String characterUUID, Handler<AsyncResult<List<CharacterMesh>>> resultHandler);
 }

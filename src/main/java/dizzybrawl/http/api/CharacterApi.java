@@ -1,6 +1,7 @@
 package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Character;
+import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.http.Error;
 import io.vertx.core.Handler;
@@ -42,6 +43,39 @@ public class CharacterApi {
                     }
 
                     context.response().end(jsonCharactersResponse.encodePrettily());
+                } else {
+                    context.fail(ar1.cause());
+                }
+            });
+        };
+    }
+
+    public static Handler<RoutingContext> getAllCharacterMeshesByCharacterUUID(CharacterService characterService) {
+        return context -> {
+            String characterUUID = context.request().getParam("character_uuid");
+
+            if (characterUUID.isEmpty()) {
+                context.response().end(new JsonObject().put("error", Error.EMPTY_QUERY_PARAMETER).encodePrettily());
+                return;
+            }
+
+            try {
+                UUID.fromString(characterUUID);
+            } catch (Exception e) {
+                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                return;
+            }
+
+            characterService.getAllCharacterMeshesByCharacterUUID(characterUUID, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<CharacterMesh> characterMeshes = ar1.result();
+                    JsonArray jsonCharacterMeshes = new JsonArray();
+
+                    for (CharacterMesh characterMesh : characterMeshes) {
+                        jsonCharacterMeshes.add(characterMesh.toJson());
+                    }
+
+                    context.response().end(jsonCharacterMeshes.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }

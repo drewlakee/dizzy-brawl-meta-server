@@ -13,6 +13,7 @@
     * [POST /account/register](#post-accountregister)
 3. [Character](#character)
     * [GET /character/all](#get-characterall)
+    * [GET /character/:character_uuid/meshes](#get-charactercharacter_uuidmeshes)
 4. [Task](#task)
     * [GET /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
@@ -102,6 +103,34 @@ error               | String        | **Optional.** Fact of wrong query executio
 Error Name                      |Description
 ------------                    |-------------
 EMPTY_BODY                      | Empty json body request
+INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+
+
+### GET `/character/:character_uuid/meshes`
+
+**Query Parameter**
+
+Name                |Data Type      | Description
+------------        | ------------- | -------------
+character_uuid      | String        |  Character's UUID
+
+**JSON Response**
+
+Response wrapped into JSON Array
+
+Name                | Data Type     |Description
+------------        |-------------  |-------------
+character_mesh_id   | int           | Character mesh ID
+character_type_id   | int           | Character type ID
+in_game_cost        | int           | Cost in game money
+is_enable           | Boolean       | Available 
+error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+**Error reasons**
+
+Error Name                      |Description
+------------                    |-------------
+EMPTY_QUERY_PARAMETER           | Empty parameter passed in query
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 ## Task

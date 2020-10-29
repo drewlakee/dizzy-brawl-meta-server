@@ -65,6 +65,7 @@ public class RestServerVerticle extends AbstractVerticle {
         router.post("/account/register").handler(AccountApi.onRegistration(accountService));
 
         router.get("/character/all").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+        router.get("/character/:character_uuid/meshes").handler(CharacterApi.getAllCharacterMeshesByCharacterUUID(characterService));
 
         router.get("/task/all").handler(TaskApi.getTasksByAccountUUID(taskService));
         router.post("/task/add").handler(TaskApi.addTasks(taskService));

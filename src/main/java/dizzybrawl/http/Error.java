@@ -5,6 +5,9 @@ public enum Error {
     // JSON error reasons
     EMPTY_BODY,
 
+    // Query
+    EMPTY_QUERY_PARAMETER,
+
     // Login error reasons
     INVALID_PASSWORD,
 

@@ -130,20 +130,72 @@ create unique index if not exists game_server_ip_v4_uindex
 create unique index if not exists game_server_name_uindex
     on game_server (name);
 
-create table if not exists character_mesh
+create function public.insert_default_meshes_to_new_character() returns trigger
+    language plpgsql
+as
+$$
+    -- function takes meshes of concrete character type
+    -- and insert to this new character at user account
+
+DECLARE
+    cm                                  character_mesh%rowtype;
+    new_already_inserted_character_uuid uuid;
+    inserted_character_type_id          int;
+BEGIN
+    new_already_inserted_character_uuid = NEW.character_uuid;
+    inserted_character_type_id = NEW.character_type_id;
+
+    FOR cm IN
+        SELECT *
+        FROM character_mesh
+        WHERE character_type_id = inserted_character_type_id
+        LOOP
+            INSERT INTO character_mesh_inventory (character_uuid, character_mesh_id, is_enabled)
+            VALUES (new_already_inserted_character_uuid, cm.character_mesh_id, cm.is_enabled_at_begin);
+        END LOOP;
+
+    RETURN NEW;
+END;
+$$;
+
+create trigger insert_default_meshes_to_new_character
+    after insert
+    on public.character
+    for each row
+execute procedure public.insert_default_meshes_to_new_character();
+
+create table if not exists public.character_mesh
 (
-    character_mesh_id serial            not null
+    character_mesh_id   serial                not null
         constraint character_mesh_pk
             primary key,
-    name              varchar,
-    cost              integer default 0 not null
+    name                varchar,
+    in_game_cost        integer default 0     not null,
+    character_type_id   integer               not null
+        constraint character_mesh_character_type_character_type_id_fk
+            references public.character_type
+            on update cascade on delete cascade,
+    is_enabled_at_begin boolean default false not null
 );
 
 create unique index if not exists character_mesh_character_mesh_id_uindex
-    on character_mesh (character_mesh_id);
+    on public.character_mesh (character_mesh_id);
 
 create unique index if not exists character_mesh_name_uindex
-    on character_mesh (name);
+    on public.character_mesh (name);
+
+create table if not exists public.character_mesh_inventory
+(
+    character_uuid    uuid                  not null
+        constraint character_to_mesh_inventory_character_character_uuid_fk
+            references public.character
+            on update cascade on delete cascade,
+    character_mesh_id integer
+        constraint character_to_mesh_inventory_character_mesh_character_mesh_id_fk
+            references public.character_mesh
+            on update cascade on delete cascade,
+    is_enabled        boolean default false not null
+);
 
 -- DATA AT BEGIN STATE
 
