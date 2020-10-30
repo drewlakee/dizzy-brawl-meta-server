@@ -98,21 +98,31 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
 
 
     @Override
-    public CharacterService getAllCharacterMeshesByCharacterUUID(String characterUUID, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
+    public CharacterService getAllCharacterMeshesByCharacterUUID(List<String> characterUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
+                List<Tuple> batch = new ArrayList<>();
+                for (String characterUUID : characterUUIDs) {
+                    batch.add(Tuple.of(UUID.fromString(characterUUID)));
+                }
+
                 connection
                         .preparedQuery(sqlQueries.get(CharacterSqlQuery.SELECT_ALL_CHARACTER_MESHES_BY_CHARACTER_UUID))
-                        .execute(Tuple.of(UUID.fromString(characterUUID)), ar2 -> {
-                           if (ar2.succeeded()) {
-                               RowSet<Row> queryResult = ar2.result();
+                        .executeBatch(batch, ar2 -> {
+                            if (ar2.succeeded()) {
+                                List<CharacterMesh> meshes = new ArrayList<>();
 
-                               List<CharacterMesh> meshes = new ArrayList<>();
-                               for (Row row : queryResult) {
-                                   meshes.add(new CharacterMesh(row));
+                               RowSet<Row> queryResult = ar2.result();
+                               while (queryResult != null) {
+                                   for (Row row : queryResult) {
+                                       meshes.add(new CharacterMesh(row));
+                                   }
+
+                                   queryResult = queryResult.next();
                                }
+
 
                                resultHandler.handle(Future.succeededFuture(meshes));
                            } else {

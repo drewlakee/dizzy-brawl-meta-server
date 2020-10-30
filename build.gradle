@@ -17,6 +17,8 @@ java {
 }
 
 dependencies {
+    compile 'com.google.guava:guava:29.0-jre'
+
     compile 'io.vertx:vertx-core:3.9.3'
     compile 'io.vertx:vertx-web:3.9.3'
     compile 'io.vertx:vertx-codegen:3.9.3'

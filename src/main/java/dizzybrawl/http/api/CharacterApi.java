@@ -1,5 +1,7 @@
 package dizzybrawl.http.api;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.CharacterService;
@@ -9,6 +11,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,30 +55,53 @@ public class CharacterApi {
 
     public static Handler<RoutingContext> getAllCharacterMeshesByCharacterUUID(CharacterService characterService) {
         return context -> {
-            String characterUUID = context.request().getParam("character_uuid");
+            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
-            if (characterUUID.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_QUERY_PARAMETER).encodePrettily());
+            if (requestBodyAsJsonArray.isEmpty()) {
+                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
                 return;
             }
 
+            List<String> characterUUIDs = new ArrayList<>();
             try {
-                UUID.fromString(characterUUID);
+                requestBodyAsJsonArray.stream()
+                        .map(o -> ((JsonObject) o).getString("character_uuid"))
+                        .distinct()
+                        .forEach(uuidString -> {
+                            UUID.fromString(uuidString);
+                            characterUUIDs.add(uuidString);
+                        });
             } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
                 return;
             }
 
-            characterService.getAllCharacterMeshesByCharacterUUID(characterUUID, ar1 -> {
+            characterService.getAllCharacterMeshesByCharacterUUID(characterUUIDs, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<CharacterMesh> characterMeshes = ar1.result();
-                    JsonArray jsonCharacterMeshes = new JsonArray();
-
-                    for (CharacterMesh characterMesh : characterMeshes) {
-                        jsonCharacterMeshes.add(characterMesh.toJson());
+                    Multimap<String, CharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
+                    for (CharacterMesh mesh : ar1.result()) {
+                        characterUUIDToCharacterMeshesMap.put(mesh.getCharacterUUID().toString(), mesh);
                     }
 
-                    context.response().end(jsonCharacterMeshes.encodePrettily());
+                    JsonArray jsonResponse = new JsonArray();
+                    for (String characterUUID : characterUUIDs) {
+                        JsonObject jsonCharacter = new JsonObject();
+                        jsonCharacter.put("character_uuid", characterUUID);
+
+                        JsonArray jsonCharacterMeshes = new JsonArray();
+                        for (CharacterMesh mesh : characterUUIDToCharacterMeshesMap.get(characterUUID)) {
+                            JsonObject jsonMesh = mesh.toJson();
+                            jsonMesh.remove("character_uuid");
+                            jsonMesh.remove("character_type_id");
+                            jsonCharacterMeshes.add(jsonMesh);
+                        }
+
+                        jsonCharacter.put("character_meshes", jsonCharacterMeshes);
+
+                        jsonResponse.add(jsonCharacter);
+                    }
+
+                    context.response().end(jsonResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }

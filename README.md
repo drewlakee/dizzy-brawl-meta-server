@@ -13,7 +13,7 @@
     * [POST /account/register](#post-accountregister)
 3. [Character](#character)
     * [GET /character/all](#get-characterall)
-    * [GET /character/:character_uuid/meshes](#get-charactercharacter_uuidmeshes)
+    * [GET /character/mesh/all](#get-charactermeshall)
 4. [Task](#task)
     * [GET /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
@@ -106,9 +106,12 @@ EMPTY_BODY                      | Empty json body request
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 
-### GET `/character/:character_uuid/meshes`
+### GET `/character/mesh/all`
 
-**Query Parameter**
+**JSON Query**
+
+Query must be wrapped into JSON Array (If single character UUID, anyway wrap it to JSON Array)
+
 
 Name                |Data Type      | Description
 ------------        | ------------- | -------------
@@ -118,19 +121,25 @@ character_uuid      | String        |  Character's UUID
 
 Response wrapped into JSON Array
 
-Name                | Data Type     |Description
-------------        |-------------  |-------------
+Name                | Data Type         |Description
+------------        |-------------      |-------------
+character_uuid      | UUID              | Character's in query passed UUID
+character_meshes    | Array of meshes   | Array that contains all character meshes
+error               | String            | **Optional.** Fact of wrong query execution or incorrect path parameter format
+
+Mesh structure
+
+Name                | Data Type         |Description
+------------        |-------------      |-------------
 character_mesh_id   | int           | Character mesh ID
-character_type_id   | int           | Character type ID
 in_game_cost        | int           | Cost in game money
 is_enable           | Boolean       | Available 
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 **Error reasons**
 
 Error Name                      |Description
 ------------                    |-------------
-EMPTY_QUERY_PARAMETER           | Empty parameter passed in query
+EMPTY_BODY                      | Empty request body
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 ## Task
