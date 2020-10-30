@@ -21,7 +21,9 @@
 
 ### API Documentation
 
-:exclamation: Prefix for all end-points `/api/v1` :exclamation:
+- <a href="https://documenter.getpostman.com/view/12029239/TVYKawXj">API in Postman Documentation</a>
+
+- Prefix for all end-points `/api/v1`
 
 ## Auth
 
