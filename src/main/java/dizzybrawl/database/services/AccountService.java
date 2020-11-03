@@ -1,6 +1,7 @@
 package dizzybrawl.database.services;
 
 import dizzybrawl.database.models.Account;
+import dizzybrawl.database.models.VerifiedAccount;
 import dizzybrawl.database.services.impls.PgAccountService;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
@@ -26,8 +27,8 @@ public interface AccountService {
     }
 
     @Fluent
-    AccountService getAccountByUsernameOrEmail(String UsernameOrEmail, Handler<AsyncResult<Account>> resultHandler);
+    AccountService getAccountByUsernameOrEmail(String UsernameOrEmail, Handler<AsyncResult<VerifiedAccount>> resultHandler);
 
     @Fluent
-    AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler);
+    AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<VerifiedAccount>> resultHandler);
 }

@@ -1,11 +1,18 @@
 package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Account;
+import dizzybrawl.database.models.VerifiedAccount;
 import dizzybrawl.database.services.AccountService;
-import dizzybrawl.http.Error;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+
+enum AccountErrors {
+    INVALID_PASSWORD,
+    DOESNT_EXIST_AT_DATABASE,
+    ALREADY_EXIST_AT_DATABASE,
+    INVALID_ACCOUNT_PARAMETERS
+}
 
 public class AccountApi {
 
@@ -13,30 +20,25 @@ public class AccountApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
             String usernameOrEmail = requestBodyAsJson.getString("username_or_email");
             String password = requestBodyAsJson.getString("password");
 
             accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
                if (ar1.succeeded()) {
-                   Account account = ar1.result();
+                   VerifiedAccount verifiedAccount = ar1.result();
                    JsonObject response;
 
-                   if (account.isEmpty()) {
+                   if (verifiedAccount.isEmpty()) {
                        response = new JsonObject();
-                       response.put("error", Error.DOESNT_EXIST_AT_DATABASE);
+                       response.put("error", AccountErrors.DOESNT_EXIST_AT_DATABASE);
                    } else {
-                       response = account.toJson();
+                       response = verifiedAccount.toJson();
 
-                       if (account.getPassword().equals(password)) {
+                       if (verifiedAccount.getPassword().equals(password)) {
                            response.remove("password");
                        } else {
                            response.clear();
-                           response.put("error", Error.INVALID_PASSWORD);
+                           response.put("error", AccountErrors.INVALID_PASSWORD);
                        }
                    }
 
@@ -52,27 +54,22 @@ public class AccountApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
+            Account preRegistrationVerifiedAccount = new Account(requestBodyAsJson);
+
+            if (preRegistrationVerifiedAccount.isEmpty()) {
+                context.response().end(new JsonObject().put("error", AccountErrors.INVALID_ACCOUNT_PARAMETERS).encodePrettily());
                 return;
             }
 
-            Account preRegistrationAccount = new Account(requestBodyAsJson);
-
-            if (preRegistrationAccount.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                return;
-            }
-
-            accountService.registerAccount(preRegistrationAccount, ar1 -> {
+            accountService.registerAccount(preRegistrationVerifiedAccount, ar1 -> {
                 if (ar1.succeeded()) {
-                    Account account = ar1.result();
+                    VerifiedAccount verifiedAccount = ar1.result();
                     JsonObject response = new JsonObject();
 
-                    if (account.isEmpty()) {
-                        response.put("error", Error.ALREADY_EXIST_AT_DATABASE);
+                    if (verifiedAccount.isEmpty()) {
+                        response.put("error", AccountErrors.ALREADY_EXIST_AT_DATABASE);
                     } else {
-                        response.put("account_uuid", account.getAccountUUID().toString());
+                        response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
                     }
 
                     context.response().end(response.encodePrettily());

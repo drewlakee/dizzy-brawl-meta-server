@@ -2,7 +2,7 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
-import dizzybrawl.http.Error;
+import dizzybrawl.http.validation.CommonErrors;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TaskApi {
 
@@ -24,17 +25,12 @@ public class TaskApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
             String accountUUIDParam = requestBodyAsJson.getString("account_uuid");
 
             try {
                 UUID.fromString(accountUUIDParam);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
@@ -76,11 +72,6 @@ public class TaskApi {
         return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
-            if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
             List<Task> tasksToAdd = new ArrayList<>();
             try {
                 for (Object taskObject : requestBodyAsJsonArray) {
@@ -90,7 +81,7 @@ public class TaskApi {
                     tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
@@ -117,20 +108,9 @@ public class TaskApi {
         return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
-            if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
-            List<Task> tasksToUpdate = new ArrayList<>();
-            try {
-                requestBodyAsJsonArray.stream()
-                        .map(o -> new Task((JsonObject) o))
-                        .forEach(tasksToUpdate::add);
-            } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
-                return;
-            }
+            List<Task> tasksToUpdate = requestBodyAsJsonArray.stream()
+                    .map(o -> new Task((JsonObject) o))
+                    .collect(Collectors.toList());
 
             taskService.updateTasksProgress(tasksToUpdate, ar1 -> {
                 if (ar1.succeeded()) {

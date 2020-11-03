@@ -1,6 +1,7 @@
 package dizzybrawl.database.services.impls;
 
 import dizzybrawl.database.models.Account;
+import dizzybrawl.database.models.VerifiedAccount;
 import dizzybrawl.database.services.AccountService;
 import dizzybrawl.database.sql.SqlLoadable;
 import dizzybrawl.database.sql.AccountSqlQuery;
@@ -61,7 +62,7 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
     }
 
     @Override
-    public AccountService getAccountByUsernameOrEmail(String UsernameOrEmail, Handler<AsyncResult<Account>> resultHandler) {
+    public AccountService getAccountByUsernameOrEmail(String UsernameOrEmail, Handler<AsyncResult<VerifiedAccount>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
@@ -72,11 +73,11 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                             if (ar2.succeeded()) {
                                 RowSet<Row> queryResult = ar2.result();
 
-                                Account response;
+                                VerifiedAccount response;
                                 if (queryResult.rowCount() == 0) {
-                                    response = Account.createEmpty();
+                                    response = VerifiedAccount.createEmpty();
                                 } else {
-                                    response = new Account(queryResult.iterator().next());
+                                    response = new VerifiedAccount(queryResult.iterator().next());
                                 }
 
                                 resultHandler.handle(Future.succeededFuture(response));
@@ -97,7 +98,7 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
     }
 
     @Override
-    public AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
+    public AccountService registerAccount(Account preRegistrationAccount, Handler<AsyncResult<VerifiedAccount>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
             SqlConnection connection = ar1.result();
@@ -109,15 +110,15 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
                             preRegistrationAccount.getEmail(),
                             preRegistrationAccount.getPassword()), ar2 -> {
 
-                        Account account;
+                        VerifiedAccount verifiedAccount;
                         if (ar2.succeeded()) {
-                            account = new Account(ar2.result().iterator().next());
+                            verifiedAccount = new VerifiedAccount(ar2.result().iterator().next());
                         } else {
-                            account = Account.createEmpty();
+                            verifiedAccount = VerifiedAccount.createEmpty();
                             log.warn("Can't query to database cause " + ar2.cause());
                         }
 
-                        resultHandler.handle(Future.succeededFuture(account));
+                        resultHandler.handle(Future.succeededFuture(verifiedAccount));
 
                         connection.close();
                     });

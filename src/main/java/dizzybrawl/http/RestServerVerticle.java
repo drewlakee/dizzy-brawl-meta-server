@@ -6,13 +6,19 @@ import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.TaskApi;
+import dizzybrawl.http.validation.JsonArrayValidationHandler;
+import dizzybrawl.http.validation.JsonObjectValidationHandler;
+import dizzybrawl.http.validation.ValidationHandler;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.Http2PushMapping;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
@@ -41,6 +47,12 @@ public class RestServerVerticle extends AbstractVerticle {
         });
     }
 
+    private void initializeServices() {
+        accountService = AccountService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.account");
+        characterService = CharacterService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.character");
+        taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
+    }
+
     private void launchHttpServer(Router apiRouter, Handler<AsyncResult<HttpServer>> listenHandler) {
         vertx.createHttpServer()
              .requestHandler(apiRouter)
@@ -49,34 +61,52 @@ public class RestServerVerticle extends AbstractVerticle {
 
     private Router getConfiguredApiRouter() {
         Router router = Router.router(vertx);
+
         router.mountSubRouter("/api/v1", router);
+
         router.route().handler(rh -> {
             rh.response()
                     .setChunked(true)
-                    .putHeader("content-type", "application/json");
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
             rh.next();
         });
 
         router.route().handler(BodyHandler.create());
 
+        // validation handlers
+        ValidationHandler jsonObjectValidationHandler = JsonObjectValidationHandler.create();
+        ValidationHandler jsonArrayValidationHandler = JsonArrayValidationHandler.create();
+
         // api end points handlers
-        router.post("/auth/login").handler(AccountApi.onLogin(accountService));
-        router.post("/account/register").handler(AccountApi.onRegistration(accountService));
+        router.post("/auth/login")
+                .handler(jsonObjectValidationHandler)
+                .handler(AccountApi.onLogin(accountService));
 
-        router.get("/character/all").handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
-        router.get("/character/mesh/all").handler(CharacterApi.getAllCharacterMeshesByCharacterUUID(characterService));
+        router.post("/account/register")
+                .handler(jsonObjectValidationHandler)
+                .handler(AccountApi.onRegistration(accountService));
 
-        router.get("/task/all").handler(TaskApi.getTasksByAccountUUID(taskService));
-        router.post("/task/add").handler(TaskApi.addTasks(taskService));
-        router.put("/task/update/progress").handler(TaskApi.updateTasksProgress(taskService));
+        router.get("/character/all")
+                .handler(jsonObjectValidationHandler)
+                .handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+
+        router.get("/character/mesh/all")
+                .handler(jsonArrayValidationHandler)
+                .handler(CharacterApi.getAllCharacterMeshesByCharacterUUID(characterService));
+
+        router.get("/task/all")
+                .handler(jsonObjectValidationHandler)
+                .handler(TaskApi.getTasksByAccountUUID(taskService));
+
+        router.post("/task/add")
+                .handler(jsonArrayValidationHandler)
+                .handler(TaskApi.addTasks(taskService));
+
+        router.put("/task/update/progress")
+                .handler(jsonArrayValidationHandler)
+                .handler(TaskApi.updateTasksProgress(taskService));
 
         return router;
-    }
-
-    private void initializeServices() {
-        accountService = AccountService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.account");
-        characterService = CharacterService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.character");
-        taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
     }
 }

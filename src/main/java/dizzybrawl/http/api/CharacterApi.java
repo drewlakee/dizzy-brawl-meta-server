@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.CharacterService;
-import dizzybrawl.http.Error;
+import dizzybrawl.http.validation.CommonErrors;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,17 +21,12 @@ public class CharacterApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            if (requestBodyAsJson.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
             String accountUUID = requestBodyAsJson.getString("account_uuid");
 
             try {
                 UUID.fromString(accountUUID);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
@@ -57,11 +52,6 @@ public class CharacterApi {
         return context -> {
             JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
-            if (requestBodyAsJsonArray.isEmpty()) {
-                context.response().end(new JsonObject().put("error", Error.EMPTY_BODY).encodePrettily());
-                return;
-            }
-
             List<String> characterUUIDs = new ArrayList<>();
             try {
                 requestBodyAsJsonArray.stream()
@@ -72,7 +62,7 @@ public class CharacterApi {
                             characterUUIDs.add(uuidString);
                         });
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", Error.INVALID_QUERY_PARAMETER_FORMAT).encodePrettily());
+                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 

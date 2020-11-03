@@ -9,8 +9,8 @@
 
 1. [Auth](#auth)
     * [POST /auth/login](#post-authlogin)
-2. [Account](#account)
-    * [POST /account/register](#post-accountregister)
+2. [Account](#verifiedAccount)
+    * [POST /verifiedAccount/register](#post-accountregister)
 3. [Character](#character)
     * [GET /character/all](#get-characterall)
     * [GET /character/mesh/all](#get-charactermeshall)
@@ -50,12 +50,12 @@ error               | String        | **Optional.** Fact of wrong query executio
 Error Name                  |Description
 ------------                |-------------
 EMPTY_BODY                  | Empty json body request
-DOESNT_EXIST_AT_DATABASE    | User's account doesn't exist at database
+DOESNT_EXIST_AT_DATABASE    | User's verifiedAccount doesn't exist at database
 INVALID_PASSWORD            | Incorrect password enter
 
 ## Account
 
-### POST `/account/register`
+### POST `/verifiedAccount/register`
 
 **JSON Query**
 
@@ -69,7 +69,7 @@ password            |  String       |  User's password
 
 Name                | Data Type     |Description
 ------------        |-------------  |-------------
-account_uuid        | UUID          | Generated UUID for registered account
+account_uuid        | UUID          | Generated UUID for registered verifiedAccount
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 Error Name                      |Description
@@ -95,7 +95,7 @@ Response wrapped into JSON Array
 Name                | Data Type     |Description
 ------------        |-------------  |-------------
 character_uuid      | UUID          | Character's UUID
-account_uuid        | UUID          | Owner's account UUID
+account_uuid        | UUID          | Owner's verifiedAccount UUID
 character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
@@ -152,7 +152,7 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 Name                |   Data type   | Description
 ------------        | ------------- | -------------
-account_uuid        | String        |  Task's owner account UUID
+account_uuid        | String        |  Task's owner verifiedAccount UUID
 
 **JSON Response**
 
@@ -161,12 +161,12 @@ Response wrapped into JSON Array
 If at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
 
-If no active task at user's account, response will be empty JSON Array
+If no active task at user's verifiedAccount, response will be empty JSON Array
 
 Name                | Data Type     | Description
 ------------        |-------------  |-------------
 task_uuid           | UUID          | Task's UUID
-account_uuid        | UUID          | Owner's account UUID
+account_uuid        | UUID          | Owner's verifiedAccount UUID
 task_type_id        | int           | Task type id
 current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
@@ -191,7 +191,7 @@ Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Ar
 
 Name                | Data Type     | Description
 ------------        | ------------- | -------------
-account_uuid        |   String      |  Task's owner account UUID
+account_uuid        |   String      |  Task's owner verifiedAccount UUID
 task_type_id        |   int         |  Task's type
 current_state       |   int         |  Current progress of task
 goal_state          |   int         |  Goal value for task complete
