@@ -9,8 +9,8 @@
 
 1. [Auth](#auth)
     * [POST /auth/login](#post-authlogin)
-2. [Account](#verifiedAccount)
-    * [POST /verifiedAccount/register](#post-accountregister)
+2. [Account](#post-accountregister)
+    * [POST /account/register](#post-accountregister)
 3. [Character](#character)
     * [GET /character/all](#get-characterall)
     * [GET /character/mesh/all](#get-charactermeshall)
@@ -55,7 +55,7 @@ INVALID_PASSWORD            | Incorrect password enter
 
 ## Account
 
-### POST `/verifiedAccount/register`
+### POST `/account/register`
 
 **JSON Query**
 

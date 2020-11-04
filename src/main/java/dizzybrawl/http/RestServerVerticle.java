@@ -9,7 +9,6 @@ import dizzybrawl.http.api.TaskApi;
 import dizzybrawl.http.validation.JsonArrayValidationHandler;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -18,7 +17,6 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Http2PushMapping;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
