@@ -23,6 +23,11 @@ public class AccountApi {
             String usernameOrEmail = requestBodyAsJson.getString("username_or_email");
             String password = requestBodyAsJson.getString("password");
 
+            if (usernameOrEmail.trim().isEmpty() || password.trim().isEmpty()) {
+                context.response().end(new JsonObject().put("error", AccountErrors.INVALID_ACCOUNT_PARAMETERS).encodePrettily());
+                return;
+            }
+
             accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
                if (ar1.succeeded()) {
                    VerifiedAccount verifiedAccount = ar1.result();

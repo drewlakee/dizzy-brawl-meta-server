@@ -29,9 +29,9 @@ public class Account {
 
     public boolean isEmpty() {
         return
-                this.username == null &&
-                this.password == null &&
-                this.email == null;
+                (this.username == null || this.username.isEmpty()) &&
+                (this.password == null || this.password.isEmpty()) &&
+                (this.email == null || this.email.isEmpty());
     }
 
     public JsonObject toJson() {

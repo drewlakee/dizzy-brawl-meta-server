@@ -77,7 +77,7 @@ public class RestServerVerticle extends AbstractVerticle {
         ValidationHandler jsonArrayValidationHandler = JsonArrayValidationHandler.create();
 
         // api end points handlers
-        router.post("/auth/login")
+        router.post("/account/auth/login")
                 .handler(jsonObjectValidationHandler)
                 .handler(AccountApi.onLogin(accountService));
 

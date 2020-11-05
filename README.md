@@ -7,14 +7,13 @@
 
 ### API Navigation
 
-1. [Auth](#auth)
-    * [POST /auth/login](#post-authlogin)
-2. [Account](#post-accountregister)
+1. [Account](#post-accountregister)
+    * [POST /account/auth/login](#post-accountauthlogin)
     * [POST /account/register](#post-accountregister)
-3. [Character](#character)
+2. [Character](#character)
     * [GET /character/all](#get-characterall)
     * [GET /character/mesh/all](#get-charactermeshall)
-4. [Task](#task)
+3. [Task](#task)
     * [GET /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
     * [PUT /task/update/progress](#put-taskupdateprogress)
@@ -27,7 +26,7 @@
 
 ## Auth
 
-### POST `/auth/login`
+### POST `/account/auth/login`
 
 **JSON Query**
 
