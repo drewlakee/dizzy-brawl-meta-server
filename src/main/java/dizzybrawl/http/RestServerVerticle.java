@@ -98,7 +98,7 @@ public class RestServerVerticle extends AbstractVerticle {
                 .handler(TaskApi.getTasksByAccountUUID(taskService));
 
         router.post("/task/add")
-                .handler(jsonArrayValidationHandler)
+                .handler(jsonObjectValidationHandler)
                 .handler(TaskApi.addTasks(taskService));
 
         router.put("/task/update/progress")

@@ -3,6 +3,7 @@ package dizzybrawl.http.api;
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.validation.CommonErrors;
+import dizzybrawl.http.validation.JsonErrors;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -70,11 +71,16 @@ public class TaskApi {
 
     public static Handler<RoutingContext> addTasks(TaskService taskService) {
         return context -> {
-            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
+            JsonObject requestBodyAsJsonObject = context.getBodyAsJson();
+
+            if (!requestBodyAsJsonObject.containsKey("tasks")) {
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
+                return;
+            }
 
             List<Task> tasksToAdd = new ArrayList<>();
             try {
-                for (Object taskObject : requestBodyAsJsonArray) {
+                for (Object taskObject : requestBodyAsJsonObject.getJsonArray("tasks")) {
                     JsonObject jsonTask = (JsonObject) taskObject;
                     UUID.fromString(jsonTask.getString("account_uuid"));
 

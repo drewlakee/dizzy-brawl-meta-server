@@ -188,6 +188,12 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
 
+Name                | Data Type         | Description
+------------        | -------------     | -------------
+tasks               |  Array Of Tasks   |  Task's owner verifiedAccount UUID
+
+Task Structure 
+
 Name                | Data Type     | Description
 ------------        | ------------- | -------------
 account_uuid        |   String      |  Task's owner verifiedAccount UUID
