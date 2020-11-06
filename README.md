@@ -106,7 +106,6 @@ Error Name                      |Description
 EMPTY_BODY                      | Empty json body request
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
-
 ### GET `/character/mesh/all`
 
 **JSON Query**
@@ -186,11 +185,9 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 **JSON Query**
 
-Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
-
 Name                | Data Type         | Description
 ------------        | -------------     | -------------
-tasks               |  Array Of Tasks   |  Task's owner verifiedAccount UUID
+tasks               |  Array Of Tasks   |  Array of Tasks that must be added
 
 Task Structure 
 
@@ -225,7 +222,11 @@ INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
 **JSON Query**
 
-Query must be wrapped into JSON Array (If single task, anyway wrap it to JSON Array)
+Name                | Data Type             | Description
+------------        | -------------         | -------------
+tasks               |   Array of Tasks      |  Array of Tasks that must be updated
+
+Task Structure
 
 Name                | Data Type     | Description
 ------------        | ------------- | -------------

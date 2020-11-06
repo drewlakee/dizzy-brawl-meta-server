@@ -71,16 +71,15 @@ public class TaskApi {
 
     public static Handler<RoutingContext> addTasks(TaskService taskService) {
         return context -> {
-            JsonObject requestBodyAsJsonObject = context.getBodyAsJson();
 
-            if (!requestBodyAsJsonObject.containsKey("tasks")) {
+            if (!context.getBodyAsJson().containsKey("tasks")) {
                 context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
             List<Task> tasksToAdd = new ArrayList<>();
             try {
-                for (Object taskObject : requestBodyAsJsonObject.getJsonArray("tasks")) {
+                for (Object taskObject : context.getBodyAsJson().getJsonArray("tasks")) {
                     JsonObject jsonTask = (JsonObject) taskObject;
                     UUID.fromString(jsonTask.getString("account_uuid"));
 
@@ -112,9 +111,13 @@ public class TaskApi {
 
     public static Handler<RoutingContext> updateTasksProgress(TaskService taskService) {
         return context -> {
-            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
 
-            List<Task> tasksToUpdate = requestBodyAsJsonArray.stream()
+            if (!context.getBodyAsJson().containsKey("tasks")) {
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
+                return;
+            }
+
+            List<Task> tasksToUpdate = context.getBodyAsJson().getJsonArray("tasks").stream()
                     .map(o -> new Task((JsonObject) o))
                     .collect(Collectors.toList());
 

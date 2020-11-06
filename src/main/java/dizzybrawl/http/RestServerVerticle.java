@@ -102,7 +102,7 @@ public class RestServerVerticle extends AbstractVerticle {
                 .handler(TaskApi.addTasks(taskService));
 
         router.put("/task/update/progress")
-                .handler(jsonArrayValidationHandler)
+                .handler(jsonObjectValidationHandler)
                 .handler(TaskApi.updateTasksProgress(taskService));
 
         return router;
