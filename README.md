@@ -11,7 +11,7 @@
     * [POST /account/auth/login](#post-accountauthlogin)
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
-    * [GET /character/all](#get-characterall)
+    * [POST /character/all](#post-characterall)
     * [GET /character/mesh/all](#get-charactermeshall)
 3. [Task](#task)
     * [GET /task/all](#get-taskall)
@@ -79,7 +79,7 @@ ALREADY_EXIST_AT_DATABASE       | Account already exist at database
 
 ## Character
 
-### GET `/character/all`
+### POST `/character/all`
 
 **JSON Query**
 
@@ -89,12 +89,15 @@ account_uuid        | String        |  Account's UUID
 
 **JSON Response**
 
-Response wrapped into JSON Array
+Name                | Data Type                    | Description
+------------        |-------------                 |-------------
+characters          | Array of Characters          | Array of characters that must be returned by account uuid
+
+Character Structure
 
 Name                | Data Type     |Description
 ------------        |-------------  |-------------
 character_uuid      | UUID          | Character's UUID
-account_uuid        | UUID          | Owner's verifiedAccount UUID
 character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
