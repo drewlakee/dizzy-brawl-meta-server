@@ -24,7 +24,7 @@
 
 - Prefix for all end-points `/api/v1`
 
-## Auth
+## Account
 
 ### POST `/account/auth/login`
 
@@ -42,17 +42,15 @@ Name                | Data Type     |Description
 account_uuid        | UUID          | Account's UUID
 username            | String        | User's in game username
 email               | String        | User's email
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-**Error reasons**
+**JSON Error Response Reasons**
 
-Error Name                  |Description
-------------                |-------------
-EMPTY_BODY                  | Empty json body request
-DOESNT_EXIST_AT_DATABASE    | User's verifiedAccount doesn't exist at database
-INVALID_PASSWORD            | Incorrect password enter
-
-## Account
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_ACCOUNT_PARAMETERS                  | Some json parameters is empty or wrong parameters
+error                   |DOESNT_EXIST_AT_DATABASE                    | User's account doesn't exist at database
+error                   |INVALID_PASSWORD                            | Incorrect password enter
 
 ### POST `/account/register`
 
@@ -69,13 +67,14 @@ password            |  String       |  User's password
 Name                | Data Type     |Description
 ------------        |-------------  |-------------
 account_uuid        | UUID          | Generated UUID for registered verifiedAccount
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty json body request
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
-ALREADY_EXIST_AT_DATABASE       | Account already exist at database
+**JSON Error Response Reasons**
+
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_ACCOUNT_PARAMETERS                  | Some json parameters is empty or wrong parameters
+error                   |ALREADY_EXIST_AT_DATABASE                   | User with same account already exist at database
 
 ## Character
 
@@ -100,14 +99,14 @@ Name                | Data Type     |Description
 character_uuid      | UUID          | Character's UUID
 character_type_id   | int           | Character's type of pawn
 is_enabled          | Boolean       | Available 
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-**Error reasons**
+**JSON Error Response Reasons**
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty json body request
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ### POST `/character/mesh/all`
 
@@ -138,12 +137,13 @@ character_mesh_id   | int           | Character mesh ID
 in_game_cost        | int           | Cost in game money
 is_enable           | Boolean       | Available 
 
-**Error Response Reasons**
+**JSON Error Response Reasons**
 
-Parameter Name                  | Error Name                        |Description
-|------------                   |------------                       |-------------
-error                           |EMPTY_BODY                         | Empty request body
-error                           |INVALID_QUERY_PARAMETER_FORMAT     | Incorrect query format
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ## Task
 
@@ -162,7 +162,7 @@ Response wrapped into JSON Array
 If at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
 
-If no active task at user's verifiedAccount, response will be empty JSON Array
+If no active task at user's account, response will be empty JSON Array
 
 Name                | Data Type     | Description
 ------------        |-------------  |-------------
@@ -173,14 +173,13 @@ current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
 time_spends         | int           | Time spends after generation in **minutes** 
 active_interval     | int           | Time of active status interval in **minutes**
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-**Error reasons**
+**JSON Error Response Reasons**
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty json body request
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_UUID                                | Account's UUID have wrong format
 
 ### POST `/task/add`
 
@@ -212,12 +211,13 @@ Name                | Data Type     | Description
 task_uuid           | UUID          | Generated task's UUID
 error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
-**Error reasons**
+**JSON Error Response Reasons**
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty json body request
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ### PUT `/task/update/progress`
 
@@ -247,11 +247,13 @@ error               | String        | **Optional.** Fact of wrong query executio
 Code                | Description
 ------------        |-------------
 200                 | If all was updated - means OK
-419                 | Means that some can't be updated, because DB doesn't store inputted Task UUID
+419                 | Means that some can't be updated, because DB doesn't store inputted Tasks UUIDs
 
-**Error reasons**
+**JSON Error Response Reasons**
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty json body request
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+Parameter               |Error Name                                  |Description
+|------------           |------------                                |-------------
+error                   |EMPTY_BODY                                  | Empty json body request
+error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
+
