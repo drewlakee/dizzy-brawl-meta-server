@@ -1,5 +1,6 @@
 package dizzybrawl.http.validation;
 
+import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.ext.web.RoutingContext;
 
 public class JsonObjectValidationHandler implements ValidationHandler {

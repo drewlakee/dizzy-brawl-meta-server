@@ -3,15 +3,14 @@ package dizzybrawl.http.api;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.VerifiedAccount;
 import dizzybrawl.database.services.AccountService;
+import dizzybrawl.http.validation.errors.DatabaseErrors;
+import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 enum AccountErrors {
-    INVALID_PASSWORD,
-    DOESNT_EXIST_AT_DATABASE,
-    ALREADY_EXIST_AT_DATABASE,
-    INVALID_ACCOUNT_PARAMETERS
+    INVALID_PASSWORD
 }
 
 public class AccountApi {
@@ -24,7 +23,7 @@ public class AccountApi {
             String password = requestBodyAsJson.getString("password");
 
             if (usernameOrEmail.trim().isEmpty() || password.trim().isEmpty()) {
-                context.response().end(new JsonObject().put("error", AccountErrors.INVALID_ACCOUNT_PARAMETERS).encodePrettily());
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
@@ -35,7 +34,7 @@ public class AccountApi {
 
                    if (verifiedAccount.isEmpty()) {
                        response = new JsonObject();
-                       response.put("error", AccountErrors.DOESNT_EXIST_AT_DATABASE);
+                       response.put("error", DatabaseErrors.DOESNT_EXIST_AT_DATABASE);
                    } else {
                        response = verifiedAccount.toJson();
 
@@ -62,7 +61,7 @@ public class AccountApi {
             Account preRegistrationVerifiedAccount = new Account(requestBodyAsJson);
 
             if (preRegistrationVerifiedAccount.isEmpty()) {
-                context.response().end(new JsonObject().put("error", AccountErrors.INVALID_ACCOUNT_PARAMETERS).encodePrettily());
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
@@ -72,7 +71,7 @@ public class AccountApi {
                     JsonObject response = new JsonObject();
 
                     if (verifiedAccount.isEmpty()) {
-                        response.put("error", AccountErrors.ALREADY_EXIST_AT_DATABASE);
+                        response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
                     } else {
                         response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
                     }

@@ -1,4 +1,4 @@
-package dizzybrawl.http.validation;
+package dizzybrawl.http.validation.errors;
 
 public enum JsonErrors {
     EMPTY_BODY,

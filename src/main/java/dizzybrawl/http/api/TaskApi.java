@@ -2,8 +2,8 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
-import dizzybrawl.http.validation.CommonErrors;
-import dizzybrawl.http.validation.JsonErrors;
+import dizzybrawl.http.validation.errors.DataErrors;
+import dizzybrawl.http.validation.errors.JsonErrors;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -31,7 +31,7 @@ public class TaskApi {
             try {
                 UUID.fromString(accountUUIDParam);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
@@ -86,7 +86,7 @@ public class TaskApi {
                     tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 

@@ -5,8 +5,8 @@ import com.google.common.collect.Multimap;
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
 import dizzybrawl.database.services.CharacterService;
-import dizzybrawl.http.validation.CommonErrors;
-import dizzybrawl.http.validation.JsonErrors;
+import dizzybrawl.http.validation.errors.DataErrors;
+import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,7 +32,7 @@ public class CharacterApi {
             try {
                 UUID.fromString(accountUUID);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
@@ -77,7 +77,7 @@ public class CharacterApi {
                             charactersUUIDs.add(uuidString);
                         });
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 

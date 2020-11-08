@@ -48,7 +48,7 @@ email               | String        | User's email
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_ACCOUNT_PARAMETERS                  | Some json parameters is empty or wrong parameters
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 error                   |DOESNT_EXIST_AT_DATABASE                    | User's account doesn't exist at database
 error                   |INVALID_PASSWORD                            | Incorrect password enter
 
@@ -73,7 +73,7 @@ account_uuid        | UUID          | Generated UUID for registered verifiedAcco
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_ACCOUNT_PARAMETERS                  | Some json parameters is empty or wrong parameters
+error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 error                   |ALREADY_EXIST_AT_DATABASE                   | User with same account already exist at database
 
 ## Character
@@ -105,7 +105,7 @@ is_enabled          | Boolean       | Available
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ### POST `/character/mesh/all`
@@ -142,7 +142,7 @@ is_enable           | Boolean       | Available
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ## Task
@@ -179,7 +179,7 @@ active_interval     | int           | Time of active status interval in **minute
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |INVALID_UUID                                | UUIDs have wrong format
 
 ### POST `/task/add`
 
@@ -216,7 +216,7 @@ error               | String        | **Optional.** Fact of wrong query executio
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
 ### PUT `/task/update/progress`
@@ -254,6 +254,6 @@ Code                | Description
 Parameter               |Error Name                                  |Description
 |------------           |------------                                |-------------
 error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | Account's UUID have wrong format
+error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
