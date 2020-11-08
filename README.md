@@ -11,12 +11,12 @@
     * [POST /account/auth/login](#post-accountauthlogin)
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
-    * [POST /character/all](#post-characterall)
-    * [POST /character/mesh/all](#post-charactermeshall)
+    * [POST /characters/get/all](#post-charactersgetall)
+    * [POST /characters/get/mesh/all](#post-charactersgetmeshall)
 3. [Task](#task)
-    * [POST /task/all](#post-taskall)
-    * [POST /task/add](#post-taskadd)
-    * [PUT /task/update/progress](#put-taskupdateprogress)
+    * [POST /tasks/get/all](#post-tasksgetall)
+    * [POST /tasks/add](#post-tasksadd)
+    * [PUT /tasks/update/progress](#put-tasksupdateprogress)
 
 ### API Documentation
 
@@ -78,7 +78,7 @@ error                   |ALREADY_EXIST_AT_DATABASE                   | User with
 
 ## Character
 
-### POST `/character/all`
+### POST `/characters/get/all`
 
 **JSON Query**
 
@@ -108,7 +108,7 @@ error                   |EMPTY_BODY                                  | Empty jso
 error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
-### POST `/character/mesh/all`
+### POST `/characters/get/mesh/all`
 
 **JSON Query**
 
@@ -147,7 +147,7 @@ error                   |EMPTY_JSON_PARAMETERS                       | Some para
 
 ## Task
 
-### POST `/task/all`
+### POST `/tasks/get/all`
 
 **JSON Query**
 
@@ -184,7 +184,7 @@ Parameter               |Error Name                                  |Descriptio
 error                   |EMPTY_BODY                                  | Empty json body request
 error                   |INVALID_UUID                                | UUIDs have wrong format
 
-### POST `/task/add`
+### POST `/tasks/add`
 
 **Transactional operation**. If some task will be not added - other tasks also will be not added
 
@@ -227,7 +227,7 @@ error                   |EMPTY_BODY                                  | Empty jso
 error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
-### PUT `/task/update/progress`
+### PUT `/tasks/update/progress`
 
 **Transactional operation**. If some task will not update from a query - other too will be not update
 

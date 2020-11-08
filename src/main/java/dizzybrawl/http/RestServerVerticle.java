@@ -83,23 +83,23 @@ public class RestServerVerticle extends AbstractVerticle {
                 .handler(jsonObjectValidationHandler)
                 .handler(AccountApi.onRegistration(accountService));
 
-        router.post("/character/all")
+        router.post("/characters/get/all")
                 .handler(jsonObjectValidationHandler)
                 .handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
-        router.post("/character/mesh/all")
+        router.post("/characters/get/mesh/all")
                 .handler(jsonObjectValidationHandler)
                 .handler(CharacterApi.getAllCharactersMeshesByCharacterUUID(characterService));
 
-        router.post("/task/all")
+        router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)
                 .handler(TaskApi.getTasksByAccountUUID(taskService));
 
-        router.post("/task/add")
+        router.post("/tasks/add")
                 .handler(jsonObjectValidationHandler)
                 .handler(TaskApi.addTasks(taskService));
 
-        router.put("/task/update/progress")
+        router.put("/tasks/update/progress")
                 .handler(jsonObjectValidationHandler)
                 .handler(TaskApi.updateTasksProgress(taskService));
 
