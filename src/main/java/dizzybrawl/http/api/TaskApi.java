@@ -54,6 +54,7 @@ public class TaskApi {
                         } else {
                             JsonObject jsonTask = task.toJson();
                             jsonTask.remove("generated_date");
+                            jsonTask.remove("account_uuid");
                             jsonTask.put("time_spends", deltaInMinutes);
                             jsonTasksToResponse.add(jsonTask);
                         }
@@ -61,7 +62,10 @@ public class TaskApi {
 
                     taskService.deleteTasks(tasksToDelete, ar2 -> {});
 
-                    context.response().end(jsonTasksToResponse.encodePrettily());
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.put("tasks", jsonTasksToResponse);
+
+                    context.response().end(jsonResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }

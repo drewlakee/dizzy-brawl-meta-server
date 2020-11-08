@@ -14,7 +14,7 @@
     * [POST /character/all](#post-characterall)
     * [POST /character/mesh/all](#post-charactermeshall)
 3. [Task](#task)
-    * [GET /task/all](#get-taskall)
+    * [POST /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
     * [PUT /task/update/progress](#put-taskupdateprogress)
 
@@ -147,27 +147,30 @@ error                   |EMPTY_JSON_PARAMETERS                       | Some para
 
 ## Task
 
-### GET `/task/all`
+### POST `/task/all`
 
 **JSON Query**
 
 Name                |   Data type   | Description
 ------------        | ------------- | -------------
-account_uuid        | String        |  Task's owner verifiedAccount UUID
+account_uuid        | String        |  Task's owner account UUID
 
 **JSON Response**
-
-Response wrapped into JSON Array
 
 If at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
 
 If no active task at user's account, response will be empty JSON Array
 
+Name                | Data Type                 | Description
+------------        |-------------              |-------------
+tasks               | Array of Tasks            | Active Tasks on User's account
+
+Task Structure
+
 Name                | Data Type     | Description
 ------------        |-------------  |-------------
 task_uuid           | UUID          | Task's UUID
-account_uuid        | UUID          | Owner's verifiedAccount UUID
 task_type_id        | int           | Task type id
 current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
