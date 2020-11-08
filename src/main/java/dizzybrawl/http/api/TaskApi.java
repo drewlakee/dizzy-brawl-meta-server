@@ -105,7 +105,10 @@ public class TaskApi {
                         jsonTasksResponse.add(jsonResponse);
                     }
 
-                    context.response().end(jsonTasksResponse.encodePrettily());
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.put("tasks", jsonTasksResponse);
+
+                    context.response().end(jsonResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }

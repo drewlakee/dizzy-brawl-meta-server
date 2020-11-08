@@ -14,7 +14,7 @@
     * [POST /character/all](#post-characterall)
     * [POST /character/mesh/all](#post-charactermeshall)
 3. [Task](#task)
-    * [POST /task/all](#get-taskall)
+    * [POST /task/all](#post-taskall)
     * [POST /task/add](#post-taskadd)
     * [PUT /task/update/progress](#put-taskupdateprogress)
 
@@ -209,10 +209,15 @@ active_interval     |   int         |  Time interval in that task will be active
 Response has same sequenced as request JSON, so UUIDs in same place
 as added tasks before
 
-Name                | Data Type     | Description
-------------        |-------------  |-------------
-task_uuid           | UUID          | Generated task's UUID
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
+Name                | Data Type                 | Description
+------------        |-------------              |-------------
+tasks               | Array of Strings          | Array contains generated tasks UUIDs
+
+Task Response Structure
+
+Name                    | Data Type                 | Description
+------------            |-------------              |-------------
+task_uuid               | UUID                      | Unique generated task key in database
 
 **JSON Error Response Reasons**
 
