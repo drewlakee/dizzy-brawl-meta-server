@@ -98,13 +98,13 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
 
 
     @Override
-    public CharacterService getAllCharacterMeshesByCharacterUUID(List<String> characterUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
+    public CharacterService getAllCharactersMeshesByCharacterUUID(List<String> charactersUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
                 List<Tuple> batch = new ArrayList<>();
-                for (String characterUUID : characterUUIDs) {
+                for (String characterUUID : charactersUUIDs) {
                     batch.add(Tuple.of(UUID.fromString(characterUUID)));
                 }
 

@@ -58,33 +58,38 @@ public class CharacterApi {
         };
     }
 
-    public static Handler<RoutingContext> getAllCharacterMeshesByCharacterUUID(CharacterService characterService) {
+    public static Handler<RoutingContext> getAllCharactersMeshesByCharacterUUID(CharacterService characterService) {
         return context -> {
-            JsonArray requestBodyAsJsonArray = context.getBodyAsJsonArray();
+            JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            List<String> characterUUIDs = new ArrayList<>();
+            if (requestBodyAsJson.getJsonArray("characters") == null || requestBodyAsJson.getJsonArray("characters").isEmpty()) {
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
+                return;
+            }
+
+            List<String> charactersUUIDs = new ArrayList<>();
             try {
-                requestBodyAsJsonArray.stream()
+                requestBodyAsJson.getJsonArray("characters").stream()
                         .map(o -> ((JsonObject) o).getString("character_uuid"))
                         .distinct()
                         .forEach(uuidString -> {
                             UUID.fromString(uuidString);
-                            characterUUIDs.add(uuidString);
+                            charactersUUIDs.add(uuidString);
                         });
             } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", CommonErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
-            characterService.getAllCharacterMeshesByCharacterUUID(characterUUIDs, ar1 -> {
+            characterService.getAllCharactersMeshesByCharacterUUID(charactersUUIDs, ar1 -> {
                 if (ar1.succeeded()) {
                     Multimap<String, CharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
                     for (CharacterMesh mesh : ar1.result()) {
                         characterUUIDToCharacterMeshesMap.put(mesh.getCharacterUUID().toString(), mesh);
                     }
 
-                    JsonArray jsonResponse = new JsonArray();
-                    for (String characterUUID : characterUUIDs) {
+                    JsonArray jsonCharactersMeshes = new JsonArray();
+                    for (String characterUUID : charactersUUIDs) {
                         JsonObject jsonCharacter = new JsonObject();
                         jsonCharacter.put("character_uuid", characterUUID);
 
@@ -96,10 +101,13 @@ public class CharacterApi {
                             jsonCharacterMeshes.add(jsonMesh);
                         }
 
-                        jsonCharacter.put("character_meshes", jsonCharacterMeshes);
+                        jsonCharacter.put("meshes", jsonCharacterMeshes);
 
-                        jsonResponse.add(jsonCharacter);
+                        jsonCharactersMeshes.add(jsonCharacter);
                     }
+
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.put("characters", jsonCharactersMeshes);
 
                     context.response().end(jsonResponse.encodePrettily());
                 } else {

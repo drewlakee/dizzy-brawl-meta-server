@@ -32,5 +32,5 @@ public interface CharacterService {
     CharacterService getAllCharactersByAccountUUID(String accountUUID, Handler<AsyncResult<List<Character>>> resultHandler);
 
     @Fluent
-    CharacterService getAllCharacterMeshesByCharacterUUID(List<String> characterUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler);
+    CharacterService getAllCharactersMeshesByCharacterUUID(List<String> charactersUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler);
 }

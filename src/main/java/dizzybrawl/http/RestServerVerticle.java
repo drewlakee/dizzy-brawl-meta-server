@@ -6,7 +6,6 @@ import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.TaskApi;
-import dizzybrawl.http.validation.JsonArrayValidationHandler;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
 import io.vertx.core.AbstractVerticle;
@@ -74,7 +73,6 @@ public class RestServerVerticle extends AbstractVerticle {
 
         // validation handlers
         ValidationHandler jsonObjectValidationHandler = JsonObjectValidationHandler.create();
-        ValidationHandler jsonArrayValidationHandler = JsonArrayValidationHandler.create();
 
         // api end points handlers
         router.post("/account/auth/login")
@@ -89,9 +87,9 @@ public class RestServerVerticle extends AbstractVerticle {
                 .handler(jsonObjectValidationHandler)
                 .handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
-        router.get("/character/mesh/all")
-                .handler(jsonArrayValidationHandler)
-                .handler(CharacterApi.getAllCharacterMeshesByCharacterUUID(characterService));
+        router.post("/character/mesh/all")
+                .handler(jsonObjectValidationHandler)
+                .handler(CharacterApi.getAllCharactersMeshesByCharacterUUID(characterService));
 
         router.get("/task/all")
                 .handler(jsonObjectValidationHandler)

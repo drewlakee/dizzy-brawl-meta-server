@@ -12,7 +12,7 @@
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
     * [POST /character/all](#post-characterall)
-    * [GET /character/mesh/all](#get-charactermeshall)
+    * [POST /character/mesh/all](#post-charactermeshall)
 3. [Task](#task)
     * [GET /task/all](#get-taskall)
     * [POST /task/add](#post-taskadd)
@@ -109,41 +109,41 @@ Error Name                      |Description
 EMPTY_BODY                      | Empty json body request
 INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
 
-### GET `/character/mesh/all`
+### POST `/character/mesh/all`
 
 **JSON Query**
 
-Query must be wrapped into JSON Array (If single character UUID, anyway wrap it to JSON Array)
-
-
-Name                |Data Type      | Description
-------------        | ------------- | -------------
-character_uuid      | String        |  Character's UUID
+Name                |Data Type               | Description
+------------        | -------------          | -------------
+characters          | Array of Strings       |  Array must contain characters UUIDs
 
 **JSON Response**
 
-Response wrapped into JSON Array
+Name                | Data Type                                 |Description
+------------        |-------------                              |-------------
+characters          | Array of Character                        | Contains array of characters
+
+Character Structure
 
 Name                | Data Type         |Description
 ------------        |-------------      |-------------
 character_uuid      | UUID              | Character's in query passed UUID
-character_meshes    | Array of meshes   | Array that contains all character meshes
-error               | String            | **Optional.** Fact of wrong query execution or incorrect path parameter format
+meshes              | Array of Meshes   | Array that contains all character meshes
 
 Mesh structure
 
-Name                | Data Type         |Description
-------------        |-------------      |-------------
+Name                | Data Type     |Description
+------------        |-------------  |-------------
 character_mesh_id   | int           | Character mesh ID
 in_game_cost        | int           | Cost in game money
 is_enable           | Boolean       | Available 
 
-**Error reasons**
+**Error Response Reasons**
 
-Error Name                      |Description
-------------                    |-------------
-EMPTY_BODY                      | Empty request body
-INVALID_QUERY_PARAMETER_FORMAT  | Incorrect query format
+Parameter Name                  | Error Name                        |Description
+|------------                   |------------                       |-------------
+error                           |EMPTY_BODY                         | Empty request body
+error                           |INVALID_QUERY_PARAMETER_FORMAT     | Incorrect query format
 
 ## Task
 
