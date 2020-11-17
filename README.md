@@ -174,7 +174,6 @@ task_uuid           | UUID          | Task's UUID
 task_type_id        | int           | Task type id
 current_state       | int           | Current progress of task
 goal_state          | int           | Goal value for task complete
-time_spends         | int           | Time spends after generation in **minutes** 
 active_interval     | int           | Time of active status interval in **minutes**
 
 **JSON Error Response Reasons**

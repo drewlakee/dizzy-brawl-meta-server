@@ -55,7 +55,6 @@ public class TaskApi {
                             JsonObject jsonTask = task.toJson();
                             jsonTask.remove("generated_date");
                             jsonTask.remove("account_uuid");
-                            jsonTask.put("time_spends", deltaInMinutes);
                             jsonTasksToResponse.add(jsonTask);
                         }
                     }
