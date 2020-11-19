@@ -87,7 +87,7 @@ public class RestServerVerticle extends AbstractVerticle {
                 .handler(jsonObjectValidationHandler)
                 .handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
 
-        router.post("/characters/get/mesh/all")
+        router.post("/characters/meshes/get/all")
                 .handler(jsonObjectValidationHandler)
                 .handler(CharacterApi.getAllCharactersMeshesByCharacterUUID(characterService));
 

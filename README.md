@@ -12,7 +12,7 @@
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
     * [POST /characters/get/all](#post-charactersgetall)
-    * [POST /characters/get/mesh/all](#post-charactersgetmeshall)
+    * [POST /characters/meshes/get/all](#post-charactersmeshesgetall)
 3. [Task](#task)
     * [POST /tasks/get/all](#post-tasksgetall)
     * [POST /tasks/add](#post-tasksadd)
@@ -108,7 +108,7 @@ error                   |EMPTY_BODY                                  | Empty jso
 error                   |INVALID_UUID                                | UUIDs have wrong format
 error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
 
-### POST `/characters/get/mesh/all`
+### POST `/characters/meshes/get/all`
 
 **JSON Query**
 
