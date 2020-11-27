@@ -40,14 +40,12 @@ public class PgDatabaseVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         configureDatabaseConnectionOptions();
 
-        // returns true if successfully executed or if doesn't need to execute scripts
+        // returns true if successfully executed OR if doesn't need to execute scripts
         if (executeDatabaseScriptsIfNeeded(startPromise, config().getBoolean(CONFIG_PG_DB_SCRIPTS_EXECUTE, false))) {
             createDatabaseServices(startPromise);
         }
 
-        if (!startPromise.tryComplete()) {
-            startPromise.complete();
-        }
+        startPromise.complete();
     }
 
     private void configureDatabaseConnectionOptions() {
