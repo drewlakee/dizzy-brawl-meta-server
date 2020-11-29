@@ -1,7 +1,6 @@
 package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Task;
-import dizzybrawl.database.sql.TaskSqlQuery;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

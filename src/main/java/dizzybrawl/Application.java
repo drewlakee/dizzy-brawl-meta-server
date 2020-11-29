@@ -1,5 +1,6 @@
 package dizzybrawl;
 
+import dizzybrawl.verticles.VertxLauncherVerticle;
 import io.vertx.core.Vertx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

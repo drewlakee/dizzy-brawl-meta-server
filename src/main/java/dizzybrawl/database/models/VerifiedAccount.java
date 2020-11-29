@@ -1,6 +1,5 @@
 package dizzybrawl.database.models;
 
-import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import lombok.Getter;
@@ -8,7 +7,6 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-@DataObject
 public class VerifiedAccount extends Account {
 
     private final UUID accountUUID;

@@ -1,4 +1,4 @@
-package dizzybrawl.http;
+package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.daos.CharacterNioDao;
@@ -8,26 +8,30 @@ import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.TaskApi;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.net.SocketAddress;
+import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.net.InetSocketAddress;
+
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
 
-    private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
-    public static final String DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
+    private static int verticleInstanceCounter = 0;
+    private final int serverNumber = verticleInstanceCounter++;
 
     private final AccountApi accountApi;
     private final AccountNioDao accountNioDao;
@@ -52,20 +56,34 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        launchHttpServer(getConfiguredApiRouter(), listenHandler -> {
-            if (listenHandler.succeeded()) {
+        launchHttpServer(getConfiguredApiRouter(), ar -> {
+            if (ar.succeeded()) {
                 startPromise.complete();
+                log.info("Rest-HTTP-Server-" + serverNumber + " launched on port-" + ar.result().actualPort());
             } else {
-                log.error("Could not launch http server " + listenHandler.cause());
-                startPromise.fail(listenHandler.cause());
+                log.error("Could not launch http server: " + ar.cause());
+                startPromise.fail(ar.cause());
             }
         });
     }
 
     private void launchHttpServer(Router apiRouter, Handler<AsyncResult<HttpServer>> listenHandler) {
-        vertx.createHttpServer()
-             .requestHandler(apiRouter)
-             .listen(config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080), listenHandler);
+        int currentPort = 8080;
+        int toPort = 65535;
+
+        InetSocketAddress address = new InetSocketAddress(currentPort);
+        while (address.isUnresolved() && currentPort <= toPort) {
+            address = new InetSocketAddress(++currentPort);
+        }
+
+        if (currentPort <= toPort) {
+            SocketAddress socket = new SocketAddressImpl(address.getPort(), address.getHostName());
+            vertx.createHttpServer()
+                    .requestHandler(apiRouter)
+                    .listen(socket, listenHandler);
+        } else {
+            listenHandler.handle(Future.failedFuture("Rest-HTTP-Server-" + serverNumber + " doesn't find free port."));
+        }
     }
 
     private Router getConfiguredApiRouter() {

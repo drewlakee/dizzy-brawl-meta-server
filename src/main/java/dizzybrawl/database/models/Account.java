@@ -1,6 +1,5 @@
 package dizzybrawl.database.models;
 
-import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-@DataObject
 public class Account {
 
     private final String username;

@@ -1,8 +1,6 @@
 plugins {
     id 'java'
-    id "io.vertx.vertx-plugin" version "1.1.2"
     id "io.freefair.lombok" version "5.2.1"
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 group 'org.dizzybrawl'
@@ -31,67 +29,15 @@ dependencies {
     // vert.x
     compile "io.vertx:vertx-core:$vertxVersion"
     compile "io.vertx:vertx-web:$vertxVersion"
-    compile "io.vertx:vertx-codegen:$vertxVersion"
-    compile "io.vertx:vertx-service-proxy:$vertxVersion"
     compile "io.vertx:vertx-pg-client:$vertxVersion"
     compile "io.vertx:vertx-auth-jwt:$vertxVersion"
 
-    annotationProcessor "io.vertx:vertx-codegen:$vertxVersion"
-    annotationProcessor "io.vertx:vertx-service-proxy:$vertxVersion"
-
     // spring
     compile "org.springframework.boot:spring-boot-starter:$springVersion"
-
 
     // for db clients
     compile 'com.ongres.scram:client:2.1'
 
     // junit tests
     testCompile "junit:junit:$junitVersion"
-}
-
-vertx {
-    mainVerticle = 'dizzybrawl.MainVerticle'
-}
-
-shadowJar {
-    manifest {
-        attributes 'Main-Class' : 'io.vertx.core.Launcher'
-        attributes 'Main-Verticle' : 'dizzybrawl.MainVerticle'
-        attributes 'Main-Command' : 'run'
-    }
-
-    mergeServiceFiles {
-        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
-    }
-}
-
-sourceSets {
-    generated {
-        java.srcDir "${projectDir}/src/generated"
-        java.srcDir "${projectDir}/src/main/asciidoc"
-    }
-}
-
-task generateProxies(type: JavaCompile, description: "Generates a vertx's proxies for services") {
-    group 'build'
-    description 'Generates the Vert.x proxies'
-    source = sourceSets.main.java
-    classpath = configurations.compile + configurations.compileOnly as FileCollection
-    options.annotationProcessorPath = configurations.annotationProcessor
-    options.compilerArgs = [
-            "-proc:only",
-            "-processor", "io.vertx.codegen.CodeGenProcessor",
-            "-Acodegen.output=${projectDir}/src/main"
-    ]
-    destinationDir = file("${projectDir}/src/generated/java")
-}
-
-compileJava {
-    dependsOn generateProxies
-    source += sourceSets.generated.java
-}
-
-clean {
-    delete += sourceSets.generated.java.srcDirs
 }

@@ -1,6 +1,5 @@
 package dizzybrawl.database.models;
 
-import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import lombok.AllArgsConstructor;
@@ -11,7 +10,6 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@DataObject
 public class Task {
 
     private final UUID taskUUID;

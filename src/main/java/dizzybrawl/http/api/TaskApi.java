@@ -2,7 +2,6 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.database.models.Task;
-import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.netty.handler.codec.http.HttpResponseStatus;
