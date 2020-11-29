@@ -20,7 +20,7 @@ import java.util.UUID;
 @Component
 public class CharacterApi {
 
-    public Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterNioDao characterNioDao) {
+    public Handler<RoutingContext> getAllCharactersByAccountUUIDHandler(CharacterNioDao characterNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -60,7 +60,7 @@ public class CharacterApi {
         };
     }
 
-    public Handler<RoutingContext> getAllCharactersMeshesByCharacterUUID(CharacterNioDao characterNioDao) {
+    public Handler<RoutingContext> getAllCharactersMeshesByCharacterUUIDHandler(CharacterNioDao characterNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 

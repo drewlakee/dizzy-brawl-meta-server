@@ -1,5 +1,6 @@
 package dizzybrawl.http.api;
 
+import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.database.models.Task;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.validation.errors.DataErrors;
@@ -9,6 +10,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -20,9 +22,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Component
 public class TaskApi {
 
-    public static Handler<RoutingContext> getTasksByAccountUUID(TaskService taskService) {
+    public Handler<RoutingContext> getTasksByAccountUUIDHandler(TaskNioDao taskNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -35,7 +38,7 @@ public class TaskApi {
                 return;
             }
 
-            taskService.getAllTasksByAccountUUID(accountUUIDParam, ar1 -> {
+            taskNioDao.getAllByAccountUUID(accountUUIDParam, ar1 -> {
                 if (ar1.succeeded()) {
                     List<Task> tasks = ar1.result();
                     List<Task> tasksToDelete = new ArrayList<>();
@@ -59,7 +62,7 @@ public class TaskApi {
                         }
                     }
 
-                    taskService.deleteTasks(tasksToDelete, ar2 -> {});
+                    taskNioDao.delete(tasksToDelete, ar2 -> {});
 
                     JsonObject jsonResponse = new JsonObject();
                     jsonResponse.put("tasks", jsonTasksToResponse);
@@ -72,7 +75,7 @@ public class TaskApi {
         };
     }
 
-    public static Handler<RoutingContext> addTasks(TaskService taskService) {
+    public Handler<RoutingContext> addTasksHandler(TaskNioDao taskNioDao) {
         return context -> {
 
             if (!context.getBodyAsJson().containsKey("tasks")) {
@@ -93,7 +96,7 @@ public class TaskApi {
                 return;
             }
 
-            taskService.addTasks(tasksToAdd, ar1 -> {
+            taskNioDao.add(tasksToAdd, ar1 -> {
                 if (ar1.succeeded()) {
                     List<Task> tasksResult = ar1.result();
                     JsonArray jsonTasksResponse = new JsonArray();
@@ -115,7 +118,7 @@ public class TaskApi {
         };
     }
 
-    public static Handler<RoutingContext> updateTasksProgress(TaskService taskService) {
+    public Handler<RoutingContext> updateTasksProgressHandler(TaskNioDao taskNioDao) {
         return context -> {
 
             if (!context.getBodyAsJson().containsKey("tasks")) {
@@ -127,7 +130,7 @@ public class TaskApi {
                     .map(o -> new Task((JsonObject) o))
                     .collect(Collectors.toList());
 
-            taskService.updateTasksProgress(tasksToUpdate, ar1 -> {
+            taskNioDao.updateProgressOf(tasksToUpdate, ar1 -> {
                 if (ar1.succeeded()) {
                     // All was updated
                     context.response().setStatusCode(HttpResponseStatus.OK.code());

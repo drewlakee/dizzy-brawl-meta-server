@@ -17,7 +17,7 @@ public class AccountApi {
         INVALID_PASSWORD
     }
 
-    public Handler<RoutingContext> onLogin(AccountNioDao accountDao) {
+    public Handler<RoutingContext> onLoginHandler(AccountNioDao accountDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -56,7 +56,7 @@ public class AccountApi {
         };
     }
 
-    public Handler<RoutingContext> onRegistration(AccountNioDao accountDao) {
+    public Handler<RoutingContext> onRegistrationHandler(AccountNioDao accountDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 

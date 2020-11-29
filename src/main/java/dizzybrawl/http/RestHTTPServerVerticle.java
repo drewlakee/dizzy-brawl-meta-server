@@ -2,8 +2,7 @@ package dizzybrawl.http;
 
 import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.daos.CharacterNioDao;
-import dizzybrawl.database.services.CharacterService;
-import dizzybrawl.database.services.TaskService;
+import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.TaskApi;
@@ -30,28 +29,29 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
     public static final String DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
-
     private final AccountApi accountApi;
     private final AccountNioDao accountNioDao;
 
     private final CharacterApi characterApi;
     private final CharacterNioDao characterNioDao;
 
-    private TaskService taskService;
+    private final TaskApi taskApi;
+    private final TaskNioDao taskNioDao;
 
     @Autowired
     public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao,
-                                  CharacterApi characterApi, CharacterNioDao characterNioDao) {
+                                  CharacterApi characterApi, CharacterNioDao characterNioDao,
+                                  TaskApi taskApi, TaskNioDao taskNioDao) {
         this.accountApi = accountApi;
         this.accountNioDao = accountNioDao;
         this.characterApi = characterApi;
         this.characterNioDao = characterNioDao;
+        this.taskApi = taskApi;
+        this.taskNioDao = taskNioDao;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
-        initializeServices();
-
         launchHttpServer(getConfiguredApiRouter(), listenHandler -> {
             if (listenHandler.succeeded()) {
                 startPromise.complete();
@@ -60,10 +60,6 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
                 startPromise.fail(listenHandler.cause());
             }
         });
-    }
-
-    private void initializeServices() {
-        taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
     }
 
     private void launchHttpServer(Router apiRouter, Handler<AsyncResult<HttpServer>> listenHandler) {
@@ -93,31 +89,31 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         // api end points handlers
         router.post("/account/auth/login")
                 .handler(jsonObjectValidationHandler)
-                .handler(accountApi.onLogin(accountNioDao));
+                .handler(accountApi.onLoginHandler(accountNioDao));
 
         router.post("/account/register")
                 .handler(jsonObjectValidationHandler)
-                .handler(accountApi.onRegistration(accountNioDao));
+                .handler(accountApi.onRegistrationHandler(accountNioDao));
 
         router.post("/characters/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(characterApi.getAllCharactersByAccountUUID(characterNioDao));
+                .handler(characterApi.getAllCharactersByAccountUUIDHandler(characterNioDao));
 
         router.post("/characters/meshes/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(characterApi.getAllCharactersMeshesByCharacterUUID(characterNioDao));
+                .handler(characterApi.getAllCharactersMeshesByCharacterUUIDHandler(characterNioDao));
 
         router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(TaskApi.getTasksByAccountUUID(taskService));
+                .handler(taskApi.getTasksByAccountUUIDHandler(taskNioDao));
 
         router.post("/tasks/add")
                 .handler(jsonObjectValidationHandler)
-                .handler(TaskApi.addTasks(taskService));
+                .handler(taskApi.addTasksHandler(taskNioDao));
 
         router.put("/tasks/update/progress")
                 .handler(jsonObjectValidationHandler)
-                .handler(TaskApi.updateTasksProgress(taskService));
+                .handler(taskApi.updateTasksProgressHandler(taskNioDao));
 
         return router;
     }
