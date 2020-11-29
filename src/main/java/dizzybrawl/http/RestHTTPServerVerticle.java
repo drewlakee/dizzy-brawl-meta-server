@@ -1,6 +1,7 @@
 package dizzybrawl.http;
 
 import dizzybrawl.database.daos.AccountNioDao;
+import dizzybrawl.database.daos.CharacterNioDao;
 import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.api.AccountApi;
@@ -33,13 +34,18 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     private final AccountApi accountApi;
     private final AccountNioDao accountNioDao;
 
-    private CharacterService characterService;
+    private final CharacterApi characterApi;
+    private final CharacterNioDao characterNioDao;
+
     private TaskService taskService;
 
     @Autowired
-    public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao) {
+    public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao,
+                                  CharacterApi characterApi, CharacterNioDao characterNioDao) {
         this.accountApi = accountApi;
         this.accountNioDao = accountNioDao;
+        this.characterApi = characterApi;
+        this.characterNioDao = characterNioDao;
     }
 
     @Override
@@ -57,7 +63,6 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     }
 
     private void initializeServices() {
-        characterService = CharacterService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.character");
         taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
     }
 
@@ -96,11 +101,11 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
         router.post("/characters/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(CharacterApi.getAllCharactersByAccountUUID(characterService));
+                .handler(characterApi.getAllCharactersByAccountUUID(characterNioDao));
 
         router.post("/characters/meshes/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(CharacterApi.getAllCharactersMeshesByCharacterUUID(characterService));
+                .handler(characterApi.getAllCharactersMeshesByCharacterUUID(characterNioDao));
 
         router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)

@@ -2,23 +2,25 @@ package dizzybrawl.http.api;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import dizzybrawl.database.daos.CharacterNioDao;
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
-import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Component
 public class CharacterApi {
 
-    public static Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterService characterService) {
+    public Handler<RoutingContext> getAllCharactersByAccountUUID(CharacterNioDao characterNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -36,7 +38,7 @@ public class CharacterApi {
                 return;
             }
 
-            characterService.getAllCharactersByAccountUUID(accountUUID, ar1 -> {
+            characterNioDao.getAllByAccountUUID(accountUUID, ar1 -> {
                 if (ar1.succeeded()) {
                     List<Character> characters = ar1.result();
                     JsonObject jsonObjectResponse = new JsonObject();
@@ -58,7 +60,7 @@ public class CharacterApi {
         };
     }
 
-    public static Handler<RoutingContext> getAllCharactersMeshesByCharacterUUID(CharacterService characterService) {
+    public Handler<RoutingContext> getAllCharactersMeshesByCharacterUUID(CharacterNioDao characterNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -81,7 +83,7 @@ public class CharacterApi {
                 return;
             }
 
-            characterService.getAllCharactersMeshesByCharacterUUID(charactersUUIDs, ar1 -> {
+            characterNioDao.getAllMeshesByCharacterUUID(charactersUUIDs, ar1 -> {
                 if (ar1.succeeded()) {
                     Multimap<String, CharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
                     for (CharacterMesh mesh : ar1.result()) {
