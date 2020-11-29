@@ -1,5 +1,6 @@
 package dizzybrawl.database.daos;
 
+import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.VerifiedAccount;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -9,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface AccountNioDao {
 
     void getByUsernameOrEmail(String usernameOrEmail, Handler<AsyncResult<VerifiedAccount>> resultHandler);
+
+    void register(Account preRegistrationAccount, Handler<AsyncResult<VerifiedAccount>> resultHandler);
 }

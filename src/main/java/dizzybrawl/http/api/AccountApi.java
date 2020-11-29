@@ -67,22 +67,22 @@ public class AccountApi {
                 return;
             }
 
-//            accountDao.registerAccount(preRegistrationVerifiedAccount, ar1 -> {
-//                if (ar1.succeeded()) {
-//                    VerifiedAccount verifiedAccount = ar1.result();
-//                    JsonObject response = new JsonObject();
-//
-//                    if (verifiedAccount.isEmpty()) {
-//                        response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
-//                    } else {
-//                        response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
-//                    }
-//
-//                    context.response().end(response.encodePrettily());
-//                } else {
-//                    context.fail(ar1.cause());
-//                }
-//            });
+            accountDao.register(preRegistrationVerifiedAccount, ar1 -> {
+                if (ar1.succeeded()) {
+                    VerifiedAccount verifiedAccount = ar1.result();
+                    JsonObject response = new JsonObject();
+
+                    if (verifiedAccount.isEmpty()) {
+                        response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
+                    } else {
+                        response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
+                    }
+
+                    context.response().end(response.encodePrettily());
+                } else {
+                    context.fail(ar1.cause());
+                }
+            });
         };
     }
 }

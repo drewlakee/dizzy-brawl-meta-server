@@ -1,5 +1,6 @@
 package dizzybrawl.database.daos;
 
+import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.VerifiedAccount;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -56,6 +57,38 @@ public class PgAccountNioDao implements AccountNioDao {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
                             }
+
+                            connection.close();
+                        });
+            } else {
+                log.error("Can't connect to database.", ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+        });
+    }
+
+    @Override
+    public void register(Account preRegistrationAccount, Handler<AsyncResult<VerifiedAccount>> resultHandler) {
+        pgClient.getConnection(ar1 -> {
+            if (ar1.succeeded()) {
+                SqlConnection connection = ar1.result();
+
+                connection
+                        .preparedQuery(environment.getProperty("insert-account-with-returning"))
+                        .execute(Tuple.of(
+                                preRegistrationAccount.getUsername(),
+                                preRegistrationAccount.getEmail(),
+                                preRegistrationAccount.getPassword()), ar2 -> {
+
+                            VerifiedAccount verifiedAccount;
+                            if (ar2.succeeded()) {
+                                verifiedAccount = new VerifiedAccount(ar2.result().iterator().next());
+                            } else {
+                                verifiedAccount = VerifiedAccount.createEmpty();
+                                log.warn("Can't query to database cause " + ar2.cause());
+                            }
+
+                            resultHandler.handle(Future.succeededFuture(verifiedAccount));
 
                             connection.close();
                         });
