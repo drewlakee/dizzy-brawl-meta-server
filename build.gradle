@@ -20,6 +20,7 @@ java {
 ext {
     vertxVersion = '3.9.3'
     junitVersion = '4.12'
+    springVersion = '2.4.0'
 }
 
 dependencies {
@@ -37,6 +38,10 @@ dependencies {
 
     annotationProcessor "io.vertx:vertx-codegen:$vertxVersion"
     annotationProcessor "io.vertx:vertx-service-proxy:$vertxVersion"
+
+    // spring
+    compile "org.springframework.boot:spring-boot-starter:$springVersion"
+
 
     // for db clients
     compile 'com.ongres.scram:client:2.1'

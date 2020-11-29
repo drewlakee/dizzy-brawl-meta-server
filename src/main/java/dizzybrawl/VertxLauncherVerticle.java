@@ -5,13 +5,14 @@ import dizzybrawl.http.RestHTTPServerVerticle;
 import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-
-public class MainVerticle extends AbstractVerticle {
+@Component
+public class VertxLauncherVerticle extends AbstractVerticle {
 
     public static String CONFIG_SHARED_WORKERS_SIZE = "vertx.rest.server.workers.size";
 
-    private static final Logger log = LoggerFactory.getLogger(MainVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(VertxLauncherVerticle.class);
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -26,6 +27,7 @@ public class MainVerticle extends AbstractVerticle {
                 deploy(new PgDatabaseVerticle()),
                 deploy(new RestHTTPServerVerticle(), restServerOptions)
         ).onComplete(ar1 -> {
+            log.info("Verticles deploy process successfully done.");
             startPromise.complete();
         }).onFailure(ar2 -> {
             log.error("Verticles deploy process failed.", ar2.getCause());
