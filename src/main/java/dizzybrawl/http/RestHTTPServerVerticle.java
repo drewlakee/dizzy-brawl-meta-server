@@ -1,6 +1,6 @@
 package dizzybrawl.http;
 
-import dizzybrawl.database.services.AccountService;
+import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.services.CharacterService;
 import dizzybrawl.database.services.TaskService;
 import dizzybrawl.http.api.AccountApi;
@@ -18,17 +18,29 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RestHTTPServerVerticle extends AbstractVerticle {
+
+    private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
 
     private static final String CONFIG_HTTP_SERVER_PORT = "http.server.port";
     public static final String DIZZYBRAWL_DB_QUEUE = "dizzybrawl.db.queue";
 
-    private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
 
-    private AccountService accountService;
+    private final AccountApi accountApi;
+    private final AccountNioDao accountNioDao;
+
     private CharacterService characterService;
     private TaskService taskService;
+
+    @Autowired
+    public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao) {
+        this.accountApi = accountApi;
+        this.accountNioDao = accountNioDao;
+    }
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -45,7 +57,6 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     }
 
     private void initializeServices() {
-        accountService = AccountService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.account");
         characterService = CharacterService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.character");
         taskService = TaskService.createProxy(vertx, DIZZYBRAWL_DB_QUEUE + ".service.task");
     }
@@ -77,11 +88,11 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         // api end points handlers
         router.post("/account/auth/login")
                 .handler(jsonObjectValidationHandler)
-                .handler(AccountApi.onLogin(accountService));
+                .handler(accountApi.onLogin(accountNioDao));
 
         router.post("/account/register")
                 .handler(jsonObjectValidationHandler)
-                .handler(AccountApi.onRegistration(accountService));
+                .handler(accountApi.onRegistration(accountNioDao));
 
         router.post("/characters/get/all")
                 .handler(jsonObjectValidationHandler)

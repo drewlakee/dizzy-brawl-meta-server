@@ -1,21 +1,23 @@
 package dizzybrawl.http.api;
 
+import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.VerifiedAccount;
-import dizzybrawl.database.services.AccountService;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.stereotype.Component;
 
-enum AccountErrors {
-    INVALID_PASSWORD
-}
-
+@Component
 public class AccountApi {
 
-    public static Handler<RoutingContext> onLogin(AccountService accountService) {
+    private enum AccountErrors {
+        INVALID_PASSWORD
+    }
+
+    public Handler<RoutingContext> onLogin(AccountNioDao accountDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -27,7 +29,7 @@ public class AccountApi {
                 return;
             }
 
-            accountService.getAccountByUsernameOrEmail(usernameOrEmail, ar1 -> {
+            accountDao.getByUsernameOrEmail(usernameOrEmail, ar1 -> {
                if (ar1.succeeded()) {
                    VerifiedAccount verifiedAccount = ar1.result();
                    JsonObject response;
@@ -54,7 +56,7 @@ public class AccountApi {
         };
     }
 
-    public static Handler<RoutingContext> onRegistration(AccountService accountService) {
+    public Handler<RoutingContext> onRegistration(AccountNioDao accountDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -65,22 +67,22 @@ public class AccountApi {
                 return;
             }
 
-            accountService.registerAccount(preRegistrationVerifiedAccount, ar1 -> {
-                if (ar1.succeeded()) {
-                    VerifiedAccount verifiedAccount = ar1.result();
-                    JsonObject response = new JsonObject();
-
-                    if (verifiedAccount.isEmpty()) {
-                        response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
-                    } else {
-                        response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
-                    }
-
-                    context.response().end(response.encodePrettily());
-                } else {
-                    context.fail(ar1.cause());
-                }
-            });
+//            accountDao.registerAccount(preRegistrationVerifiedAccount, ar1 -> {
+//                if (ar1.succeeded()) {
+//                    VerifiedAccount verifiedAccount = ar1.result();
+//                    JsonObject response = new JsonObject();
+//
+//                    if (verifiedAccount.isEmpty()) {
+//                        response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
+//                    } else {
+//                        response.put("account_uuid", verifiedAccount.getAccountUUID().toString());
+//                    }
+//
+//                    context.response().end(response.encodePrettily());
+//                } else {
+//                    context.fail(ar1.cause());
+//                }
+//            });
         };
     }
 }

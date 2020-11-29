@@ -48,7 +48,7 @@ public class PgCharacterService implements CharacterService, SqlLoadable<Charact
         HashMap<CharacterSqlQuery, String> loadedSqlQueries = new HashMap<>();
         Properties queriesProps = new Properties();
 
-        try (InputStream queriesInputStream = getClass().getResourceAsStream("/character-db-queries.properties")) {
+        try (InputStream queriesInputStream = getClass().getResourceAsStream("/queries/character-db-queries.properties")) {
             queriesProps.load(queriesInputStream);
 
             loadedSqlQueries.put(CharacterSqlQuery.SELECT_ALL_CHARACTERS_BY_ACCOUNT_UUID, queriesProps.getProperty("select-all-characters-by-account-uuid"));

@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 @SpringBootApplication
 public class Application {
 
-    VertxLauncherVerticle launcherVerticle;
+    private final VertxLauncherVerticle launcherVerticle;
 
     @Autowired
     public Application(VertxLauncherVerticle launcherVerticle) {

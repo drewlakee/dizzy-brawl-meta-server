@@ -47,7 +47,7 @@ public class PgTaskService implements TaskService, SqlLoadable<TaskSqlQuery> {
         HashMap<TaskSqlQuery, String> loadedSqlQueries = new HashMap<>();
         Properties queriesProps = new Properties();
 
-        try (InputStream queriesInputStream = getClass().getResourceAsStream("/task-db-queries.properties")) {
+        try (InputStream queriesInputStream = getClass().getResourceAsStream("/queries/task-db-queries.properties")) {
             queriesProps.load(queriesInputStream);
 
             loadedSqlQueries.put(TaskSqlQuery.SELECT_ALL_TASKS_BY_ACCOUNT_UUID, queriesProps.getProperty("select-all-tasks-by-account-uuid"));

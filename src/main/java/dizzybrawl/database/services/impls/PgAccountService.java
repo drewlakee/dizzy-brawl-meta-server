@@ -49,7 +49,7 @@ public class PgAccountService implements AccountService, SqlLoadable<AccountSqlQ
         HashMap<AccountSqlQuery, String> loadedSqlQueries = new HashMap<>();
         Properties queriesProps = new Properties();
 
-        try (InputStream queriesInputStream = getClass().getResourceAsStream("/account-db-queries.properties")) {
+        try (InputStream queriesInputStream = getClass().getResourceAsStream("/queries/account-db-queries.properties")) {
             queriesProps.load(queriesInputStream);
 
             loadedSqlQueries.put(AccountSqlQuery.SELECT_ACCOUNT_BY_USERNAME_OR_EMAIL, queriesProps.getProperty("select-account-by-username-or-email"));
