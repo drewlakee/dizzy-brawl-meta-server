@@ -1,52 +1,106 @@
 package dizzybrawl.database.models;
 
+import dizzybrawl.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
+import javax.persistence.*;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
-@Data
-@AllArgsConstructor
+@Entity
+@Table(name = "character")
 public class Character {
 
-    private final UUID characterUUID;
-    private final int characterTypeId;
-    private final UUID accountUUID;
-    private final boolean isEnabled;
+    @Id
+    @Column(name = "character_uuid",
+            unique = true,
+            nullable = false)
+    private UUID characterUUID;
 
-    public Character(JsonObject jsonCharacter) {
-        this.characterUUID = jsonCharacter.getString("character_uuid") == null ? null : UUID.fromString(jsonCharacter.getString("character_uuid"));
-        this.characterTypeId = jsonCharacter.getInteger("character_type_id") == null ? 0 : jsonCharacter.getInteger("character_type_id");
-        this.accountUUID = jsonCharacter.getString("account_uuid") == null ? null : UUID.fromString(jsonCharacter.getString("account_uuid"));
-        this.isEnabled = jsonCharacter.getBoolean("is_enabled") == null ? false : jsonCharacter.getBoolean("is_enabled");
-    }
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "character_type_id",
+                unique = true,
+                nullable = false)
+    private CharacterType characterType;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "account_uuid",
+                nullable = false)
+    private Account account;
+
+    @Column(name = "is_enabled",
+            nullable = false)
+    private boolean isEnabled;
+
+    public Character() {}
 
     public Character(Row sqlRowCharacter) {
-        this.characterUUID = sqlRowCharacter.getUUID("character_uuid") == null ? null : sqlRowCharacter.getUUID("character_uuid");
-        this.characterTypeId = sqlRowCharacter.getInteger("character_type_id") == null ? 0 : sqlRowCharacter.getInteger("character_type_id");
-        this.accountUUID = sqlRowCharacter.getUUID("account_uuid") == null ? null : sqlRowCharacter.getUUID("account_uuid");
-        this.isEnabled = sqlRowCharacter.getBoolean("is_enabled") == null ? false : sqlRowCharacter.getBoolean("is_enabled");
-    }
+        Function<String, UUID> getElseNullObject = SqlRowUtils.getElse(sqlRowCharacter, null);
 
-    public static Character createEmpty() {
-        return new Character(null, 0, null, false);
-    }
+        this.account = Account.createEmpty();
+        this.characterType = CharacterType.createEmpty();
 
-    public boolean isEmpty() {
-        return
-                this.characterUUID == null &&
-                this.characterTypeId == 0 &&
-                this.accountUUID == null &&
-                !this.isEnabled;
+        this.characterUUID = getElseNullObject.apply("character_uuid");
+        this.characterType.setId(SqlRowUtils.getElse(sqlRowCharacter, 0).apply("character_type_id"));
+        this.account.setAccountUUID(getElseNullObject.apply("account_uuid"));
+        this.isEnabled = SqlRowUtils.getElse(sqlRowCharacter, false).apply("is_enabled");
     }
 
     public JsonObject toJson() {
         return new JsonObject()
                 .put("character_uuid", characterUUID == null ? null : characterUUID.toString())
-                .put("character_type_id", characterTypeId)
-                .put("account_uuid", accountUUID == null ? null : accountUUID.toString())
+                .put("character_type_id", characterType == null ? 0 : characterType.getId())
+                .put("account_uuid", account.getAccountUUID() == null ? null : account.getAccountUUID().toString())
                 .put("is_enabled", isEnabled);
+    }
+
+    public UUID getCharacterUUID() {
+        return characterUUID;
+    }
+
+    public void setCharacterUUID(UUID characterUUID) {
+        this.characterUUID = characterUUID;
+    }
+
+    public CharacterType getCharacterType() {
+        return characterType;
+    }
+
+    public void setCharacterType(CharacterType characterType) {
+        this.characterType = characterType;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Character character = (Character) o;
+        return isEnabled == character.isEnabled &&
+                Objects.equals(characterUUID, character.characterUUID) &&
+                Objects.equals(characterType, character.characterType) &&
+                Objects.equals(account, character.account);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(characterUUID, characterType, account, isEnabled);
     }
 }

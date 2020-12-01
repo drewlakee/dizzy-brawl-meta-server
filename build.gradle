@@ -34,8 +34,20 @@ dependencies {
 
     // spring
     compile "org.springframework.boot:spring-boot-starter:$springVersion"
+    compile "org.springframework.boot:spring-boot-starter-jdbc:$springVersion"
 
-    // for db clients
+    // spring orm for hibernate
+    compile 'org.springframework:spring-orm:5.2.11.RELEASE'
+
+
+    // hibernate
+    compile 'org.hibernate:hibernate-core:5.4.24.Final'
+
+    // postgre driver
+    compile 'org.postgresql:postgresql:42.2.18'
+
+
+    // for db clients (vertx pg poll required)
     compile 'com.ongres.scram:client:2.1'
 
     // junit tests

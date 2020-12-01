@@ -1,7 +1,6 @@
 package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Account;
-import dizzybrawl.database.models.VerifiedAccount;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -16,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
 
 @Repository
 @PropertySource("classpath:queries/account-db-queries.properties")
@@ -34,7 +35,7 @@ public class PgAccountNioDao implements AccountNioDao {
     }
 
     @Override
-    public void getByUsernameOrEmail(String usernameOrEmail, Handler<AsyncResult<VerifiedAccount>> resultHandler) {
+    public void getByUsernameOrEmail(String usernameOrEmail, Handler<AsyncResult<Account>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
@@ -45,14 +46,11 @@ public class PgAccountNioDao implements AccountNioDao {
                             if (ar2.succeeded()) {
                                 RowSet<Row> queryResult = ar2.result();
 
-                                VerifiedAccount response;
                                 if (queryResult.rowCount() == 0) {
-                                    response = VerifiedAccount.createEmpty();
+                                    resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
                                 } else {
-                                    response = new VerifiedAccount(queryResult.iterator().next());
+                                    resultHandler.handle(Future.succeededFuture(new Account(queryResult.iterator().next())));
                                 }
-
-                                resultHandler.handle(Future.succeededFuture(response));
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
@@ -68,27 +66,28 @@ public class PgAccountNioDao implements AccountNioDao {
     }
 
     @Override
-    public void register(Account preRegistrationAccount, Handler<AsyncResult<VerifiedAccount>> resultHandler) {
+    public void register(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
+                UUID generatedUUID = UUID.nameUUIDFromBytes(preRegistrationAccount.getUsername().getBytes());
+
                 connection
-                        .preparedQuery(environment.getProperty("insert-account-with-returning"))
+                        .preparedQuery(environment.getProperty("insert-new-account"))
                         .execute(Tuple.of(
+                                generatedUUID,
                                 preRegistrationAccount.getUsername(),
                                 preRegistrationAccount.getEmail(),
                                 preRegistrationAccount.getPassword()), ar2 -> {
 
-                            VerifiedAccount verifiedAccount;
                             if (ar2.succeeded()) {
-                                verifiedAccount = new VerifiedAccount(ar2.result().iterator().next());
+                                preRegistrationAccount.setAccountUUID(generatedUUID);
+                                resultHandler.handle(Future.succeededFuture(preRegistrationAccount));
                             } else {
-                                verifiedAccount = VerifiedAccount.createEmpty();
                                 log.warn("Can't query to database cause " + ar2.cause());
+                                resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
                             }
-
-                            resultHandler.handle(Future.succeededFuture(verifiedAccount));
 
                             connection.close();
                         });

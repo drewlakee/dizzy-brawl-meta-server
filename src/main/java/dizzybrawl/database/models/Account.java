@@ -1,41 +1,119 @@
 package dizzybrawl.database.models;
 
+import dizzybrawl.utils.JsonUtils;
+import dizzybrawl.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
-@AllArgsConstructor
+import javax.persistence.*;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+
+@Entity
+@Table(name = "account")
 public class Account {
 
-    private final String username;
-    private final String password;
-    private final String email;
+    @Id
+    @Column(name = "account_uuid",
+            unique = true,
+            nullable = false)
+    private UUID accountUUID;
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    public Account() {}
 
     public Account(JsonObject jsonAccount) {
-        this.username = jsonAccount.getString("username") == null ? null : jsonAccount.getString("username");
-        this.password = jsonAccount.getString("password") == null ? null : jsonAccount.getString("password");
-        this.email = jsonAccount.getString("email") == null ? null : jsonAccount.getString("email");
+        Function<String, String> getElseNullString = JsonUtils.getElse(jsonAccount, null);
+
+        this.accountUUID = JsonUtils.getElse(jsonAccount, null, UUID.class).apply("account_uuid");
+        this.username = getElseNullString.apply("username");
+        this.password = getElseNullString.apply("password");
+        this.email = getElseNullString.apply("email");
     }
 
     public Account(Row sqlRowAccount) {
-        this.username = sqlRowAccount.getString("username") == null ? null : sqlRowAccount.getString("username");
-        this.password = sqlRowAccount.getString("password") == null ? null : sqlRowAccount.getString("password");
-        this.email = sqlRowAccount.getString("email") == null ? null : sqlRowAccount.getString("email");
+        Function<String, String> getElseNullString = SqlRowUtils.getElse(sqlRowAccount, null);
+
+        this.accountUUID = SqlRowUtils.getElse(sqlRowAccount, null, UUID.class).apply("account_uuid");
+        this.username = getElseNullString.apply("username");
+        this.password = getElseNullString.apply("password");
+        this.email = getElseNullString.apply("email");
+    }
+
+    public static Account createEmpty() {
+        return new Account();
     }
 
     public boolean isEmpty() {
         return
-                (this.username == null || this.username.isEmpty()) &&
-                (this.password == null || this.password.isEmpty()) &&
-                (this.email == null || this.email.isEmpty());
+                accountUUID == null &&
+                username == null &&
+                email == null &&
+                password == null;
     }
 
     public JsonObject toJson() {
         return new JsonObject()
+                .put("account_uuid", accountUUID == null ? null : accountUUID.toString())
                 .put("username", username)
                 .put("password", password)
                 .put("email", email);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public UUID getAccountUUID() {
+        return accountUUID;
+    }
+
+    public void setAccountUUID(UUID accountUUID) {
+        this.accountUUID = accountUUID;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(accountUUID, account.accountUUID) &&
+                Objects.equals(username, account.username) &&
+                Objects.equals(password, account.password) &&
+                Objects.equals(email, account.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountUUID, username, password, email);
     }
 }

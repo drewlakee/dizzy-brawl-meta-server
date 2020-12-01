@@ -2,7 +2,6 @@ package dizzybrawl.http.api;
 
 import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.models.Account;
-import dizzybrawl.database.models.VerifiedAccount;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
@@ -31,7 +30,7 @@ public class AccountApi {
 
             accountDao.getByUsernameOrEmail(usernameOrEmail, ar1 -> {
                if (ar1.succeeded()) {
-                   VerifiedAccount verifiedAccount = ar1.result();
+                   Account verifiedAccount = ar1.result();
                    JsonObject response;
 
                    if (verifiedAccount.isEmpty()) {
@@ -60,16 +59,16 @@ public class AccountApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            Account preRegistrationVerifiedAccount = new Account(requestBodyAsJson);
+            Account preRegistrationAccount = new Account(requestBodyAsJson);
 
-            if (preRegistrationVerifiedAccount.isEmpty()) {
+            if (preRegistrationAccount.isEmpty()) {
                 context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
-            accountDao.register(preRegistrationVerifiedAccount, ar1 -> {
+            accountDao.register(preRegistrationAccount, ar1 -> {
                 if (ar1.succeeded()) {
-                    VerifiedAccount verifiedAccount = ar1.result();
+                    Account verifiedAccount = ar1.result();
                     JsonObject response = new JsonObject();
 
                     if (verifiedAccount.isEmpty()) {
