@@ -1,68 +1,169 @@
 package dizzybrawl.database.models;
 
+import dizzybrawl.utils.JsonUtils;
+import dizzybrawl.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
-@Data
-@AllArgsConstructor
+@Entity
+@Table(name = "task")
 public class Task {
 
-    private final UUID taskUUID;
-    private final UUID accountUUID;
-    private final int taskTypeId;
-    private final int currentState;
-    private final int goalState;
-    private final Timestamp generatedDate;
-    private final int activeInterval;
+    @Id
+    @Column(name = "task_uuid",
+            unique = true,
+            nullable = false)
+    private UUID taskUUID;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "account_uuid",
+                nullable = false)
+    private Account account;
+
+    @Column(name = "task_type_id",
+            nullable = false)
+    private int taskTypeId;
+
+    @Column(name = "current_state",
+            nullable = false)
+    private int currentState;
+
+    @Column(name = "goal_state",
+            nullable = false)
+    private int goalState;
+
+    @Column(name = "generated_date",
+            nullable = false)
+    private Timestamp generatedDate;
+
+    @Column(name = "active_interval",
+            nullable = false)
+    private int activeInterval;
+
+    public Task() {
+        this.account = Account.createEmpty();
+    }
 
     public Task(JsonObject jsonTask) {
-        this.taskUUID = jsonTask.getString("task_uuid") == null ? null : UUID.fromString(jsonTask.getString("task_uuid"));
-        this.accountUUID = jsonTask.getString("account_uuid") == null ? null : UUID.fromString(jsonTask.getString("account_uuid"));
-        this.taskTypeId = jsonTask.getInteger("task_type_id") == null ? 0 : jsonTask.getInteger("task_type_id");
-        this.currentState = jsonTask.getInteger("current_state") == null ? 0 : jsonTask.getInteger("current_state");
-        this.goalState = jsonTask.getInteger("goal_state") == null ? 0 : jsonTask.getInteger("goal_state");
-        this.generatedDate = jsonTask.getString("generated_date") == null ? null : Timestamp.valueOf(jsonTask.getString("generated_date"));
-        this.activeInterval = jsonTask.getInteger("active_interval")  == null ? 0 : jsonTask.getInteger("active_interval");
+        this();
+
+        Function<String, Integer> getOrElseZero = JsonUtils.getElse(jsonTask, 0);
+        Function<String, String> getOrElseNullString = JsonUtils.getElse(jsonTask, null);
+
+        this.taskUUID = getOrElseNullString.apply("task_uuid") == null ? null : UUID.fromString(getOrElseNullString.apply("task_uuid"));
+        this.account.setAccountUUID(getOrElseNullString.apply("account_uuid") == null ? null : UUID.fromString(getOrElseNullString.apply("account_uuid")));
+        this.taskTypeId = getOrElseZero.apply("task_type_id");
+        this.currentState = getOrElseZero.apply("current_state");
+        this.goalState = getOrElseZero.apply("goal_state");
+        this.generatedDate = JsonUtils.getElse(jsonTask, null, Timestamp.class).apply("generated_date");
+        this.activeInterval = getOrElseZero.apply("active_interval");
     }
 
     public Task(Row sqlRowTask) {
-        this.taskUUID = sqlRowTask.getUUID("task_uuid") == null ? null : sqlRowTask.getUUID("task_uuid");
-        this.accountUUID = sqlRowTask.getUUID("account_uuid") == null ? null : sqlRowTask.getUUID("account_uuid");
-        this.taskTypeId = sqlRowTask.getInteger("task_type_id") == null ? 0 : sqlRowTask.getInteger("task_type_id");
-        this.currentState = sqlRowTask.getInteger("current_state") == null ? 0 : sqlRowTask.getInteger("current_state");
-        this.goalState = sqlRowTask.getInteger("goal_state") == null ? 0 : sqlRowTask.getInteger("goal_state");
-        this.generatedDate = sqlRowTask.getLocalDateTime("generated_date") == null ? null : Timestamp.valueOf(sqlRowTask.getLocalDateTime("generated_date"));
-        this.activeInterval = sqlRowTask.getInteger("active_interval") == null ? 0 : sqlRowTask.getInteger("active_interval");
-    }
+        this();
 
-    public static Task createEmpty() {
-        return new Task(null, null, 0, 0, 0, null, 0);
-    }
+        Function<String, Integer> getOrElseZero = SqlRowUtils.getElse(sqlRowTask, 0);
+        Function<String, UUID> getOrElseNullObject = SqlRowUtils.getElse(sqlRowTask, null);
 
-    public boolean isEmpty() {
-        return
-                this.taskUUID == null &&
-                this.accountUUID == null &&
-                this.taskTypeId == 0 &&
-                this.currentState == 0 &&
-                this.goalState == 0 &&
-                this.generatedDate == null &&
-                this.activeInterval == 0;
+        this.taskUUID = getOrElseNullObject.apply("task_uuid");
+        this.account.setAccountUUID(getOrElseNullObject.apply("account_uuid"));
+        this.taskTypeId = getOrElseZero.apply("task_type_id");
+        this.currentState = getOrElseZero.apply("current_state");
+        this.goalState = getOrElseZero.apply("goal_state");
+        this.generatedDate = Timestamp.valueOf(SqlRowUtils.getElse(sqlRowTask, null, LocalDateTime.class).apply("generated_date"));
+        this.activeInterval = getOrElseZero.apply("active_interval");
     }
 
     public JsonObject toJson() {
         return new JsonObject()
                 .put("task_uuid", taskUUID == null ? null : taskUUID.toString())
-                .put("account_uuid", accountUUID == null ? null : accountUUID.toString())
+                .put("account_uuid", (account == null || account.getAccountUUID() == null) ? null : account.getAccountUUID().toString())
                 .put("task_type_id", taskTypeId)
                 .put("current_state", currentState)
                 .put("goal_state", goalState)
                 .put("generated_date", generatedDate == null ? null : generatedDate.toString())
                 .put("active_interval", activeInterval);
+    }
+
+    public UUID getTaskUUID() {
+        return taskUUID;
+    }
+
+    public void setTaskUUID(UUID taskUUID) {
+        this.taskUUID = taskUUID;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public int getTaskTypeId() {
+        return taskTypeId;
+    }
+
+    public void setTaskTypeId(int taskTypeId) {
+        this.taskTypeId = taskTypeId;
+    }
+
+    public int getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(int currentState) {
+        this.currentState = currentState;
+    }
+
+    public int getGoalState() {
+        return goalState;
+    }
+
+    public void setGoalState(int goalState) {
+        this.goalState = goalState;
+    }
+
+    public Timestamp getGeneratedDate() {
+        return generatedDate;
+    }
+
+    public void setGeneratedDate(Timestamp generatedDate) {
+        this.generatedDate = generatedDate;
+    }
+
+    public int getActiveInterval() {
+        return activeInterval;
+    }
+
+    public void setActiveInterval(int activeInterval) {
+        this.activeInterval = activeInterval;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return taskTypeId == task.taskTypeId &&
+                currentState == task.currentState &&
+                goalState == task.goalState &&
+                activeInterval == task.activeInterval &&
+                Objects.equals(taskUUID, task.taskUUID) &&
+                Objects.equals(account, task.account) &&
+                Objects.equals(generatedDate, task.generatedDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskUUID, account, taskTypeId, currentState, goalState, generatedDate, activeInterval);
     }
 }

@@ -13,6 +13,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -105,13 +109,16 @@ public class PgTaskNioDao implements TaskNioDao {
 
                 List<Tuple> batch = new ArrayList<>();
                 for (Task task : tasks) {
+                    task.setTaskUUID(UUID.randomUUID());
+
                     batch.add(Tuple.of(
-                            task.getAccountUUID(),
-                            task.getTaskTypeId(),
+                            task.getTaskUUID(),
+                            task.getActiveInterval(),
                             task.getCurrentState(),
+                            LocalDateTime.now(Clock.systemUTC()),
                             task.getGoalState(),
-                            task.getActiveInterval()
-                            )
+                            task.getTaskTypeId(),
+                            task.getAccount().getAccountUUID())
                     );
                 }
 
@@ -120,19 +127,19 @@ public class PgTaskNioDao implements TaskNioDao {
                         .preparedQuery(environment.getProperty("insert-task-by-account-uuid"))
                         .executeBatch(batch, ar2 -> {
                             if (ar2.succeeded()) {
-                                List<Task> insertedTasks = new ArrayList<>();
+                                int countOfInsertedRows = 0;
 
                                 RowSet<Row> currentSetOfTupleInBatch = ar2.result();
                                 while (currentSetOfTupleInBatch != null) {
-                                    insertedTasks.add(new Task(currentSetOfTupleInBatch.iterator().next()));
+                                    countOfInsertedRows++;
                                     currentSetOfTupleInBatch = currentSetOfTupleInBatch.next();
                                 }
 
-                                if (insertedTasks.size() != batch.size()) {
+                                if (countOfInsertedRows != batch.size()) {
                                     resultHandler.handle(Future.failedFuture(ar2.cause()));
                                     transaction.rollback();
                                 } else {
-                                    resultHandler.handle(Future.succeededFuture(insertedTasks));
+                                    resultHandler.handle(Future.succeededFuture(tasks));
                                     transaction.commit();
                                 }
                             } else {

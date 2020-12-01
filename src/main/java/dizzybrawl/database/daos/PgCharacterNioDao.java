@@ -2,6 +2,7 @@ package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
+import dizzybrawl.database.models.ConcreteCharacterMesh;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -72,7 +73,7 @@ public class PgCharacterNioDao implements CharacterNioDao  {
     }
 
     @Override
-    public void getAllMeshesByCharacterUUID(List<String> charactersUUIDs, Handler<AsyncResult<List<CharacterMesh>>> resultHandler) {
+    public void getAllMeshesByCharacterUUID(List<String> charactersUUIDs, Handler<AsyncResult<List<ConcreteCharacterMesh>>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
@@ -86,12 +87,12 @@ public class PgCharacterNioDao implements CharacterNioDao  {
                         .preparedQuery(environment.getProperty("select-all-character-meshes-by-character-uuid"))
                         .executeBatch(batch, ar2 -> {
                             if (ar2.succeeded()) {
-                                List<CharacterMesh> meshes = new ArrayList<>();
+                                List<ConcreteCharacterMesh> meshes = new ArrayList<>();
 
                                 RowSet<Row> queryResult = ar2.result();
                                 while (queryResult != null) {
                                     for (Row row : queryResult) {
-                                        meshes.add(new CharacterMesh(row));
+                                        meshes.add(new ConcreteCharacterMesh(row));
                                     }
 
                                     queryResult = queryResult.next();

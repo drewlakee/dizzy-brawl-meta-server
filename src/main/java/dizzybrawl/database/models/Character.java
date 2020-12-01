@@ -5,9 +5,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
+
+/**
+ *  Table contains concrete characters information
+ */
 
 @Entity
 @Table(name = "character")
@@ -34,13 +40,15 @@ public class Character {
             nullable = false)
     private boolean isEnabled;
 
-    public Character() {}
+    public Character() {
+        this.characterType = CharacterType.createEmpty();
+        this.account = Account.createEmpty();
+    }
 
     public Character(Row sqlRowCharacter) {
-        Function<String, UUID> getElseNullObject = SqlRowUtils.getElse(sqlRowCharacter, null);
+        this();
 
-        this.account = Account.createEmpty();
-        this.characterType = CharacterType.createEmpty();
+        Function<String, UUID> getElseNullObject = SqlRowUtils.getElse(sqlRowCharacter, null);
 
         this.characterUUID = getElseNullObject.apply("character_uuid");
         this.characterType.setId(SqlRowUtils.getElse(sqlRowCharacter, 0).apply("character_type_id"));

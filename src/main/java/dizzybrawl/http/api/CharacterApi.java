@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import dizzybrawl.database.daos.CharacterNioDao;
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.CharacterMesh;
+import dizzybrawl.database.models.ConcreteCharacterMesh;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
@@ -85,8 +86,8 @@ public class CharacterApi {
 
             characterNioDao.getAllMeshesByCharacterUUID(charactersUUIDs, ar1 -> {
                 if (ar1.succeeded()) {
-                    Multimap<String, CharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
-                    for (CharacterMesh mesh : ar1.result()) {
+                    Multimap<String, ConcreteCharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
+                    for (ConcreteCharacterMesh mesh : ar1.result()) {
                         characterUUIDToCharacterMeshesMap.put(mesh.getCharacterUUID().toString(), mesh);
                     }
 

@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
+/**
+ *  Table contains user's account information
+ */
+
 @Entity
 @Table(name = "account")
 public class Account {
@@ -34,7 +38,7 @@ public class Account {
     public Account(JsonObject jsonAccount) {
         Function<String, String> getElseNullString = JsonUtils.getElse(jsonAccount, null);
 
-        this.accountUUID = JsonUtils.getElse(jsonAccount, null, UUID.class).apply("account_uuid");
+        this.accountUUID = getElseNullString.apply("account_uuid") == null ? null : UUID.fromString(getElseNullString.apply("account_uuid"));
         this.username = getElseNullString.apply("username");
         this.password = getElseNullString.apply("password");
         this.email = getElseNullString.apply("email");
