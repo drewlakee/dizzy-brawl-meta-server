@@ -12,7 +12,7 @@ public class GameMode {
         RACE
     }
 
-    @Id:
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "game_mode_id")
     private int gameModeId;
