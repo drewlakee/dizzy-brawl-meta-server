@@ -13,8 +13,9 @@ public class GameMode {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "game_mode_id")
+    @Column(name = "game_mode_id",
+            unique = true,
+            nullable = false)
     private int gameModeId;
 
     @Enumerated(EnumType.STRING)

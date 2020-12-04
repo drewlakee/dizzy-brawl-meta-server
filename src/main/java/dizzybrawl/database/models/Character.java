@@ -3,10 +3,10 @@ package dizzybrawl.database.models;
 import dizzybrawl.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -32,8 +32,9 @@ public class Character {
     private CharacterType characterType;
 
     @ManyToOne(cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "account_uuid",
-                nullable = false)
+            nullable = false)
     private Account account;
 
     @Column(name = "is_enabled",

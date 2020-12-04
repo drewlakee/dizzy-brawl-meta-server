@@ -1,25 +1,32 @@
 package dizzybrawl.verticles;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
+@PropertySource(value = "classpath:verticles.properties")
 public class VertxLauncherVerticle extends AbstractVerticle {
-
-    public static String CONFIG_SHARED_WORKERS_SIZE = "vertx.rest.server.workers.size";
 
     private static final Logger log = LoggerFactory.getLogger(VertxLauncherVerticle.class);
 
+    public final Environment environment;
+
     private final RestHTTPServerVerticle restHTTPServerVerticle;
 
+    private final PgDatabaseVerticle pgDatabaseVerticle;
+
     @Autowired
-    public VertxLauncherVerticle(RestHTTPServerVerticle restHTTPServerVerticle) {
+    public VertxLauncherVerticle(RestHTTPServerVerticle restHTTPServerVerticle,
+                                 PgDatabaseVerticle pgDatabaseVerticle,
+                                 Environment environment) {
         this.restHTTPServerVerticle = restHTTPServerVerticle;
+        this.pgDatabaseVerticle = pgDatabaseVerticle;
+        this.environment = environment;
     }
 
     @Override
@@ -29,16 +36,44 @@ public class VertxLauncherVerticle extends AbstractVerticle {
         DeploymentOptions restServerOptions = new DeploymentOptions()
                 .setWorker(true)
                 .setWorkerPoolName("rest-server-worker")
-                .setWorkerPoolSize(config().getInteger(CONFIG_SHARED_WORKERS_SIZE, 5));
+                .setWorkerPoolSize(environment.getProperty("http.rest-workers.pool", Integer.class, 0));
 
-        vertx.deployVerticle(restHTTPServerVerticle, restServerOptions, ar -> {
-            if (ar.succeeded()) {
-                startPromise.complete();
-                log.info("Verticles deploy process successfully done.");
-            } else {
-                startPromise.fail(ar.cause());
-                log.error("Verticles deploy process failed.");
-            }
+        CompositeFuture.all(
+            deploy(restHTTPServerVerticle, restServerOptions),
+            deploy(pgDatabaseVerticle)
+        ).onComplete(handler -> {
+            startPromise.complete();
+            log.info("Verticles deploy process successfully done.");
+        }).onFailure(handler -> {
+            handler.printStackTrace();
+            startPromise.fail(handler.getCause());
+            log.error("Verticles deploy process failed cause ", handler.getCause());
+        });
+    }
+
+    private Future<Void> deploy(AbstractVerticle verticle, DeploymentOptions deploymentOptions) {
+        return Future.future(handler -> {
+            vertx.deployVerticle(verticle, deploymentOptions, ar1 -> {
+                if (ar1.succeeded()) {
+                    handler.complete();
+                } else {
+                    ar1.cause().printStackTrace();
+                    handler.fail(ar1.cause());
+                }
+            });
+        });
+    }
+
+    private Future<Void> deploy(AbstractVerticle verticle) {
+        return Future.future(handler -> {
+            vertx.deployVerticle(verticle, ar1 -> {
+                if (ar1.succeeded()) {
+                    handler.complete();
+                } else {
+                    ar1.cause().printStackTrace();
+                    handler.fail(ar1.cause());
+                }
+            });
         });
     }
 }

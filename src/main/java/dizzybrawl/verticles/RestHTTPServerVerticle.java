@@ -8,30 +8,28 @@ import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.TaskApi;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.net.SocketAddress;
-import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-
 @Component
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@PropertySource(value = "classpath:verticles.properties")
 public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
 
-    private static int verticleInstanceCounter = 0;
-    private final int serverNumber = verticleInstanceCounter++;
+    private final Environment environment;
 
     private final AccountApi accountApi;
     private final AccountNioDao accountNioDao;
@@ -45,13 +43,15 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     @Autowired
     public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao,
                                   CharacterApi characterApi, CharacterNioDao characterNioDao,
-                                  TaskApi taskApi, TaskNioDao taskNioDao) {
+                                  TaskApi taskApi, TaskNioDao taskNioDao,
+                                  Environment environment) {
         this.accountApi = accountApi;
         this.accountNioDao = accountNioDao;
         this.characterApi = characterApi;
         this.characterNioDao = characterNioDao;
         this.taskApi = taskApi;
         this.taskNioDao = taskNioDao;
+        this.environment = environment;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         launchHttpServer(getConfiguredApiRouter(), ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
-                log.info("Rest-HTTP-Server-" + serverNumber + " launched on port-" + ar.result().actualPort());
+                log.info(String.format("%s deployment ID: %s", this.getClass().getSimpleName(), this.deploymentID()));
             } else {
                 log.error("Could not launch http server: " + ar.cause());
                 startPromise.fail(ar.cause());
@@ -68,22 +68,9 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     }
 
     private void launchHttpServer(Router apiRouter, Handler<AsyncResult<HttpServer>> listenHandler) {
-        int currentPort = 8080;
-        int toPort = 65535;
-
-        InetSocketAddress address = new InetSocketAddress(currentPort);
-        while (address.isUnresolved() && currentPort <= toPort) {
-            address = new InetSocketAddress(++currentPort);
-        }
-
-        if (currentPort <= toPort) {
-            SocketAddress socket = new SocketAddressImpl(address.getPort(), address.getHostName());
-            vertx.createHttpServer()
-                    .requestHandler(apiRouter)
-                    .listen(socket, listenHandler);
-        } else {
-            listenHandler.handle(Future.failedFuture("Rest-HTTP-Server-" + serverNumber + " doesn't find free port."));
-        }
+        vertx.createHttpServer()
+                .requestHandler(apiRouter)
+                .listen(environment.getProperty("http.server.port", Integer.class), listenHandler);
     }
 
     private Router getConfiguredApiRouter() {
