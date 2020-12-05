@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 @Entity
 @Table(name = "character_mesh")
-public class CharacterMesh {
+public class CharacterMesh implements JsonTransformable {
 
     @Id
     @Column(name = "character_mesh_id",
@@ -61,6 +61,7 @@ public class CharacterMesh {
         this.isEnabledAtBegin = getOrElseFalse.apply("is_enabled_at_begin");
     }
 
+    @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put("character_mesh_id", characterMeshId)

@@ -1,12 +1,17 @@
 package dizzybrawl.database.models;
 
+import dizzybrawl.utils.JsonUtils;
+import dizzybrawl.utils.SqlRowUtils;
+import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
+
 import javax.persistence.*;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "server")
-public class Server {
+public class Server implements JsonTransformable {
 
     @Id
     @Column(name = "server_uuid",
@@ -24,7 +29,25 @@ public class Server {
                 nullable = false)
     private GameMode gameMode;
 
-    public Server() {}
+    public Server() {
+        this.gameMode = GameMode.createEmpty();
+    }
+
+    public Server(JsonObject jsonServer) {
+        this();
+
+        this.serverUUID = JsonUtils.getElse(jsonServer, null, UUID.class).apply("server_uuid");
+        this.ipV4 = JsonUtils.getElse(jsonServer, null, String.class).apply("ip_v4");
+        this.gameMode.setGameModeId(JsonUtils.getElse(jsonServer, 0).apply("game_mode_id"));
+    }
+
+    public Server(Row sqlRowServer) {
+        this();
+
+        this.serverUUID = SqlRowUtils.getElse(sqlRowServer, null, UUID.class).apply("server_uuid");
+        this.ipV4 = SqlRowUtils.getElse(sqlRowServer, null, String.class).apply("ip_v4");
+        this.gameMode.setGameModeId(SqlRowUtils.getElse(sqlRowServer, 0).apply("game_mode_id"));
+    }
 
     public UUID getServerUUID() {
         return serverUUID;
@@ -48,6 +71,14 @@ public class Server {
 
     public void setGameMode(GameMode gameMode) {
         this.gameMode = gameMode;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        return new JsonObject()
+                .put("server_uuid", serverUUID == null ? null : serverUUID.toString())
+                .put("ip_v4", ipV4)
+                .put("game_mode_id", (gameMode != null && gameMode.getGameModeId() != 0) ? gameMode.getGameModeId() : 0);
     }
 
     @Override

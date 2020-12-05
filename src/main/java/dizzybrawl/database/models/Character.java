@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @Entity
 @Table(name = "character")
-public class Character {
+public class Character implements JsonTransformable {
 
     @Id
     @Column(name = "character_uuid",
@@ -57,6 +57,7 @@ public class Character {
         this.isEnabled = SqlRowUtils.getElse(sqlRowCharacter, false).apply("is_enabled");
     }
 
+    @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put("character_uuid", characterUUID == null ? null : characterUUID.toString())

@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 @Entity
 @Table(name = "account")
-public class Account {
+public class Account implements JsonTransformable {
 
     @Id
     @Column(name = "account_uuid",
@@ -68,6 +68,7 @@ public class Account {
                 password == null;
     }
 
+    @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put("account_uuid", accountUUID == null ? null : accountUUID.toString())

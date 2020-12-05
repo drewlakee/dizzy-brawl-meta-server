@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 @Entity
 @Table(name = "task")
-public class Task {
+public class Task implements JsonTransformable {
 
     @Id
     @Column(name = "task_uuid",
@@ -81,6 +81,7 @@ public class Task {
         this.activeInterval = getOrElseZero.apply("active_interval");
     }
 
+    @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put("task_uuid", taskUUID == null ? null : taskUUID.toString())

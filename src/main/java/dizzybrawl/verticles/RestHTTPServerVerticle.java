@@ -2,9 +2,11 @@ package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.daos.CharacterNioDao;
+import dizzybrawl.database.daos.ServerNioDao;
 import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
+import dizzybrawl.http.api.ServerApi;
 import dizzybrawl.http.api.TaskApi;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
@@ -40,10 +42,14 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     private final TaskApi taskApi;
     private final TaskNioDao taskNioDao;
 
+    private final ServerApi serverApi;
+    private final ServerNioDao serverNioDao;
+
     @Autowired
     public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao,
                                   CharacterApi characterApi, CharacterNioDao characterNioDao,
                                   TaskApi taskApi, TaskNioDao taskNioDao,
+                                  ServerApi serverApi, ServerNioDao serverNioDao,
                                   Environment environment) {
         this.accountApi = accountApi;
         this.accountNioDao = accountNioDao;
@@ -51,6 +57,9 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         this.characterNioDao = characterNioDao;
         this.taskApi = taskApi;
         this.taskNioDao = taskNioDao;
+        this.serverApi = serverApi;
+        this.serverNioDao = serverNioDao;
+
         this.environment = environment;
     }
 
@@ -119,6 +128,17 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         router.put("/tasks/update/progress")
                 .handler(jsonObjectValidationHandler)
                 .handler(taskApi.updateTasksProgressHandler(taskNioDao));
+
+        router.post("/servers/add")
+                .handler(jsonObjectValidationHandler)
+                .handler(serverApi.addHandler(serverNioDao));
+
+        router.post("/servers/get/all")
+                .handler(serverApi.getAllHandler(serverNioDao));
+
+        router.delete("/servers/delete")
+                .handler(jsonObjectValidationHandler)
+                .handler(serverApi.deleteHandler(serverNioDao));
 
         return router;
     }

@@ -7,27 +7,25 @@ import java.util.Objects;
 @Table(name = "game_mode")
 public class GameMode {
 
-    public enum GameModeType {
-        BATTLE_ROYAL,
-        RACE
-    }
-
     @Id
     @Column(name = "game_mode_id",
             unique = true,
             nullable = false)
     private int gameModeId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "game_mode_type",
+    @Column(name = "name",
             nullable = false)
-    private GameModeType gameModeType;
+    private String name;
 
     @Column(name = "players_in_game_server_count",
             nullable = false)
     private int playersInGameServerCount;
 
     public GameMode() {}
+
+    public static GameMode createEmpty() {
+        return new GameMode();
+    }
 
     public int getGameModeId() {
         return gameModeId;
@@ -37,12 +35,12 @@ public class GameMode {
         this.gameModeId = gameModeId;
     }
 
-    public GameModeType getGameModeType() {
-        return gameModeType;
+    public String getName() {
+        return name;
     }
 
-    public void setGameModeType(GameModeType gameModeType) {
-        this.gameModeType = gameModeType;
+    public void setName(String gameModeType) {
+        this.name = gameModeType;
     }
 
     public int getPlayersInGameServerCount() {
@@ -60,11 +58,11 @@ public class GameMode {
         GameMode gameMode = (GameMode) o;
         return gameModeId == gameMode.gameModeId &&
                 playersInGameServerCount == gameMode.playersInGameServerCount &&
-                gameModeType == gameMode.gameModeType;
+                name == gameMode.name;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameModeId, gameModeType, playersInGameServerCount);
+        return Objects.hash(gameModeId, name, playersInGameServerCount);
     }
 }
