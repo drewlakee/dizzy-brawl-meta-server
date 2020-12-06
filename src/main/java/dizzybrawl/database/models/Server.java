@@ -48,6 +48,7 @@ public class Server implements JsonTransformable {
         this.serverUUID = SqlRowUtils.getElse(sqlRowServer, null, UUID.class).apply("server_uuid");
         this.ipV4 = SqlRowUtils.getElse(sqlRowServer, null, String.class).apply("ip_v4");
         this.gameMode.setGameModeId(SqlRowUtils.getElse(sqlRowServer, 0).apply("game_mode_id"));
+        this.gameMode.setName(SqlRowUtils.getElse(sqlRowServer, null, String.class).apply("game_mode_name"));
     }
 
     public UUID getServerUUID() {
@@ -79,7 +80,8 @@ public class Server implements JsonTransformable {
         return new JsonObject()
                 .put("server_uuid", serverUUID == null ? null : serverUUID.toString())
                 .put("ip_v4", ipV4)
-                .put("game_mode_id", (gameMode != null && gameMode.getGameModeId() != 0) ? gameMode.getGameModeId() : 0);
+                .put("game_mode_id", (gameMode != null && gameMode.getGameModeId() != 0) ? gameMode.getGameModeId() : 0)
+                .put("game_mode_name", (gameMode != null && gameMode.getName() != null) ? gameMode.getName() : null);
     }
 
     @Override

@@ -2,27 +2,31 @@
 
 ### Content
 
-1. [API Navigation](#api-navigation)
-2. [API Documentation](#api-documentation)
+1. [APIv1 Navigation](#apiv1-navigation)
+2. [APIv1 Documentation](#apiv1-documentation)
 
-### API Navigation
+### APIv1 Navigation
 
 1. [Account](#post-accountregister)
     * [POST /account/auth/login](#post-accountauthlogin)
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
     * [POST /characters/get/all](#post-charactersgetall)
-    * [POST /characters/meshes/get/all](#post-charactersmeshesgetall)
+    * [POST /characters/armors/get/all](#post-charactersarmorsgetall)
 3. [Task](#task)
     * [POST /tasks/get/all](#post-tasksgetall)
     * [POST /tasks/add](#post-tasksadd)
     * [PUT /tasks/update/progress](#put-tasksupdateprogress)
+4. [Server](#server)
+    * [POST /servers/get/all](#post-serversgetall)
+    * [POST /servers/add](#post-serversadd)
+    * [DELETE /servers/delete](#delete-serversdelete)
 
-### API Documentation
+### APIv1 Documentation
 
 - <a href="https://documenter.getpostman.com/view/12029239/TVYKawXj">API in Postman Documentation</a>
 
-- Prefix for all end-points `/api/v1`
+- API prefix `/api/v1`
 
 ## Account
 
@@ -30,51 +34,34 @@
 
 **JSON Query**
 
-Name                | Data Type     | Description
+name                | data type     | description
 ------------        | ------------- | -------------
-username_or_email   |  String       |  User's username or email
-password            |  String       |  User's password
+username_or_email   |  string       |  user's username or email
+password            |  string       |  user's password
 
 **JSON Response**
 
-Name                | Data Type     |Description
+name                | data type     |description
 ------------        |-------------  |-------------
-account_uuid        | UUID          | Account's UUID
-username            | String        | User's in game username
-email               | String        | User's email
-
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
-error                   |DOESNT_EXIST_AT_DATABASE                    | User's account doesn't exist at database
-error                   |INVALID_PASSWORD                            | Incorrect password enter
+account_uuid        | uuid          | account's uuid
+username            | string        | user's in game username
+email               | string        | user's email
 
 ### POST `/account/register`
 
 **JSON Query**
 
-Name                |   Data Type   | Description
+name                |   data type   | description
 ------------        | ------------- | -------------
-username            |  String       |  User's username or email
-email               |  String       |  User's email
-password            |  String       |  User's password
+username            |  string       |  user's username or email
+email               |  string       |  user's email
+password            |  string       |  user's password
 
 **JSON Response**
 
-Name                | Data Type     |Description
+name                | data type     |description
 ------------        |-------------  |-------------
-account_uuid        | UUID          | Generated UUID for registered verifiedAccount
-
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
-error                   |ALREADY_EXIST_AT_DATABASE                   | User with same account already exist at database
+account_uuid        | uuid          | generated uuid for registered account
 
 ## Character
 
@@ -82,68 +69,48 @@ error                   |ALREADY_EXIST_AT_DATABASE                   | User with
 
 **JSON Query**
 
-Name                |Data Type      | Description
+name                |data type      | description
 ------------        | ------------- | -------------
-account_uuid        | String        |  Account's UUID
+account_uuid        | string        |  account's uuid
 
 **JSON Response**
 
-Name                | Data Type                    | Description
+name                | data type                    | description
 ------------        |-------------                 |-------------
-characters          | Array of Characters          | Array of characters that must be returned by account uuid
+characters          | array of characters          | array of characters that must be returned by account uuid
 
-Character Structure
+single "character" json object
 
-Name                | Data Type     |Description
+name                | data type     |description
 ------------        |-------------  |-------------
-character_uuid      | UUID          | Character's UUID
-character_type_id   | int           | Character's type of pawn
-is_enabled          | Boolean       | Available 
+character_uuid      | uuid          | character's uuid
+character_type_id   | int           | character's type of pawn
+is_enabled          | Boolean       | available for account
 
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | UUIDs have wrong format
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
-
-### POST `/characters/meshes/get/all`
+### POST `/characters/armors/get/all`
 
 **JSON Query**
 
-Name                |Data Type               | Description
+name                |data type               | description
 ------------        | -------------          | -------------
-characters          | Array of Strings       |  Array must contain characters UUIDs
+account_uuid         | string       |  armors owner account uuid
 
 **JSON Response**
 
-Name                | Data Type                                 |Description
+name                | data type                                 |description
 ------------        |-------------                              |-------------
-characters          | Array of Character                        | Contains array of characters
+armors          | array of armors                        | contains array of armors data
 
-Character Structure
+single "armor" json object
 
-Name                | Data Type         |Description
+name                | data type         |description
 ------------        |-------------      |-------------
-character_uuid      | UUID              | Character's in query passed UUID
-meshes              | Array of Meshes   | Array that contains all character meshes
-
-Mesh structure
-
-Name                | Data Type     |Description
-------------        |-------------  |-------------
-character_mesh_id   | int           | Character mesh ID
-in_game_cost        | int           | Cost in game money
-is_enable           | Boolean       | Available 
-
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | UUIDs have wrong format
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
+armor_id            | uuid              | character's in query passed uuid
+armor_name             | string   |     name    
+armor_type          |  string  |        type name
+cost           |  int  |                in game cost
+armor_level                |  int  |    in game level
+is_enabled             |  Boolean  |    is available for account
 
 ## Task
 
@@ -151,116 +118,143 @@ error                   |EMPTY_JSON_PARAMETERS                       | Some para
 
 **JSON Query**
 
-Name                |   Data type   | Description
+name                |   data type   | description
 ------------        | ------------- | -------------
-account_uuid        | String        |  Task's owner account UUID
+account_uuid        | string        |  task's owner account uuid
 
 **JSON Response**
 
-If at request moment task spend time after generation MORE than "active_interval" parameter 
+if at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
 
-If no active task at user's account, response will be empty JSON Array
+if no active task at user's account, response will be empty JSON Array
 
-Name                | Data Type                 | Description
+name                | data type                 | description
 ------------        |-------------              |-------------
-tasks               | Array of Tasks            | Active Tasks on User's account
+tasks               | array of tasks            | active Tasks on user's account
 
-Task Structure
+single "task" json object
 
-Name                | Data Type     | Description
+name                | data type     | description
 ------------        |-------------  |-------------
-task_uuid           | UUID          | Task's UUID
-task_type_id        | int           | Task type id
-current_state       | int           | Current progress of task
-goal_state          | int           | Goal value for task complete
-active_interval     | int           | Time of active status interval in **minutes**
-
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | UUIDs have wrong format
+task_uuid           | uuid          | task's uuid
+task_type_id        | int           | task type id
+current_state       | int           | current progress of task
+goal_state          | int           | goal value for task complete
+active_interval     | int           | time of active status interval in **minutes**
 
 ### POST `/tasks/add`
 
-**Transactional operation**. If some task will be not added - other tasks also will be not added
-
 **JSON Query**
 
-Name                | Data Type         | Description
+name                | data type         | description
 ------------        | -------------     | -------------
-tasks               |  Array Of Tasks   |  Array of Tasks that must be added
+tasks               |  array Of tasks   |  array of tasks that must be added
 
-Task Structure 
+single "task" json object
 
-Name                | Data Type     | Description
+name                | data type     | description
 ------------        | ------------- | -------------
-account_uuid        |   String      |  Task's owner verifiedAccount UUID
-task_type_id        |   int         |  Task's type
-current_state       |   int         |  Current progress of task
-goal_state          |   int         |  Goal value for task complete
-active_interval     |   int         |  Time interval in that task will be active. Time in **minutes**
+account_uuid        |   string      |  task's owner verifiedAccount uuid
+task_type_id        |   int         |  task's type
+current_state       |   int         |  current progress of task
+goal_state          |   int         |  goal value for task complete
+active_interval     |   int         |  time interval in that task will be active. Time in **minutes**
 
 **JSON Response**
 
-Response has same sequenced as request JSON, so UUIDs in same place
+response has same sequenced as request JSON, so uuids in same place
 as added tasks before
 
-Name                | Data Type                 | Description
+name                | data type                 | description
 ------------        |-------------              |-------------
-tasks               | Array of Strings          | Array contains generated tasks UUIDs
+tasks               | array of strings          | array contains generated tasks uuids
 
-Task Response Structure
+single json object
 
-Name                    | Data Type                 | Description
+name                    | data type                 | description
 ------------            |-------------              |-------------
-task_uuid               | UUID                      | Unique generated task key in database
-
-**JSON Error Response Reasons**
-
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | UUIDs have wrong format
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
+task_uuid               | uuid                      | unique generated task key in database
 
 ### PUT `/tasks/update/progress`
 
-**Transactional operation**. If some task will not update from a query - other too will be not update
-
 **JSON Query**
 
-Name                | Data Type             | Description
+name                | data type             | description
 ------------        | -------------         | -------------
-tasks               |   Array of Tasks      |  Array of Tasks that must be updated
+tasks               |   array of tasks      |  array of tasks that must be updated
 
-Task Structure
+single "task" json object
 
-Name                | Data Type     | Description
+name                | data type     | description
 ------------        | ------------- | -------------
-task_uuid           |   String      |  Task's UUID that will be updated
+task_uuid           |   string      |  Task's uuid that will be updated
 current_state       |   int         |  Current progress to update
-
-**JSON Response**
-
-Name                | Data Type     | Description
-------------        |-------------  |-------------
-error               | String        | **Optional.** Fact of wrong query execution or incorrect path parameter format
 
 **HTTP Response Codes**
 
-Code                | Description
+code                | description
 ------------        |-------------
-200                 | If all was updated - means OK
-419                 | Means that some can't be updated, because DB doesn't store inputted Tasks UUIDs
+200                 | if all was updated - means ok
+419                 | means that some can't be updated, because DB doesn't store inputted Tasks uuids
 
-**JSON Error Response Reasons**
+## Server
 
-Parameter               |Error Name                                  |Description
-|------------           |------------                                |-------------
-error                   |EMPTY_BODY                                  | Empty json body request
-error                   |INVALID_UUID                                | UUIDs have wrong format
-error                   |EMPTY_JSON_PARAMETERS                       | Some parameters is empty
+### POST `/servers/get/all`
 
+**JSON Response**
+
+name                | data type     | description
+------------        |-------------  |-------------
+server_uuid               | string        | unique server identifier 
+ip_v4                | string        |  server's ipv4
+game_mode_id                | int        | game mode id
+game_mode_name      | string | game mode name in game
+
+### POST `/servers/add`
+
+**JSON Query**
+
+name                | data type             | description
+------------        | -------------         | -------------
+servers               |   array of servers      |  array of servers that must be added
+
+single "server" json object
+
+name                | data type             | description
+------------        | -------------         | -------------
+ip_v4               |   string     |  ipv4 of server
+game_mode_id               |   int      |  game mode of server
+
+**JSON Response**
+
+name                | data type     | description
+------------        |-------------  |-------------
+servers               | array of strings        | unique servers identifier in database
+
+single json object
+
+name                | data type     | description
+------------        |-------------  |-------------
+server_uuid               | string       | unique server uuid in database
+
+### DELETE `/servers/delete`
+
+**JSON Query**
+
+name                | data type             | description
+------------        | -------------         | -------------
+servers               |   array of strings      |  array of unique identifiers of servers in database
+
+single json object
+
+name                | data type             | description
+------------        | -------------         | -------------
+server_uuid               |   string      |  unique identifier of server in database
+
+**HTTP Response Codes**
+
+code                | description
+------------        |-------------
+200                 | ok - all deleted
+404                 | some server not founded in database and other servers in query also was not deleted
