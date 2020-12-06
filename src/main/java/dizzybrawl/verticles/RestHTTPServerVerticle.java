@@ -113,9 +113,9 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
                 .handler(jsonObjectValidationHandler)
                 .handler(characterApi.getAllCharactersByAccountUUIDHandler(characterNioDao));
 
-        router.post("/characters/meshes/get/all")
+        router.post("/characters/armors/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(characterApi.getAllCharactersMeshesByCharacterUUIDHandler(characterNioDao));
+                .handler(characterApi.getAllArmorsByAccountsUUIDsHandler(characterNioDao));
 
         router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)

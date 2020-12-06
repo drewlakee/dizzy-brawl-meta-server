@@ -4,8 +4,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import dizzybrawl.database.daos.CharacterNioDao;
 import dizzybrawl.database.models.Character;
-import dizzybrawl.database.models.CharacterMesh;
-import dizzybrawl.database.models.ConcreteCharacterMesh;
+import dizzybrawl.database.models.Armor;
+import dizzybrawl.database.models.ConcreteArmor;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import io.vertx.core.Handler;
@@ -14,7 +14,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,57 +60,28 @@ public class CharacterApi {
         };
     }
 
-    public Handler<RoutingContext> getAllCharactersMeshesByCharacterUUIDHandler(CharacterNioDao characterNioDao) {
+    public Handler<RoutingContext> getAllArmorsByAccountsUUIDsHandler(CharacterNioDao characterNioDao) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            if (requestBodyAsJson.getJsonArray("characters") == null || requestBodyAsJson.getJsonArray("characters").isEmpty()) {
-                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
-                return;
-            }
-
-            List<String> charactersUUIDs = new ArrayList<>();
+            UUID accountUUID;
             try {
-                requestBodyAsJson.getJsonArray("characters").stream()
-                        .map(o -> ((JsonObject) o).getString("character_uuid"))
-                        .distinct()
-                        .forEach(uuidString -> {
-                            UUID.fromString(uuidString);
-                            charactersUUIDs.add(uuidString);
-                        });
+                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
             } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
-            characterNioDao.getAllMeshesByCharacterUUID(charactersUUIDs, ar1 -> {
+            characterNioDao.getAllArmorsByAccountUUID(accountUUID, ar1 -> {
                 if (ar1.succeeded()) {
-                    Multimap<String, ConcreteCharacterMesh> characterUUIDToCharacterMeshesMap = HashMultimap.create();
-                    for (ConcreteCharacterMesh mesh : ar1.result()) {
-                        characterUUIDToCharacterMeshesMap.put(mesh.getCharacterUUID().toString(), mesh);
-                    }
-
-                    JsonArray jsonCharactersMeshes = new JsonArray();
-                    for (String characterUUID : charactersUUIDs) {
-                        JsonObject jsonCharacter = new JsonObject();
-                        jsonCharacter.put("character_uuid", characterUUID);
-
-                        JsonArray jsonCharacterMeshes = new JsonArray();
-                        for (CharacterMesh mesh : characterUUIDToCharacterMeshesMap.get(characterUUID)) {
-                            JsonObject jsonMesh = mesh.toJson();
-                            jsonMesh.remove("character_uuid");
-                            jsonMesh.remove("character_type_id");
-                            jsonCharacterMeshes.add(jsonMesh);
-                        }
-
-                        jsonCharacter.put("meshes", jsonCharacterMeshes);
-
-                        jsonCharactersMeshes.add(jsonCharacter);
-                    }
-
+                    JsonArray jsonArmors = new JsonArray();
+                    ar1.result().forEach(armor -> {
+                        JsonObject jsonArmor = armor.toJson();
+                        jsonArmor.remove("account_uuid");
+                        jsonArmors.add(jsonArmor);
+                    });
                     JsonObject jsonResponse = new JsonObject();
-                    jsonResponse.put("characters", jsonCharactersMeshes);
-
+                    jsonResponse.put("armors", jsonArmors);
                     context.response().end(jsonResponse.encodePrettily());
                 } else {
                     context.fail(ar1.cause());

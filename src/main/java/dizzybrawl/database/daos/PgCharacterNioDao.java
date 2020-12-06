@@ -1,8 +1,7 @@
 package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Character;
-import dizzybrawl.database.models.CharacterMesh;
-import dizzybrawl.database.models.ConcreteCharacterMesh;
+import dizzybrawl.database.models.ConcreteArmor;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -73,33 +72,30 @@ public class PgCharacterNioDao implements CharacterNioDao  {
     }
 
     @Override
-    public void getAllMeshesByCharacterUUID(List<String> charactersUUIDs, Handler<AsyncResult<List<ConcreteCharacterMesh>>> resultHandler) {
+    public void getAllArmorsByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
-                List<Tuple> batch = new ArrayList<>();
-                for (String characterUUID : charactersUUIDs) {
-                    batch.add(Tuple.of(UUID.fromString(characterUUID)));
-                }
-
                 connection
-                        .preparedQuery(environment.getProperty("select-all-character-meshes-by-character-uuid"))
-                        .executeBatch(batch, ar2 -> {
+                        .preparedQuery(environment.getProperty("select-all-armors-by-account-uuid"))
+                        .execute(Tuple.of(accountUUID), ar2 -> {
                             if (ar2.succeeded()) {
-                                List<ConcreteCharacterMesh> meshes = new ArrayList<>();
+                                List<ConcreteArmor> armors = new ArrayList<>();
 
                                 RowSet<Row> queryResult = ar2.result();
                                 while (queryResult != null) {
                                     for (Row row : queryResult) {
-                                        meshes.add(new ConcreteCharacterMesh(row));
+                                        ConcreteArmor concreteArmor = new ConcreteArmor(row);
+                                        concreteArmor.setAccountUUID(accountUUID);
+                                        armors.add(concreteArmor);
                                     }
 
                                     queryResult = queryResult.next();
                                 }
 
 
-                                resultHandler.handle(Future.succeededFuture(meshes));
+                                resultHandler.handle(Future.succeededFuture(armors));
                             } else {
                                 log.warn("Can't query to database cause " + ar2.cause());
                                 resultHandler.handle(Future.failedFuture(ar2.cause()));
