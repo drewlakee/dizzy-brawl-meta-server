@@ -1,4 +1,4 @@
-# Dizzy Brawl Database Server
+# Dizzy Brawl Meta-Server
 
 ### Content
 
@@ -149,7 +149,7 @@ active_interval     | int           | time of active status interval in **minute
 
 name                | data type         | description
 ------------        | -------------     | -------------
-tasks               |  array Of tasks   |  array of tasks that must be added
+tasks               |  array of tasks   |  array of tasks that must be added
 
 single "task" json object
 
