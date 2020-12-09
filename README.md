@@ -7,7 +7,7 @@
 
 ### APIv1 Navigation
 
-1. [Account](#post-accountregister)
+1. [Account](#account)
     * [POST /account/auth/login](#post-accountauthlogin)
     * [POST /account/register](#post-accountregister)
 2. [Character](#character)
