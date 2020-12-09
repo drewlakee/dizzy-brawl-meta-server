@@ -47,6 +47,8 @@ account_uuid        | uuid          | account's uuid
 username            | string        | user's in game username
 email               | string        | user's email
 
+[To API Navigation](#apiv1-navigation)
+
 ### POST `/account/register`
 
 **JSON Query**
@@ -62,6 +64,8 @@ password            |  string       |  user's password
 name                | data type     |description
 ------------        |-------------  |-------------
 account_uuid        | uuid          | generated uuid for registered account
+
+[To API Navigation](#apiv1-navigation)
 
 ## Character
 
@@ -87,6 +91,8 @@ character_uuid      | uuid          | character's uuid
 character_type_id   | int           | character's type of pawn
 is_enabled          | Boolean       | available for account
 
+[To API Navigation](#apiv1-navigation)
+
 ### POST `/characters/armors/get/all`
 
 **JSON Query**
@@ -111,6 +117,8 @@ armor_type          |  string  |        type name
 cost           |  int  |                in game cost
 armor_level                |  int  |    in game level
 is_enabled             |  Boolean  |    is available for account
+
+[To API Navigation](#apiv1-navigation)
 
 ## Task
 
@@ -142,6 +150,8 @@ task_type_id        | int           | task type id
 current_state       | int           | current progress of task
 goal_state          | int           | goal value for task complete
 active_interval     | int           | time of active status interval in **minutes**
+
+[To API Navigation](#apiv1-navigation)
 
 ### POST `/tasks/add`
 
@@ -176,6 +186,8 @@ name                    | data type                 | description
 ------------            |-------------              |-------------
 task_uuid               | uuid                      | unique generated task key in database
 
+[To API Navigation](#apiv1-navigation)
+
 ### PUT `/tasks/update/progress`
 
 **JSON Query**
@@ -198,6 +210,8 @@ code                | description
 200                 | if all was updated - means ok
 419                 | means that some can't be updated, because DB doesn't store inputted Tasks uuids
 
+[To API Navigation](#apiv1-navigation)
+
 ## Server
 
 ### POST `/servers/get/all`
@@ -210,6 +224,8 @@ server_uuid               | string        | unique server identifier
 ip_v4                | string        |  server's ipv4
 game_mode_id                | int        | game mode id
 game_mode_name      | string | game mode name in game
+
+[To API Navigation](#apiv1-navigation)
 
 ### POST `/servers/add`
 
@@ -238,6 +254,8 @@ name                | data type     | description
 ------------        |-------------  |-------------
 server_uuid               | string       | unique server uuid in database
 
+[To API Navigation](#apiv1-navigation)
+
 ### DELETE `/servers/delete`
 
 **JSON Query**
@@ -258,3 +276,5 @@ code                | description
 ------------        |-------------
 200                 | ok - all deleted
 404                 | some server not founded in database and other servers in query also was not deleted
+
+[To API Navigation](#apiv1-navigation)
