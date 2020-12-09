@@ -26,8 +26,6 @@
 
 - <a href="https://documenter.getpostman.com/view/12029239/TVYKawXj">API in Postman Documentation</a>
 
-- API prefix `/api/v1`
-
 ## Account
 
 ### POST `/account/auth/login`
