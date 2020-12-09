@@ -36,14 +36,14 @@ public class PgTaskNioDao implements TaskNioDao {
     }
 
     @Override
-    public void getAllByAccountUUID(String accountUUID, Handler<AsyncResult<List<Task>>> resultHandler) {
+    public void getAllByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler) {
         pgClient.getConnection(ar1 -> {
             if (ar1.succeeded()) {
                 SqlConnection connection = ar1.result();
 
                 connection
                         .preparedQuery(environment.getProperty("select-all-tasks-by-account-uuid"))
-                        .execute(Tuple.of(UUID.fromString(accountUUID)), ar2 -> {
+                        .execute(Tuple.of(accountUUID), ar2 -> {
                             if (ar2.succeeded()) {
                                 RowSet<Row> queryResult = ar2.result();
 

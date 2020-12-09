@@ -1,9 +1,5 @@
 package dizzybrawl.verticles;
 
-import dizzybrawl.database.daos.AccountNioDao;
-import dizzybrawl.database.daos.CharacterNioDao;
-import dizzybrawl.database.daos.ServerNioDao;
-import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.http.api.AccountApi;
 import dizzybrawl.http.api.CharacterApi;
 import dizzybrawl.http.api.ServerApi;
@@ -11,11 +7,9 @@ import dizzybrawl.http.api.TaskApi;
 import dizzybrawl.http.validation.JsonObjectValidationHandler;
 import dizzybrawl.http.validation.ValidationHandler;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
@@ -34,38 +28,30 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     private final Environment environment;
 
     private final AccountApi accountApi;
-    private final AccountNioDao accountNioDao;
-
     private final CharacterApi characterApi;
-    private final CharacterNioDao characterNioDao;
-
     private final TaskApi taskApi;
-    private final TaskNioDao taskNioDao;
-
     private final ServerApi serverApi;
-    private final ServerNioDao serverNioDao;
 
     @Autowired
-    public RestHTTPServerVerticle(AccountApi accountApi, AccountNioDao accountNioDao,
-                                  CharacterApi characterApi, CharacterNioDao characterNioDao,
-                                  TaskApi taskApi, TaskNioDao taskNioDao,
-                                  ServerApi serverApi, ServerNioDao serverNioDao,
+    public RestHTTPServerVerticle(AccountApi accountApi,
+                                  CharacterApi characterApi,
+                                  TaskApi taskApi,
+                                  ServerApi serverApi,
                                   Environment environment) {
         this.accountApi = accountApi;
-        this.accountNioDao = accountNioDao;
         this.characterApi = characterApi;
-        this.characterNioDao = characterNioDao;
         this.taskApi = taskApi;
-        this.taskNioDao = taskNioDao;
         this.serverApi = serverApi;
-        this.serverNioDao = serverNioDao;
 
         this.environment = environment;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
-        launchHttpServer(getConfiguredApiRouter(), ar -> {
+        HttpServerOptions serverOptions = new HttpServerOptions()
+                .setPort(environment.getProperty("http.server.port", Integer.class, 8080));
+
+        vertx.createHttpServer(serverOptions).requestHandler(getConfiguredApiRouter()).listen(ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
                 log.info(String.format("%s deployment ID: %s", this.getClass().getSimpleName(), this.deploymentID()));
@@ -74,12 +60,6 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
                 startPromise.fail(ar.cause());
             }
         });
-    }
-
-    private void launchHttpServer(Router apiRouter, Handler<AsyncResult<HttpServer>> listenHandler) {
-        vertx.createHttpServer()
-                .requestHandler(apiRouter)
-                .listen(environment.getProperty("http.server.port", Integer.class), listenHandler);
     }
 
     private Router getConfiguredApiRouter() {
@@ -101,44 +81,44 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
         ValidationHandler jsonObjectValidationHandler = JsonObjectValidationHandler.create();
 
         // api end points handlers
-        router.post("/account/auth/login")
+        router.post("/accounts/auth/login")
                 .handler(jsonObjectValidationHandler)
-                .handler(accountApi.onLoginHandler(accountNioDao));
+                .handler(accountApi.onLogin(vertx));
 
-        router.post("/account/register")
+        router.post("/accounts/register")
                 .handler(jsonObjectValidationHandler)
-                .handler(accountApi.onRegistrationHandler(accountNioDao));
+                .handler(accountApi.onRegistration(vertx));
 
         router.post("/characters/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(characterApi.getAllCharactersByAccountUUIDHandler(characterNioDao));
+                .handler(characterApi.onGetAllCharacters(vertx));
 
         router.post("/characters/armors/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(characterApi.getAllArmorsByAccountsUUIDsHandler(characterNioDao));
+                .handler(characterApi.onGetAllArmors(vertx));
 
         router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)
-                .handler(taskApi.getTasksByAccountUUIDHandler(taskNioDao));
+                .handler(taskApi.onGetAll(vertx));
 
         router.post("/tasks/add")
                 .handler(jsonObjectValidationHandler)
-                .handler(taskApi.addTasksHandler(taskNioDao));
+                .handler(taskApi.onAdd(vertx));
 
         router.put("/tasks/update/progress")
                 .handler(jsonObjectValidationHandler)
-                .handler(taskApi.updateTasksProgressHandler(taskNioDao));
+                .handler(taskApi.onUpdateProgress(vertx));
 
         router.post("/servers/add")
                 .handler(jsonObjectValidationHandler)
-                .handler(serverApi.addHandler(serverNioDao));
+                .handler(serverApi.onAdd(vertx));
 
         router.post("/servers/get/all")
-                .handler(serverApi.getAllHandler(serverNioDao));
+                .handler(serverApi.onGetAll(vertx));
 
         router.delete("/servers/delete")
                 .handler(jsonObjectValidationHandler)
-                .handler(serverApi.deleteHandler(serverNioDao));
+                .handler(serverApi.onDelete(vertx));
 
         return router;
     }

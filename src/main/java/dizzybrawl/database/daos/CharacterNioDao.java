@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface CharacterNioDao {
 
 
-    void getAllByAccountUUID(String accountUUID, Handler<AsyncResult<List<Character>>> resultHandler);
+    void getAllByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<Character>>> resultHandler);
 
     void getAllArmorsByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler);
 }

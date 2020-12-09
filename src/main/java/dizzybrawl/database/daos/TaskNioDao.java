@@ -6,12 +6,13 @@ import io.vertx.core.Handler;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface TaskNioDao {
 
 
-    void getAllByAccountUUID(String accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);
+    void getAllByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);
 
     void delete(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
 

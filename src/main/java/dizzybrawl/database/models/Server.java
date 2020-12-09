@@ -1,8 +1,8 @@
 package dizzybrawl.database.models;
 
 import dizzybrawl.database.models.utils.JsonTransformable;
-import dizzybrawl.utils.JsonUtils;
-import dizzybrawl.utils.SqlRowUtils;
+import dizzybrawl.database.utils.SqlRowUtils;
+import dizzybrawl.http.utils.JsonUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 

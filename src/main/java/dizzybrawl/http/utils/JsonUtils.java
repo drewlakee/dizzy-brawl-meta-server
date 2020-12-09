@@ -1,4 +1,4 @@
-package dizzybrawl.utils;
+package dizzybrawl.http.utils;
 
 import io.vertx.core.json.JsonObject;
 

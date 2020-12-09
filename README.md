@@ -8,8 +8,8 @@
 ### APIv1 Navigation
 
 1. [Account](#account)
-    * [POST /account/auth/login](#post-accountauthlogin)
-    * [POST /account/register](#post-accountregister)
+    * [POST /accounts/auth/login](#post-accountsauthlogin)
+    * [POST /accounts/register](#post-accountsregister)
 2. [Character](#character)
     * [POST /characters/get/all](#post-charactersgetall)
     * [POST /characters/armors/get/all](#post-charactersarmorsgetall)
@@ -28,7 +28,7 @@
 
 ## Account
 
-### POST `/account/auth/login`
+### POST `/accounts/auth/login`
 
 **JSON Query**
 
@@ -47,7 +47,7 @@ email               | string        | user's email
 
 [To API Navigation](#apiv1-navigation)
 
-### POST `/account/register`
+### POST `/accounts/register`
 
 **JSON Query**
 

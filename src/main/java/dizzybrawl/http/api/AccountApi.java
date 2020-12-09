@@ -1,10 +1,11 @@
 package dizzybrawl.http.api;
 
-import dizzybrawl.database.daos.AccountNioDao;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
+import dizzybrawl.verticles.AccountServiceVerticle;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.springframework.stereotype.Component;
@@ -12,11 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountApi {
 
-    private enum AccountErrors {
-        INVALID_PASSWORD
-    }
-
-    public Handler<RoutingContext> onLoginHandler(AccountNioDao accountDao) {
+    public Handler<RoutingContext> onLogin(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -28,34 +25,34 @@ public class AccountApi {
                 return;
             }
 
-            accountDao.getByUsernameOrEmail(usernameOrEmail, ar1 -> {
-               if (ar1.succeeded()) {
-                   Account verifiedAccount = ar1.result();
-                   JsonObject response;
+            vertx.eventBus().<Account>request(AccountServiceVerticle.AUTH_LOGIN_ADDRESS, usernameOrEmail, ar1 -> {
+                if (ar1.succeeded()) {
+                    Account verifiedAccount = ar1.result().body();
+                    JsonObject response;
 
-                   if (verifiedAccount.isEmpty()) {
-                       response = new JsonObject();
-                       response.put("error", DatabaseErrors.DOESNT_EXIST_AT_DATABASE);
-                   } else {
-                       response = verifiedAccount.toJson();
+                    if (verifiedAccount == null || verifiedAccount.isEmpty()) {
+                        response = new JsonObject();
+                        response.put("error", DatabaseErrors.DOESNT_EXIST_AT_DATABASE);
+                    } else {
+                        response = verifiedAccount.toJson();
 
-                       if (verifiedAccount.getPassword().equals(password)) {
-                           response.remove("password");
-                       } else {
-                           response.clear();
-                           response.put("error", AccountErrors.INVALID_PASSWORD);
-                       }
-                   }
+                        if (verifiedAccount.getPassword().equals(password)) {
+                            response.remove("password");
+                        } else {
+                            response.clear();
+                            response.put("error", "INVALID_PASSWORD");
+                        }
+                    }
 
-                   context.response().end(response.encodePrettily());
-               } else {
-                   context.fail(ar1.cause());
-               }
+                    context.response().end(response.encodePrettily());
+                } else {
+                    context.fail(ar1.cause());
+                }
             });
         };
     }
 
-    public Handler<RoutingContext> onRegistrationHandler(AccountNioDao accountDao) {
+    public Handler<RoutingContext> onRegistration(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -66,9 +63,9 @@ public class AccountApi {
                 return;
             }
 
-            accountDao.register(preRegistrationAccount, ar1 -> {
+            vertx.eventBus().<Account>request(AccountServiceVerticle.REGISTRATION_ADDRESS, preRegistrationAccount, ar1 -> {
                 if (ar1.succeeded()) {
-                    Account verifiedAccount = ar1.result();
+                    Account verifiedAccount = ar1.result().body();
                     JsonObject response = new JsonObject();
 
                     if (verifiedAccount.isEmpty()) {

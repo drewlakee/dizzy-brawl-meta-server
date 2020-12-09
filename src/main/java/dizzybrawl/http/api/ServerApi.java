@@ -1,12 +1,12 @@
 package dizzybrawl.http.api;
 
-import dizzybrawl.database.daos.ServerNioDao;
 import dizzybrawl.database.models.Server;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import dizzybrawl.verticles.ServerServiceVerticle;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -20,21 +20,21 @@ import java.util.stream.Collectors;
 @Component
 public class ServerApi {
 
-    public Handler<RoutingContext> getAllHandler(ServerNioDao serverNioDao) {
+    public Handler<RoutingContext> onGetAll(Vertx vertx) {
         return context -> {
-              serverNioDao.getAll(ar1 -> {
-                  if (ar1.succeeded()) {
-                      List<JsonObject> servers = ar1.result().stream().map(Server::toJson).collect(Collectors.toList());
-                      JsonObject response = new JsonObject();
-                      JsonArray array = new JsonArray(servers);
-                      response.put("servers", array);
-                      context.response().end(response.encodePrettily());
-                  }
-              });
+            vertx.eventBus().<List<Server>>request(ServerServiceVerticle.GET_ALL_ADDRESS, null, ar1 -> {
+                if (ar1.succeeded()) {
+                    List<JsonObject> servers = ar1.result().body().stream().map(Server::toJson).collect(Collectors.toList());
+                    JsonObject response = new JsonObject();
+                    JsonArray array = new JsonArray(servers);
+                    response.put("servers", array);
+                    context.response().end(response.encodePrettily());
+                }
+            });
         };
     }
 
-    public Handler<RoutingContext> addHandler(ServerNioDao serverNioDao) {
+    public Handler<RoutingContext> onAdd(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -53,9 +53,9 @@ public class ServerApi {
                 return;
             }
 
-            serverNioDao.add(serversToAdd, ar1 -> {
+            vertx.eventBus().<List<Server>>request(ServerServiceVerticle.ADD_ADDRESS, serversToAdd, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Server> addedServers = ar1.result();
+                    List<Server> addedServers = ar1.result().body();
                     JsonObject response = new JsonObject();
                     JsonArray array = new JsonArray();
                     for (Server addedServer : addedServers) {
@@ -71,7 +71,7 @@ public class ServerApi {
         };
     }
 
-    public Handler<RoutingContext> deleteHandler(ServerNioDao serverNioDao) {
+    public Handler<RoutingContext> onDelete(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -90,7 +90,7 @@ public class ServerApi {
                 return;
             }
 
-            serverNioDao.delete(serversUUIDs, ar1 -> {
+            vertx.eventBus().request(ServerServiceVerticle.DELETE_ADDRESS, serversUUIDs, ar1 -> {
                 if (ar1.succeeded()) {
                     context.response().setStatusCode(200).end();
                 } else {

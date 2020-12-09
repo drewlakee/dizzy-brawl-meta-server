@@ -1,7 +1,7 @@
 package dizzybrawl.database.models;
 
 import dizzybrawl.database.models.utils.JsonTransformable;
-import dizzybrawl.utils.SqlRowUtils;
+import dizzybrawl.database.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import org.hibernate.annotations.OnDelete;

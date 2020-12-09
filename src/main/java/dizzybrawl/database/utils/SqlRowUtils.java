@@ -1,4 +1,4 @@
-package dizzybrawl.utils;
+package dizzybrawl.database.utils;
 
 import io.vertx.sqlclient.Row;
 

@@ -4,8 +4,10 @@ import dizzybrawl.database.daos.TaskNioDao;
 import dizzybrawl.database.models.Task;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
+import dizzybrawl.verticles.TaskServiceVerticle;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -24,22 +26,22 @@ import java.util.stream.Collectors;
 @Component
 public class TaskApi {
 
-    public Handler<RoutingContext> getTasksByAccountUUIDHandler(TaskNioDao taskNioDao) {
+    public Handler<RoutingContext> onGetAll(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            String accountUUIDParam = requestBodyAsJson.getString("account_uuid");
+            UUID accountUUID;
 
             try {
-                UUID.fromString(accountUUIDParam);
+                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
             } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
-            taskNioDao.getAllByAccountUUID(accountUUIDParam, ar1 -> {
+            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.GET_ALL_ADDRESS, accountUUID, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasks = ar1.result();
+                    List<Task> tasks = ar1.result().body();
                     List<Task> tasksToDelete = new ArrayList<>();
                     JsonArray jsonTasksToResponse = new JsonArray();
 
@@ -61,7 +63,7 @@ public class TaskApi {
                         }
                     }
 
-                    taskNioDao.delete(tasksToDelete, ar2 -> {});
+                    vertx.eventBus().request(TaskServiceVerticle.DELETE_ADDRESS, tasksToDelete, ar2 -> {});
 
                     JsonObject jsonResponse = new JsonObject();
                     jsonResponse.put("tasks", jsonTasksToResponse);
@@ -74,7 +76,7 @@ public class TaskApi {
         };
     }
 
-    public Handler<RoutingContext> addTasksHandler(TaskNioDao taskNioDao) {
+    public Handler<RoutingContext> onAdd(Vertx vertx) {
         return context -> {
 
             if (!context.getBodyAsJson().containsKey("tasks")) {
@@ -86,8 +88,6 @@ public class TaskApi {
             try {
                 for (Object taskObject : context.getBodyAsJson().getJsonArray("tasks")) {
                     JsonObject jsonTask = (JsonObject) taskObject;
-                    UUID.fromString(jsonTask.getString("account_uuid"));
-
                     tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
@@ -95,9 +95,9 @@ public class TaskApi {
                 return;
             }
 
-            taskNioDao.add(tasksToAdd, ar1 -> {
+            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.ADD_ADDRESS, tasksToAdd, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasksResult = ar1.result();
+                    List<Task> tasksResult = ar1.result().body();
                     JsonArray jsonTasksResponse = new JsonArray();
 
                     for (Task task : tasksResult) {
@@ -117,7 +117,7 @@ public class TaskApi {
         };
     }
 
-    public Handler<RoutingContext> updateTasksProgressHandler(TaskNioDao taskNioDao) {
+    public Handler<RoutingContext> onUpdateProgress(Vertx vertx) {
         return context -> {
 
             if (!context.getBodyAsJson().containsKey("tasks")) {
@@ -129,16 +129,14 @@ public class TaskApi {
                     .map(o -> new Task((JsonObject) o))
                     .collect(Collectors.toList());
 
-            taskNioDao.updateProgressOf(tasksToUpdate, ar1 -> {
+            vertx.eventBus().request(TaskServiceVerticle.UPDATE_PROGRESS_ADDRESS, tasksToUpdate, ar1 -> {
                 if (ar1.succeeded()) {
                     // All was updated
-                    context.response().setStatusCode(HttpResponseStatus.OK.code());
+                    context.response().setStatusCode(HttpResponseStatus.OK.code()).end();
                 } else {
                     // Error cause DB doesn't store tasks from request
-                    context.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code());
+                    context.response().setStatusCode(HttpResponseStatus.PRECONDITION_FAILED.code()).end();
                 }
-
-                context.response().end();
             });
         };
     }

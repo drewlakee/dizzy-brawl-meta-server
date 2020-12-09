@@ -15,13 +15,17 @@ public class JsonObjectValidationHandler implements ValidationHandler {
             event.getBodyAsJson();
         } catch (Exception e) {
             event.response()
-                    .end(toJsonErrorResponse(JsonErrors.EMPTY_BODY.name(), "Json query body is empty").encodePrettily());
+                    .end(
+                            toJsonErrorResponse(JsonErrors.EMPTY_BODY.name(), "Json body is empty").encodePrettily()
+                    );
             return;
         }
 
         if (event.getBodyAsJson().isEmpty()) {
             event.response()
-                    .end(toJsonErrorResponse(JsonErrors.EMPTY_BODY.name(), "Json query body is empty").encodePrettily());
+                    .end(
+                            toJsonErrorResponse(JsonErrors.EMPTY_BODY.name(), "Json body is empty").encodePrettily()
+                    );
             return;
         }
 

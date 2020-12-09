@@ -4,7 +4,6 @@ import dizzybrawl.database.models.Server;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;

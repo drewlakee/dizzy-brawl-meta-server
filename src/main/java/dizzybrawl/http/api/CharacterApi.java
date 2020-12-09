@@ -1,14 +1,12 @@
 package dizzybrawl.http.api;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import dizzybrawl.database.daos.CharacterNioDao;
 import dizzybrawl.database.models.Character;
-import dizzybrawl.database.models.Armor;
 import dizzybrawl.database.models.ConcreteArmor;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
+import dizzybrawl.verticles.CharacterServiceVerticle;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -20,27 +18,27 @@ import java.util.UUID;
 @Component
 public class CharacterApi {
 
-    public Handler<RoutingContext> getAllCharactersByAccountUUIDHandler(CharacterNioDao characterNioDao) {
+    public Handler<RoutingContext> onGetAllCharacters(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            String accountUUID = requestBodyAsJson.getString("account_uuid");
+            UUID accountUUID;
 
-            if (accountUUID == null || accountUUID.isEmpty()) {
+            if (requestBodyAsJson.getString("account_uuid") == null || requestBodyAsJson.getString("account_uuid").isEmpty()) {
                 context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
             try {
-                UUID.fromString(accountUUID);
+                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
             } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
                 return;
             }
 
-            characterNioDao.getAllByAccountUUID(accountUUID, ar1 -> {
+            vertx.eventBus().<List<Character>>request(CharacterServiceVerticle.GET_ALL_ADDRESS, accountUUID, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Character> characters = ar1.result();
+                    List<Character> characters = ar1.result().body();
                     JsonObject jsonObjectResponse = new JsonObject();
                     JsonArray jsonCharactersResponse = new JsonArray();
 
@@ -60,7 +58,7 @@ public class CharacterApi {
         };
     }
 
-    public Handler<RoutingContext> getAllArmorsByAccountsUUIDsHandler(CharacterNioDao characterNioDao) {
+    public Handler<RoutingContext> onGetAllArmors(Vertx vertx) {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
@@ -72,10 +70,10 @@ public class CharacterApi {
                 return;
             }
 
-            characterNioDao.getAllArmorsByAccountUUID(accountUUID, ar1 -> {
+            vertx.eventBus().<List<ConcreteArmor>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, accountUUID, ar1 -> {
                 if (ar1.succeeded()) {
                     JsonArray jsonArmors = new JsonArray();
-                    ar1.result().forEach(armor -> {
+                    ar1.result().body().forEach(armor -> {
                         JsonObject jsonArmor = armor.toJson();
                         jsonArmor.remove("account_uuid");
                         jsonArmors.add(jsonArmor);
