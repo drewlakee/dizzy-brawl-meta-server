@@ -2,6 +2,9 @@ package dizzybrawl.verticles;
 
 import dizzybrawl.database.models.*;
 import dizzybrawl.database.models.Character;
+import dizzybrawl.database.wrappers.query.executors.AsyncQueryExecutor;
+import dizzybrawl.database.wrappers.query.executors.BatchAtomicAsyncQueryExecutor;
+import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
 import dizzybrawl.verticles.eventBus.codecs.*;
 import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
@@ -59,7 +62,10 @@ public class VertxLauncherVerticle extends AbstractVerticle {
                 .registerDefaultCodec(ArrayList.class, new ArrayListMessageCodec())
                 .registerDefaultCodec(Armor.class, new ArmorMessageCodec())
                 .registerDefaultCodec(Task.class, new TaskMessageCodec())
-                .registerDefaultCodec(Server.class, new ServerMessageCodec());
+                .registerDefaultCodec(Server.class, new ServerMessageCodec())
+                .registerDefaultCodec(TupleAsyncQueryExecutor.class, new TupleAsyncQueryExecutorMessageCodec())
+                .registerDefaultCodec(BatchAtomicAsyncQueryExecutor.class, new BatchAtomicAsyncQueryExecutorMessageCodec())
+                .registerDefaultCodec(AsyncQueryExecutor.class, new AsyncQueryExecutorMessageCodec());
 
         DeploymentOptions restServerDeploymentOptions = new DeploymentOptions()
                 .setWorker(true)

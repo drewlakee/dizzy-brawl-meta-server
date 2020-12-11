@@ -30,7 +30,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<UUID>consumer(GET_ALL_ADDRESS, handler -> {
-            taskNioDao.getAllByAccountUUID(handler.body(), ar1 -> {
+            taskNioDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -38,7 +38,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(DELETE_ADDRESS, handler -> {
-            taskNioDao.delete(handler.body(), ar1 -> {
+            taskNioDao.delete(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -46,7 +46,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(ADD_ADDRESS, handler -> {
-            taskNioDao.add(handler.body(), ar1 -> {
+            taskNioDao.add(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -54,7 +54,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(UPDATE_PROGRESS_ADDRESS, handler -> {
-           taskNioDao.add(handler.body(), ar1 -> {
+           taskNioDao.updateProgress(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

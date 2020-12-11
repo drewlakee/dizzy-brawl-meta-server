@@ -3,6 +3,7 @@ package dizzybrawl.database.daos;
 import dizzybrawl.database.models.Task;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,12 +13,12 @@ import java.util.UUID;
 public interface TaskNioDao {
 
 
-    void getAllByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);
+    void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);
 
-    void delete(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
+    void delete(Vertx vertx, List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
 
-    void add(List<Task> tasks, Handler<AsyncResult<List<Task>>> resultHandler);
+    void add(Vertx vertx, List<Task> tasks, Handler<AsyncResult<List<Task>>> resultHandler);
 
-    void updateProgressOf(List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
+    void updateProgress(Vertx vertx, List<Task> tasks, Handler<AsyncResult<Void>> resultHandler);
 
 }

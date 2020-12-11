@@ -30,7 +30,7 @@ public class ServerServiceVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<List<Server>>consumer(ADD_ADDRESS, handler -> {
-           serverNioDao.add(handler.body(), ar1 -> {
+           serverNioDao.add(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }
@@ -38,7 +38,7 @@ public class ServerServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().consumer(GET_ALL_ADDRESS, handler -> {
-            serverNioDao.getAll(ar1 -> {
+            serverNioDao.getAll(vertx, ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -46,7 +46,7 @@ public class ServerServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<UUID>>consumer(DELETE_ADDRESS, handler -> {
-           serverNioDao.delete(handler.body(), ar1 -> {
+           serverNioDao.delete(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

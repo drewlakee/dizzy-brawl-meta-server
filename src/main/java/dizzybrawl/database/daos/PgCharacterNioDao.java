@@ -2,13 +2,14 @@ package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.ConcreteArmor;
+import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
+import dizzybrawl.verticles.PgDatabaseVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.pgclient.PgPool;
+import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,84 +30,64 @@ public class PgCharacterNioDao implements CharacterNioDao  {
 
     private final Environment environment;
 
-    private final PgPool pgClient;
-
     @Autowired
-    public PgCharacterNioDao(PgPool pgPool, Environment environment) {
-        this.pgClient = pgPool;
+    public PgCharacterNioDao(Environment environment) {
         this.environment = environment;
     }
 
     @Override
-    public void getAllByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<Character>>> resultHandler) {
-        pgClient.getConnection(ar1 -> {
+    public void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Character>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-characters-by-account-uuid"), Tuple.of(accountUUID));
+        queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                SqlConnection connection = ar1.result();
+                RowSet<Row> queryResult = ar1.result();
 
-                connection
-                        .preparedQuery(environment.getProperty("select-all-characters-by-account-uuid"))
-                        .execute(Tuple.of(accountUUID), ar2 -> {
-                            if (ar2.succeeded()) {
-                                RowSet<Row> queryResult = ar2.result();
+                List<Character> characters = new ArrayList<>();
+                if (queryResult.rowCount() > 0) {
+                    for(Row row : queryResult) {
+                        characters.add(new Character(row));
+                    }
+                }
 
-                                List<Character> characters = new ArrayList<>();
-                                if (queryResult.rowCount() > 0) {
-                                    for(Row row : queryResult) {
-                                        characters.add(new Character(row));
-                                    }
-                                }
-
-                                resultHandler.handle(Future.succeededFuture(characters));
-                            } else {
-                                log.warn("Can't query to database cause " + ar2.cause());
-                                resultHandler.handle(Future.failedFuture(ar2.cause()));
-                            }
-
-                            connection.close();
-                        });
+                resultHandler.handle(Future.succeededFuture(characters));
             } else {
-                log.error("Can't connect to database.", ar1.cause());
+                log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
             }
+
+            queryExecutor.releaseConnection();
         });
+
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
     }
 
     @Override
-    public void getAllArmorsByAccountUUID(UUID accountUUID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
-        pgClient.getConnection(ar1 -> {
+    public void getAllArmorsByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-armors-by-account-uuid"), Tuple.of(accountUUID));
+        queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                SqlConnection connection = ar1.result();
+                List<ConcreteArmor> armors = new ArrayList<>();
 
-                connection
-                        .preparedQuery(environment.getProperty("select-all-armors-by-account-uuid"))
-                        .execute(Tuple.of(accountUUID), ar2 -> {
-                            if (ar2.succeeded()) {
-                                List<ConcreteArmor> armors = new ArrayList<>();
+                RowSet<Row> queryResult = ar1.result();
+                while (queryResult != null) {
+                    for (Row row : queryResult) {
+                        ConcreteArmor concreteArmor = new ConcreteArmor(row);
+                        concreteArmor.setAccountUUID(accountUUID);
+                        armors.add(concreteArmor);
+                    }
 
-                                RowSet<Row> queryResult = ar2.result();
-                                while (queryResult != null) {
-                                    for (Row row : queryResult) {
-                                        ConcreteArmor concreteArmor = new ConcreteArmor(row);
-                                        concreteArmor.setAccountUUID(accountUUID);
-                                        armors.add(concreteArmor);
-                                    }
+                    queryResult = queryResult.next();
+                }
 
-                                    queryResult = queryResult.next();
-                                }
-
-
-                                resultHandler.handle(Future.succeededFuture(armors));
-                            } else {
-                                log.warn("Can't query to database cause " + ar2.cause());
-                                resultHandler.handle(Future.failedFuture(ar2.cause()));
-                            }
-
-                            connection.close();
-                        });
+                resultHandler.handle(Future.succeededFuture(armors));
             } else {
-                log.error("Can't connect to database.", ar1.cause());
+                log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
             }
+
+            queryExecutor.releaseConnection();
         });
+
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
     }
 }

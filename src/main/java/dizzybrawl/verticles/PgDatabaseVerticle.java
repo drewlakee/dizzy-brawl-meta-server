@@ -1,5 +1,8 @@
 package dizzybrawl.verticles;
 
+import dizzybrawl.database.wrappers.query.executors.AsyncQueryExecutor;
+import dizzybrawl.database.wrappers.query.executors.AtomicAsyncQueryExecutor;
+import dizzybrawl.database.wrappers.query.executors.Executor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -19,6 +22,9 @@ import java.nio.file.Path;
 @Component
 public class PgDatabaseVerticle extends AbstractVerticle {
 
+    public static final String ADDRESS = "pg.database";
+    public static final String QUERY_ADDRESS = ADDRESS + ".query";
+
     private static final Logger log = LoggerFactory.getLogger(PgDatabaseVerticle.class);
 
     private final PgPool pgClient;
@@ -30,6 +36,21 @@ public class PgDatabaseVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
+
+        vertx.eventBus().<Executor>consumer(QUERY_ADDRESS, handler -> {
+            pgClient.getConnection(ar1 -> {
+                if (ar1.succeeded()) {
+                    SqlConnection connection = ar1.result();
+
+                    Executor queryExecutor = handler.body();
+                    queryExecutor.execute(connection);
+                } else {
+                    log.error("Can't connect to database.", ar1.cause());
+                    handler.reply(Future.failedFuture(ar1.cause()));
+                }
+            });
+        });
+
         buildSqlTriggers()
                 .onComplete(handler -> startPromise.complete())
                 .onFailure(startPromise::fail);

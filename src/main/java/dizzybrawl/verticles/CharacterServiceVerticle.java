@@ -26,7 +26,7 @@ public class CharacterServiceVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<UUID>consumer(GET_ALL_ADDRESS, handler -> {
-            characterNioDao.getAllByAccountUUID(handler.body(), ar1 -> {
+            characterNioDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -34,7 +34,7 @@ public class CharacterServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<UUID>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
-           characterNioDao.getAllArmorsByAccountUUID(handler.body(), ar1 -> {
+           characterNioDao.getAllArmorsByAccountUUID(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

@@ -25,7 +25,7 @@ public class AccountServiceVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<String>consumer(AUTH_LOGIN_ADDRESS, handler -> {
-            accountNioDao.getByUsernameOrEmail(handler.body(), ar1 -> {
+            accountNioDao.getByUsernameOrEmail(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -33,7 +33,7 @@ public class AccountServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<Account>consumer(REGISTRATION_ADDRESS, handler -> {
-           accountNioDao.register(handler.body(), ar1 -> {
+           accountNioDao.register(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

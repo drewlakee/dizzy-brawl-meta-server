@@ -1,13 +1,14 @@
 package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Account;
+import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
+import dizzybrawl.verticles.PgDatabaseVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.pgclient.PgPool;
+import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,75 +27,57 @@ public class PgAccountNioDao implements AccountNioDao {
 
     private final Environment environment;
 
-    private final PgPool pgClient;
-
     @Autowired
-    public PgAccountNioDao(PgPool pgPool, Environment environment) {
-        this.pgClient = pgPool;
+    public PgAccountNioDao(Environment environment) {
         this.environment = environment;
     }
 
     @Override
-    public void getByUsernameOrEmail(String usernameOrEmail, Handler<AsyncResult<Account>> resultHandler) {
-        pgClient.getConnection(ar1 -> {
+    public void getByUsernameOrEmail(Vertx vertx, String usernameOrEmail, Handler<AsyncResult<Account>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-account-by-username-or-email"), Tuple.of(usernameOrEmail));
+        queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                SqlConnection connection = ar1.result();
+                RowSet<Row> queryResult = ar1.result();
 
-                connection
-                        .preparedQuery(environment.getProperty("select-account-by-username-or-email"))
-                        .execute(Tuple.of(usernameOrEmail), ar2 -> {
-                            if (ar2.succeeded()) {
-                                RowSet<Row> queryResult = ar2.result();
-
-                                if (queryResult.rowCount() == 0) {
-                                    resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
-                                } else {
-                                    resultHandler.handle(Future.succeededFuture(new Account(queryResult.iterator().next())));
-                                }
-                            } else {
-                                log.warn("Can't query to database cause " + ar2.cause());
-                                resultHandler.handle(Future.failedFuture(ar2.cause()));
-                            }
-
-                            connection.close();
-                        });
+                if (queryResult.rowCount() == 0) {
+                    resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
+                } else {
+                    resultHandler.handle(Future.succeededFuture(new Account(queryResult.iterator().next())));
+                }
             } else {
-                log.error("Can't connect to database.", ar1.cause());
+                log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
             }
+
+            queryExecutor.releaseConnection();
         });
+
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
     }
 
     @Override
-    public void register(Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
-        pgClient.getConnection(ar1 -> {
+    public void register(Vertx vertx, Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
+        UUID generatedUUID = UUID.nameUUIDFromBytes(preRegistrationAccount.getUsername().getBytes());
+        Tuple tuple = Tuple.of(
+                generatedUUID,
+                preRegistrationAccount.getUsername(),
+                preRegistrationAccount.getEmail(),
+                preRegistrationAccount.getPassword()
+        );
+
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("insert-new-account"), tuple);
+        queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                SqlConnection connection = ar1.result();
-
-                UUID generatedUUID = UUID.nameUUIDFromBytes(preRegistrationAccount.getUsername().getBytes());
-
-                connection
-                        .preparedQuery(environment.getProperty("insert-new-account"))
-                        .execute(Tuple.of(
-                                generatedUUID,
-                                preRegistrationAccount.getUsername(),
-                                preRegistrationAccount.getEmail(),
-                                preRegistrationAccount.getPassword()), ar2 -> {
-
-                            if (ar2.succeeded()) {
-                                preRegistrationAccount.setAccountUUID(generatedUUID);
-                                resultHandler.handle(Future.succeededFuture(preRegistrationAccount));
-                            } else {
-                                log.warn("Can't query to database cause " + ar2.cause());
-                                resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
-                            }
-
-                            connection.close();
-                        });
+                preRegistrationAccount.setAccountUUID(generatedUUID);
+                resultHandler.handle(Future.succeededFuture(preRegistrationAccount));
             } else {
-                log.error("Can't connect to database.", ar1.cause());
-                resultHandler.handle(Future.failedFuture(ar1.cause()));
+                log.warn("Can't query to database cause " + ar1.cause());
+                resultHandler.handle(Future.succeededFuture(Account.createEmpty()));
             }
+
+            queryExecutor.releaseConnection();
         });
+
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
     }
 }

@@ -64,9 +64,7 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private Router getConfiguredApiRouter() {
         Router router = Router.router(vertx);
-
         router.mountSubRouter(environment.getProperty("http.server.endpoints.prefix", "/api"), router);
-
         router.route().handler(rh -> {
             rh.response()
                     .setChunked(true)

@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
 @SpringBootApplication
 public class Application {
 
-    private static ConfigurableApplicationContext configurableApplicationContext;
+    public static ConfigurableApplicationContext configurableApplicationContext;
 
     private final VertxLauncherVerticle launcherVerticle;
 
@@ -46,6 +46,6 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        configurableApplicationContext = SpringApplication.run(Application.class, args);
+        Application.configurableApplicationContext = SpringApplication.run(Application.class, args);
     }
 }
