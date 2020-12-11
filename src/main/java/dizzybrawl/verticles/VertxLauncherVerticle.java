@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @Component
-@PropertySource(value = "classpath:verticles.properties")
+@PropertySource(value = "classpath:http.properties")
 public class VertxLauncherVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(VertxLauncherVerticle.class);

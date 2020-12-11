@@ -20,7 +20,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource(value = "classpath:verticles.properties")
+@PropertySource(value = "classpath:http.properties")
 public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
