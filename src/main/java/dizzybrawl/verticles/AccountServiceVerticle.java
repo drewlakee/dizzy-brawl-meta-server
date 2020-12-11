@@ -1,6 +1,6 @@
 package dizzybrawl.verticles;
 
-import dizzybrawl.database.daos.AccountNioDao;
+import dizzybrawl.database.daos.AccountAsyncDao;
 import dizzybrawl.database.models.Account;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -14,18 +14,18 @@ public class AccountServiceVerticle extends AbstractVerticle {
     public static final String AUTH_LOGIN_ADDRESS = ADDRESS + ".auth.login";
     public static final String REGISTRATION_ADDRESS = ADDRESS + ".registration";
 
-    private final AccountNioDao accountNioDao;
+    private final AccountAsyncDao accountAsyncDao;
 
     @Autowired
-    public AccountServiceVerticle(AccountNioDao accountNioDao) {
-        this.accountNioDao = accountNioDao;
+    public AccountServiceVerticle(AccountAsyncDao accountAsyncDao) {
+        this.accountAsyncDao = accountAsyncDao;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<String>consumer(AUTH_LOGIN_ADDRESS, handler -> {
-            accountNioDao.getByUsernameOrEmail(vertx, handler.body(), ar1 -> {
+            accountAsyncDao.getByUsernameOrEmail(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -33,7 +33,7 @@ public class AccountServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<Account>consumer(REGISTRATION_ADDRESS, handler -> {
-           accountNioDao.register(vertx, handler.body(), ar1 -> {
+           accountAsyncDao.register(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

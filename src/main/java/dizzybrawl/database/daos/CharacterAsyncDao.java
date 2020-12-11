@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CharacterNioDao {
+public interface CharacterAsyncDao {
 
 
     void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Character>>> resultHandler);

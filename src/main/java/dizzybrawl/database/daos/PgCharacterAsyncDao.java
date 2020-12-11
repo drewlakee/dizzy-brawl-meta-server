@@ -24,14 +24,14 @@ import java.util.UUID;
 
 @Repository
 @PropertySource("classpath:queries/character-db-queries.properties")
-public class PgCharacterNioDao implements CharacterNioDao  {
+public class PgCharacterAsyncDao implements CharacterAsyncDao {
 
-    private static final Logger log = LoggerFactory.getLogger(PgCharacterNioDao.class);
+    private static final Logger log = LoggerFactory.getLogger(PgCharacterAsyncDao.class);
 
     private final Environment environment;
 
     @Autowired
-    public PgCharacterNioDao(Environment environment) {
+    public PgCharacterAsyncDao(Environment environment) {
         this.environment = environment;
     }
 

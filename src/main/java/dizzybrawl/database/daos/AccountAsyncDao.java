@@ -7,7 +7,7 @@ import io.vertx.core.Vertx;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AccountNioDao {
+public interface AccountAsyncDao {
 
     void getByUsernameOrEmail(Vertx vertx, String usernameOrEmail, Handler<AsyncResult<Account>> resultHandler);
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface TaskNioDao {
+public interface TaskAsyncDao {
 
 
     void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler);

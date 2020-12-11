@@ -26,14 +26,14 @@ import java.util.UUID;
 
 @Repository
 @PropertySource("classpath:queries/task-db-queries.properties")
-public class PgTaskNioDao implements TaskNioDao {
+public class PgTaskAsyncDao implements TaskAsyncDao {
 
-    private static final Logger log = LoggerFactory.getLogger(PgTaskNioDao.class);
+    private static final Logger log = LoggerFactory.getLogger(PgTaskAsyncDao.class);
 
     private final Environment environment;
 
     @Autowired
-    public PgTaskNioDao(Environment environment) {
+    public PgTaskAsyncDao(Environment environment) {
         this.environment = environment;
     }
 

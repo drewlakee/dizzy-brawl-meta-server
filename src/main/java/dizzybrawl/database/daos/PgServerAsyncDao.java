@@ -24,14 +24,14 @@ import java.util.UUID;
 
 @Repository
 @PropertySource(value = "classpath:queries/server-db-queries.properties")
-public class PgServerNioDao implements ServerNioDao {
+public class PgServerAsyncDao implements ServerAsyncDao {
 
-    private static final Logger log = LoggerFactory.getLogger(PgServerNioDao.class);
+    private static final Logger log = LoggerFactory.getLogger(PgServerAsyncDao.class);
 
     private final Environment environment;
 
     @Autowired
-    public PgServerNioDao(Environment environment) {
+    public PgServerAsyncDao(Environment environment) {
         this.environment = environment;
     }
 

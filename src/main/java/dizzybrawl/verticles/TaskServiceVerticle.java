@@ -1,6 +1,6 @@
 package dizzybrawl.verticles;
 
-import dizzybrawl.database.daos.TaskNioDao;
+import dizzybrawl.database.daos.TaskAsyncDao;
 import dizzybrawl.database.models.Task;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -19,18 +19,18 @@ public class TaskServiceVerticle extends AbstractVerticle {
     public static final String ADD_ADDRESS = ADDRESS + ".add";
     public static final String UPDATE_PROGRESS_ADDRESS = ADDRESS + ".update.progress";
 
-    private final TaskNioDao taskNioDao;
+    private final TaskAsyncDao taskAsyncDao;
 
     @Autowired
-    public TaskServiceVerticle(TaskNioDao taskNioDao) {
-        this.taskNioDao = taskNioDao;
+    public TaskServiceVerticle(TaskAsyncDao taskAsyncDao) {
+        this.taskAsyncDao = taskAsyncDao;
     }
 
     @Override
     public void start(Promise<Void> startPromise) {
 
         vertx.eventBus().<UUID>consumer(GET_ALL_ADDRESS, handler -> {
-            taskNioDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
+            taskAsyncDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -38,7 +38,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(DELETE_ADDRESS, handler -> {
-            taskNioDao.delete(vertx, handler.body(), ar1 -> {
+            taskAsyncDao.delete(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -46,7 +46,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(ADD_ADDRESS, handler -> {
-            taskNioDao.add(vertx, handler.body(), ar1 -> {
+            taskAsyncDao.add(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
@@ -54,7 +54,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
         });
 
         vertx.eventBus().<List<Task>>consumer(UPDATE_PROGRESS_ADDRESS, handler -> {
-           taskNioDao.updateProgress(vertx, handler.body(), ar1 -> {
+           taskAsyncDao.updateProgress(vertx, handler.body(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

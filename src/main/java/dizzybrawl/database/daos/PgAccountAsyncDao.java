@@ -21,14 +21,14 @@ import java.util.UUID;
 
 @Repository
 @PropertySource("classpath:queries/account-db-queries.properties")
-public class PgAccountNioDao implements AccountNioDao {
+public class PgAccountAsyncDao implements AccountAsyncDao {
 
-    private static final Logger log = LoggerFactory.getLogger(PgAccountNioDao.class);
+    private static final Logger log = LoggerFactory.getLogger(PgAccountAsyncDao.class);
 
     private final Environment environment;
 
     @Autowired
-    public PgAccountNioDao(Environment environment) {
+    public PgAccountAsyncDao(Environment environment) {
         this.environment = environment;
     }
 
