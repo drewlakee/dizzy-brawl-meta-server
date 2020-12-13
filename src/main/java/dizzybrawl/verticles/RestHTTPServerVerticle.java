@@ -95,6 +95,10 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
                 .handler(jsonObjectValidationHandler)
                 .handler(characterApi.onGetAllArmors(vertx));
 
+        router.post("/characters/weapons/get/all")
+                .handler(jsonObjectValidationHandler)
+                .handler(characterApi.onGetAllWeapons(vertx));
+
         router.post("/tasks/get/all")
                 .handler(jsonObjectValidationHandler)
                 .handler(taskApi.onGetAll(vertx));

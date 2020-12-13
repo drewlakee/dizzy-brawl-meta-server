@@ -51,7 +51,7 @@ public class WeaponInventory {
 
     @Column(name = "weapon_level",
             nullable = false)
-    private Long weaponLevel;
+    private int weaponLevel;
 
     protected WeaponInventory() {}
 

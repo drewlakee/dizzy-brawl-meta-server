@@ -19,7 +19,7 @@ public class ConcreteArmor extends Armor {
         super(sqlRowArmor);
 
         this.level = SqlRowUtils.getElse(sqlRowArmor, 0).apply("armor_level");
-        this.accountUUID = SqlRowUtils.getElse(sqlRowArmor, null, UUID.class).apply("character_uuid");
+        this.accountUUID = SqlRowUtils.getElse(sqlRowArmor, null, UUID.class).apply("account_uuid");
         this.isEnabled = SqlRowUtils.getElse(sqlRowArmor, false).apply("is_enabled");
     }
 

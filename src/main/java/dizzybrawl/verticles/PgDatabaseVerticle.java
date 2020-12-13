@@ -1,7 +1,5 @@
 package dizzybrawl.verticles;
 
-import dizzybrawl.database.wrappers.query.executors.AsyncQueryExecutor;
-import dizzybrawl.database.wrappers.query.executors.AtomicAsyncQueryExecutor;
 import dizzybrawl.database.wrappers.query.executors.Executor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;

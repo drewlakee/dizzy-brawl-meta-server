@@ -2,6 +2,8 @@ package dizzybrawl.database.daos;
 
 import dizzybrawl.database.models.Character;
 import dizzybrawl.database.models.ConcreteArmor;
+import dizzybrawl.database.models.ConcreteWeapon;
+import dizzybrawl.database.wrappers.query.executors.BatchAsyncQueryExecutor;
 import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
 import dizzybrawl.verticles.PgDatabaseVerticle;
 import io.vertx.core.AsyncResult;
@@ -80,6 +82,40 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
                 }
 
                 resultHandler.handle(Future.succeededFuture(armors));
+            } else {
+                log.warn("Can't query to database cause " + ar1.cause());
+                resultHandler.handle(Future.failedFuture(ar1.cause()));
+            }
+
+            queryExecutor.releaseConnection();
+        });
+
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+    }
+
+    @Override
+    public void getAllWeaponsByCharactersUUIDs(Vertx vertx, List<UUID> charactersUUIDs, Handler<AsyncResult<List<ConcreteWeapon>>> resultHandler) {
+        List<Tuple> batch = new ArrayList<>();
+        for (UUID characterUUID : charactersUUIDs) {
+            batch.add(Tuple.of(characterUUID));
+        }
+
+        BatchAsyncQueryExecutor queryExecutor = new BatchAsyncQueryExecutor(environment.getProperty("select-all-weapons-by-character-uuid"), batch);
+        queryExecutor.setHandler(ar1 -> {
+            if (ar1.succeeded()) {
+                List<ConcreteWeapon> concreteWeapons = new ArrayList<>();
+
+                RowSet<Row> queryResultRows = ar1.result();
+                for (int characterIndex = 0; characterIndex < batch.size(); characterIndex++) {
+                    for (Row row : queryResultRows) {
+                        ConcreteWeapon concreteWeapon = new ConcreteWeapon(row);
+                        concreteWeapon.setCharacterUUID(charactersUUIDs.get(characterIndex));
+                        concreteWeapons.add(concreteWeapon);
+                    }
+                    queryResultRows = queryResultRows.next();
+                }
+
+                resultHandler.handle(Future.succeededFuture(concreteWeapons));
             } else {
                 log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));

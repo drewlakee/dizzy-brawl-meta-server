@@ -1,11 +1,16 @@
 package dizzybrawl.database.models;
 
+import dizzybrawl.database.models.format.JsonTransformable;
+import dizzybrawl.database.utils.SqlRowUtils;
+import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "weapon")
-public class Weapon {
+public class Weapon implements JsonTransformable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +33,24 @@ public class Weapon {
     public Weapon() {
         this.id = 0L;
         this.characterType = CharacterType.createEmpty();
+    }
+
+    public Weapon(Row sqlRowWeapon) {
+        this();
+
+        this.id = SqlRowUtils.getElse(sqlRowWeapon, 0L).apply("weapon_id");
+        this.characterType.setId(SqlRowUtils.getElse(sqlRowWeapon, 0).apply("character_type_id"));
+        this.name = SqlRowUtils.getElse(sqlRowWeapon, null, String.class).apply("weapon_name");
+        this.cost = SqlRowUtils.getElse(sqlRowWeapon, 0).apply("weapon_cost");
+    }
+
+    @Override
+    public JsonObject toJson() {
+        return new JsonObject()
+                .put("weapon_id", id)
+                .put("character_type_id", characterType.getId())
+                .put("weapon_name", name)
+                .put("weapon_cost", cost);
     }
 
     public Long getId() {
