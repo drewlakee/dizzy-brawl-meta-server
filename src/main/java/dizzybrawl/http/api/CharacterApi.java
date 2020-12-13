@@ -8,6 +8,7 @@ import dizzybrawl.database.models.ConcreteWeapon;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.CharacterServiceVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -41,9 +42,9 @@ public class CharacterApi {
                 return;
             }
 
-            vertx.eventBus().<List<Character>>request(CharacterServiceVerticle.GET_ALL_ADDRESS, accountUUID, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Character>>>request(CharacterServiceVerticle.GET_ALL_ADDRESS, EventBusObjectWrapper.of(accountUUID), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Character> characters = ar1.result().body();
+                    List<Character> characters = ar1.result().body().get();
                     JsonObject jsonObjectResponse = new JsonObject();
                     JsonArray jsonCharactersResponse = new JsonArray();
 
@@ -75,10 +76,10 @@ public class CharacterApi {
                 return;
             }
 
-            vertx.eventBus().<List<ConcreteArmor>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, accountUUID, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(accountUUID), ar1 -> {
                 if (ar1.succeeded()) {
                     JsonArray jsonArmors = new JsonArray();
-                    ar1.result().body().forEach(armor -> {
+                    ar1.result().body().get().forEach(armor -> {
                         JsonObject jsonArmor = armor.toJson();
                         jsonArmor.remove("account_uuid");
                         jsonArmors.add(jsonArmor);
@@ -114,9 +115,9 @@ public class CharacterApi {
                 return;
             }
 
-            vertx.eventBus().<List<ConcreteWeapon>>request(CharacterServiceVerticle.GET_ALL_WEAPONS_ADDRESS, charactersUUIDs, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteWeapon>>>request(CharacterServiceVerticle.GET_ALL_WEAPONS_ADDRESS, EventBusObjectWrapper.of(charactersUUIDs), ar1 -> {
                if (ar1.succeeded()) {
-                   List<ConcreteWeapon> concreteWeapons = ar1.result().body();
+                   List<ConcreteWeapon> concreteWeapons = ar1.result().body().get();
                    Multimap<String, ConcreteWeapon> characterToWeapons = ArrayListMultimap.create();
 
                    for (ConcreteWeapon concreteWeapon : concreteWeapons) {

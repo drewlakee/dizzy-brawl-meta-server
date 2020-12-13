@@ -2,6 +2,7 @@ package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.ServerAsyncDao;
 import dizzybrawl.database.models.Server;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,10 @@ public class ServerServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<List<Server>>consumer(ADD_ADDRESS, handler -> {
-           serverAsyncDao.add(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<Server>>>consumer(ADD_ADDRESS, handler -> {
+           serverAsyncDao.add(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
-                   handler.reply(ar1.result());
+                   handler.reply(EventBusObjectWrapper.of(ar1.result()));
                }
            });
         });
@@ -39,13 +40,13 @@ public class ServerServiceVerticle extends AbstractVerticle {
         vertx.eventBus().consumer(GET_ALL_ADDRESS, handler -> {
             serverAsyncDao.getAll(vertx, ar1 -> {
                 if (ar1.succeeded()) {
-                    handler.reply(ar1.result());
+                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
                 }
             });
         });
 
-        vertx.eventBus().<List<UUID>>consumer(DELETE_ADDRESS, handler -> {
-           serverAsyncDao.delete(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<UUID>>>consumer(DELETE_ADDRESS, handler -> {
+           serverAsyncDao.delete(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

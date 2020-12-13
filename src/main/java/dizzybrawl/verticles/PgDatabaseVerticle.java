@@ -1,6 +1,7 @@
 package dizzybrawl.verticles;
 
 import dizzybrawl.database.wrappers.query.executors.Executor;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -35,12 +36,12 @@ public class PgDatabaseVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<Executor>consumer(QUERY_ADDRESS, handler -> {
+        vertx.eventBus().<EventBusObjectWrapper<Executor>>consumer(QUERY_ADDRESS, handler -> {
             pgClient.getConnection(ar1 -> {
                 if (ar1.succeeded()) {
                     SqlConnection connection = ar1.result();
 
-                    Executor queryExecutor = handler.body();
+                    Executor queryExecutor = handler.body().get();
                     queryExecutor.execute(connection);
                 } else {
                     log.error("Can't connect to database.", ar1.cause());

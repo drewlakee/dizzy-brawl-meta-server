@@ -3,6 +3,7 @@ package dizzybrawl.database.daos;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
 import dizzybrawl.verticles.PgDatabaseVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -52,7 +53,7 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -78,6 +79,6 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 }

@@ -4,6 +4,7 @@ import dizzybrawl.database.models.Account;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.AccountServiceVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -25,9 +26,9 @@ public class AccountApi {
                 return;
             }
 
-            vertx.eventBus().<Account>request(AccountServiceVerticle.AUTH_LOGIN_ADDRESS, usernameOrEmail, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<Account>>request(AccountServiceVerticle.AUTH_LOGIN_ADDRESS, usernameOrEmail, ar1 -> {
                 if (ar1.succeeded()) {
-                    Account verifiedAccount = ar1.result().body();
+                    Account verifiedAccount = ar1.result().body().get();
                     JsonObject response;
 
                     if (verifiedAccount == null || verifiedAccount.isEmpty()) {
@@ -63,9 +64,9 @@ public class AccountApi {
                 return;
             }
 
-            vertx.eventBus().<Account>request(AccountServiceVerticle.REGISTRATION_ADDRESS, preRegistrationAccount, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<Account>>request(AccountServiceVerticle.REGISTRATION_ADDRESS, EventBusObjectWrapper.of(preRegistrationAccount), ar1 -> {
                 if (ar1.succeeded()) {
-                    Account verifiedAccount = ar1.result().body();
+                    Account verifiedAccount = ar1.result().body().get();
                     JsonObject response = new JsonObject();
 
                     if (verifiedAccount.isEmpty()) {

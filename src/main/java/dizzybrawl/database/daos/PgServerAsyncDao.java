@@ -4,6 +4,7 @@ import dizzybrawl.database.models.Server;
 import dizzybrawl.database.wrappers.query.executors.AsyncQueryExecutor;
 import dizzybrawl.database.wrappers.query.executors.BatchAtomicAsyncQueryExecutor;
 import dizzybrawl.verticles.PgDatabaseVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -56,7 +57,7 @@ public class PgServerAsyncDao implements ServerAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -84,7 +85,7 @@ public class PgServerAsyncDao implements ServerAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -108,6 +109,6 @@ public class PgServerAsyncDao implements ServerAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 }

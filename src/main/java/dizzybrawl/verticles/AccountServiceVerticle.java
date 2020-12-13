@@ -2,6 +2,7 @@ package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.AccountAsyncDao;
 import dizzybrawl.database.models.Account;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +28,15 @@ public class AccountServiceVerticle extends AbstractVerticle {
         vertx.eventBus().<String>consumer(AUTH_LOGIN_ADDRESS, handler -> {
             accountAsyncDao.getByUsernameOrEmail(vertx, handler.body(), ar1 -> {
                 if (ar1.succeeded()) {
-                    handler.reply(ar1.result());
+                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
                 }
             });
         });
 
-        vertx.eventBus().<Account>consumer(REGISTRATION_ADDRESS, handler -> {
-           accountAsyncDao.register(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<Account>>consumer(REGISTRATION_ADDRESS, handler -> {
+           accountAsyncDao.register(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
-                   handler.reply(ar1.result());
+                   handler.reply(EventBusObjectWrapper.of(ar1.result()));
                }
            });
         });

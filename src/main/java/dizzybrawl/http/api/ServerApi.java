@@ -5,6 +5,7 @@ import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.DatabaseErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.ServerServiceVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -22,9 +23,9 @@ public class ServerApi {
 
     public Handler<RoutingContext> onGetAll(Vertx vertx) {
         return context -> {
-            vertx.eventBus().<List<Server>>request(ServerServiceVerticle.GET_ALL_ADDRESS, null, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Server>>>request(ServerServiceVerticle.GET_ALL_ADDRESS, null, ar1 -> {
                 if (ar1.succeeded()) {
-                    List<JsonObject> servers = ar1.result().body().stream().map(Server::toJson).collect(Collectors.toList());
+                    List<JsonObject> servers = ar1.result().body().get().stream().map(Server::toJson).collect(Collectors.toList());
                     JsonObject response = new JsonObject();
                     JsonArray array = new JsonArray(servers);
                     response.put("servers", array);
@@ -53,9 +54,9 @@ public class ServerApi {
                 return;
             }
 
-            vertx.eventBus().<List<Server>>request(ServerServiceVerticle.ADD_ADDRESS, serversToAdd, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Server>>>request(ServerServiceVerticle.ADD_ADDRESS, EventBusObjectWrapper.of(serversToAdd), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Server> addedServers = ar1.result().body();
+                    List<Server> addedServers = ar1.result().body().get();
                     JsonObject response = new JsonObject();
                     JsonArray array = new JsonArray();
                     for (Server addedServer : addedServers) {
@@ -90,7 +91,7 @@ public class ServerApi {
                 return;
             }
 
-            vertx.eventBus().request(ServerServiceVerticle.DELETE_ADDRESS, serversUUIDs, ar1 -> {
+            vertx.eventBus().request(ServerServiceVerticle.DELETE_ADDRESS, EventBusObjectWrapper.of(serversUUIDs), ar1 -> {
                 if (ar1.succeeded()) {
                     context.response().setStatusCode(200).end();
                 } else {

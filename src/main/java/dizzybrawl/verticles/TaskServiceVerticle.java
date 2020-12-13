@@ -2,6 +2,7 @@ package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.TaskAsyncDao;
 import dizzybrawl.database.models.Task;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,32 +30,32 @@ public class TaskServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<UUID>consumer(GET_ALL_ADDRESS, handler -> {
-            taskAsyncDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ADDRESS, handler -> {
+            taskAsyncDao.getAllByAccountUUID(vertx, handler.body().get(), ar1 -> {
+                if (ar1.succeeded()) {
+                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
+                }
+            });
+        });
+
+        vertx.eventBus().<EventBusObjectWrapper<List<Task>>>consumer(DELETE_ADDRESS, handler -> {
+            taskAsyncDao.delete(vertx, handler.body().get(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(ar1.result());
                 }
             });
         });
 
-        vertx.eventBus().<List<Task>>consumer(DELETE_ADDRESS, handler -> {
-            taskAsyncDao.delete(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<Task>>>consumer(ADD_ADDRESS, handler -> {
+            taskAsyncDao.add(vertx, handler.body().get(), ar1 -> {
                 if (ar1.succeeded()) {
-                    handler.reply(ar1.result());
+                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
                 }
             });
         });
 
-        vertx.eventBus().<List<Task>>consumer(ADD_ADDRESS, handler -> {
-            taskAsyncDao.add(vertx, handler.body(), ar1 -> {
-                if (ar1.succeeded()) {
-                    handler.reply(ar1.result());
-                }
-            });
-        });
-
-        vertx.eventBus().<List<Task>>consumer(UPDATE_PROGRESS_ADDRESS, handler -> {
-           taskAsyncDao.updateProgress(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<Task>>>consumer(UPDATE_PROGRESS_ADDRESS, handler -> {
+           taskAsyncDao.updateProgress(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(ar1.result());
                }

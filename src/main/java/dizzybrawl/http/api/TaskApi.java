@@ -4,6 +4,7 @@ import dizzybrawl.database.models.Task;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.TaskServiceVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -38,9 +39,9 @@ public class TaskApi {
                 return;
             }
 
-            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.GET_ALL_ADDRESS, accountUUID, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Task>>>request(TaskServiceVerticle.GET_ALL_ADDRESS, EventBusObjectWrapper.of(accountUUID), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasks = ar1.result().body();
+                    List<Task> tasks = ar1.result().body().get();
                     List<Task> tasksToDelete = new ArrayList<>();
                     JsonArray jsonTasksToResponse = new JsonArray();
 
@@ -62,7 +63,7 @@ public class TaskApi {
                         }
                     }
 
-                    vertx.eventBus().request(TaskServiceVerticle.DELETE_ADDRESS, tasksToDelete, ar2 -> {});
+                    vertx.eventBus().request(TaskServiceVerticle.DELETE_ADDRESS, EventBusObjectWrapper.of(tasksToDelete), ar2 -> {});
 
                     JsonObject jsonResponse = new JsonObject();
                     jsonResponse.put("tasks", jsonTasksToResponse);
@@ -94,9 +95,9 @@ public class TaskApi {
                 return;
             }
 
-            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.ADD_ADDRESS, tasksToAdd, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Task>>>request(TaskServiceVerticle.ADD_ADDRESS, EventBusObjectWrapper.of(tasksToAdd), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasksResult = ar1.result().body();
+                    List<Task> tasksResult = ar1.result().body().get();
                     JsonArray jsonTasksResponse = new JsonArray();
 
                     for (Task task : tasksResult) {
@@ -128,7 +129,7 @@ public class TaskApi {
                     .map(o -> new Task((JsonObject) o))
                     .collect(Collectors.toList());
 
-            vertx.eventBus().request(TaskServiceVerticle.UPDATE_PROGRESS_ADDRESS, tasksToUpdate, ar1 -> {
+            vertx.eventBus().request(TaskServiceVerticle.UPDATE_PROGRESS_ADDRESS, EventBusObjectWrapper.of(tasksToUpdate), ar1 -> {
                 if (ar1.succeeded()) {
                     // All was updated
                     context.response().setStatusCode(HttpResponseStatus.OK.code()).end();

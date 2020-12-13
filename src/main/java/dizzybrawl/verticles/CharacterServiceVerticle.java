@@ -1,6 +1,7 @@
 package dizzybrawl.verticles;
 
 import dizzybrawl.database.daos.CharacterAsyncDao;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,26 +28,26 @@ public class CharacterServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<UUID>consumer(GET_ALL_ADDRESS, handler -> {
-            characterAsyncDao.getAllByAccountUUID(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ADDRESS, handler -> {
+            characterAsyncDao.getAllByAccountUUID(vertx, handler.body().get(), ar1 -> {
                 if (ar1.succeeded()) {
-                    handler.reply(ar1.result());
+                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
                 }
             });
         });
 
-        vertx.eventBus().<UUID>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
-           characterAsyncDao.getAllArmorsByAccountUUID(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
+           characterAsyncDao.getAllArmorsByAccountUUID(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
-                   handler.reply(ar1.result());
+                   handler.reply(EventBusObjectWrapper.of(ar1.result()));
                }
            });
         });
 
-        vertx.eventBus().<List<UUID>>consumer(GET_ALL_WEAPONS_ADDRESS, handler -> {
-           characterAsyncDao.getAllWeaponsByCharactersUUIDs(vertx, handler.body(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<UUID>>>consumer(GET_ALL_WEAPONS_ADDRESS, handler -> {
+           characterAsyncDao.getAllWeaponsByCharactersUUIDs(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
-                   handler.reply(ar1.result());
+                   handler.reply(EventBusObjectWrapper.of(ar1.result()));
                }
            });
         });
