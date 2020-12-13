@@ -18,22 +18,6 @@ class AccountsToArmors implements Serializable {
 
     protected AccountsToArmors() {}
 
-    public UUID getAccountUUID() {
-        return accountUUID;
-    }
-
-    protected void setAccountUUID(UUID characterUUID) {
-        this.accountUUID = characterUUID;
-    }
-
-    public int getArmorId() {
-        return armorId;
-    }
-
-    protected void setArmorId(int characterMeshId) {
-        this.armorId = characterMeshId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,37 +53,7 @@ public class ArmorInventory {
     @Column(name = "armor_level")
     private int armorLevel;
 
-    public AccountsToArmors getId() {
-        return id;
-    }
-
-    public void setId(AccountsToArmors id) {
-        this.id = id;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public Armor getArmor() {
-        return armor;
-    }
-
-    public void setArmor(Armor armor) {
-        this.armor = armor;
-    }
-
-    public int getArmorLevel() {
-        return armorLevel;
-    }
-
-    public void setArmorLevel(int armorLevel) {
-        this.armorLevel = armorLevel;
-    }
+    protected ArmorInventory() {}
 
     @Override
     public boolean equals(Object o) {
