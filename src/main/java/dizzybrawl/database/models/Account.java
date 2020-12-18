@@ -49,7 +49,7 @@ public class Account implements JsonTransformable {
     public Account(JsonObject jsonAccount) {
         Function<String, String> getElseNullString = JsonUtils.getElse(jsonAccount, null);
 
-        this.accountID = JsonUtils.getElse(jsonAccount, 0L).apply(ACCOUNT_ID);
+        this.accountID = Long.valueOf(JsonUtils.getElse(jsonAccount, 0).apply(ACCOUNT_ID));
         this.username = getElseNullString.apply(USERNAME);
         this.password = getElseNullString.apply(PASSWORD);
         this.email = getElseNullString.apply(EMAIL);
@@ -70,7 +70,7 @@ public class Account implements JsonTransformable {
 
     public boolean isEmpty() {
         return
-                accountID == null &&
+                (accountID == null || accountID == 0L) &&
                 username == null &&
                 email == null &&
                 password == null;
