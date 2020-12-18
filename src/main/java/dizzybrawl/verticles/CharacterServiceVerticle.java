@@ -28,23 +28,23 @@ public class CharacterServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ADDRESS, handler -> {
-            characterAsyncDao.getAllByAccountUUID(vertx, handler.body().get(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<Long>>consumer(GET_ALL_ADDRESS, handler -> {
+            characterAsyncDao.getAllByAccountID(vertx, handler.body().get(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(EventBusObjectWrapper.of(ar1.result()));
                 }
             });
         });
 
-        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
-           characterAsyncDao.getAllArmorsByAccountUUID(vertx, handler.body().get(), ar1 -> {
+        vertx.eventBus().<EventBusObjectWrapper<Long>>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
+           characterAsyncDao.getAllArmorsByAccountID(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(EventBusObjectWrapper.of(ar1.result()));
                }
            });
         });
 
-        vertx.eventBus().<EventBusObjectWrapper<List<UUID>>>consumer(GET_ALL_WEAPONS_ADDRESS, handler -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<Long>>>consumer(GET_ALL_WEAPONS_ADDRESS, handler -> {
            characterAsyncDao.getAllWeaponsByCharactersUUIDs(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(EventBusObjectWrapper.of(ar1.result()));

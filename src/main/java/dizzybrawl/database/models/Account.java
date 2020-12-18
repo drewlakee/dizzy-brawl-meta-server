@@ -6,12 +6,8 @@ import dizzybrawl.http.utils.JsonUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -22,19 +18,30 @@ import java.util.function.Function;
 @Table(name = "account")
 public class Account implements JsonTransformable {
 
+    public static final String ACCOUNT_ID = "account_id";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String EMAIL = "email";
+
     @Id
-    @Column(name = "account_uuid",
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = ACCOUNT_ID,
             unique = true,
             nullable = false)
-    private UUID accountUUID;
+    private Long accountID;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = USERNAME,
+            unique = true,
+            nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column(name = PASSWORD,
+            nullable = false)
     private String password;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = EMAIL,
+            unique = true,
+            nullable = false)
     private String email;
 
     public Account() {}
@@ -42,19 +49,19 @@ public class Account implements JsonTransformable {
     public Account(JsonObject jsonAccount) {
         Function<String, String> getElseNullString = JsonUtils.getElse(jsonAccount, null);
 
-        this.accountUUID = getElseNullString.apply("account_uuid") == null ? null : UUID.fromString(getElseNullString.apply("account_uuid"));
-        this.username = getElseNullString.apply("username");
-        this.password = getElseNullString.apply("password");
-        this.email = getElseNullString.apply("email");
+        this.accountID = JsonUtils.getElse(jsonAccount, 0L).apply(ACCOUNT_ID);
+        this.username = getElseNullString.apply(USERNAME);
+        this.password = getElseNullString.apply(PASSWORD);
+        this.email = getElseNullString.apply(EMAIL);
     }
 
     public Account(Row sqlRowAccount) {
         Function<String, String> getElseNullString = SqlRowUtils.getElse(sqlRowAccount, null);
 
-        this.accountUUID = SqlRowUtils.getElse(sqlRowAccount, null, UUID.class).apply("account_uuid");
-        this.username = getElseNullString.apply("username");
-        this.password = getElseNullString.apply("password");
-        this.email = getElseNullString.apply("email");
+        this.accountID = SqlRowUtils.getElse(sqlRowAccount, 0L).apply(ACCOUNT_ID);
+        this.username = getElseNullString.apply(USERNAME);
+        this.password = getElseNullString.apply(PASSWORD);
+        this.email = getElseNullString.apply(EMAIL);
     }
 
     public static Account createEmpty() {
@@ -63,7 +70,7 @@ public class Account implements JsonTransformable {
 
     public boolean isEmpty() {
         return
-                accountUUID == null &&
+                accountID == null &&
                 username == null &&
                 email == null &&
                 password == null;
@@ -72,10 +79,10 @@ public class Account implements JsonTransformable {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("account_uuid", accountUUID == null ? null : accountUUID.toString())
-                .put("username", username)
-                .put("password", password)
-                .put("email", email);
+                .put(ACCOUNT_ID, accountID == null ? 0 : accountID)
+                .put(USERNAME, username)
+                .put(PASSWORD, password)
+                .put(EMAIL, email);
     }
 
     public String getUsername() {
@@ -90,12 +97,12 @@ public class Account implements JsonTransformable {
         return email;
     }
 
-    public UUID getAccountUUID() {
-        return accountUUID;
+    public Long getAccountID() {
+        return accountID;
     }
 
-    public void setAccountUUID(UUID accountUUID) {
-        this.accountUUID = accountUUID;
+    public void setAccountID(Long accountID) {
+        this.accountID = accountID;
     }
 
     public void setUsername(String username) {
@@ -115,7 +122,7 @@ public class Account implements JsonTransformable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(accountUUID, account.accountUUID) &&
+        return Objects.equals(accountID, account.accountID) &&
                 Objects.equals(username, account.username) &&
                 Objects.equals(password, account.password) &&
                 Objects.equals(email, account.email);
@@ -123,6 +130,6 @@ public class Account implements JsonTransformable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountUUID, username, password, email);
+        return Objects.hash(accountID, username, password, email);
     }
 }

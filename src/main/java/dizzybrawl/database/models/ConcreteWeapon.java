@@ -9,7 +9,10 @@ import java.util.UUID;
 
 public class ConcreteWeapon extends Weapon {
 
-    private UUID characterUUID;
+    public static final String WEAPON_LEVEL = "weapon_level";
+    public static final String WEAPON_IS_ENABLED = "is_enabled";
+
+    private Long characterID;
 
     private int level;
 
@@ -18,25 +21,25 @@ public class ConcreteWeapon extends Weapon {
     public ConcreteWeapon(Row sqlConcreteWeapon) {
         super(sqlConcreteWeapon);
 
-        this.level = SqlRowUtils.getElse(sqlConcreteWeapon, 0).apply("weapon_level");
-        this.characterUUID = SqlRowUtils.getElse(sqlConcreteWeapon, null, UUID.class).apply("character_uuid");
-        this.isEnabled = SqlRowUtils.getElse(sqlConcreteWeapon, false).apply("is_enabled");
+        this.level = SqlRowUtils.getElse(sqlConcreteWeapon, 0).apply(WEAPON_LEVEL);
+        this.characterID = SqlRowUtils.getElse(sqlConcreteWeapon, 0L).apply(Character.CHARACTER_ID);
+        this.isEnabled = SqlRowUtils.getElse(sqlConcreteWeapon, false).apply(WEAPON_IS_ENABLED);
     }
 
     @Override
     public JsonObject toJson() {
         return super.toJson()
-                .put("weapon_level", level)
-                .put("character_uuid", characterUUID.toString())
-                .put("is_enabled", isEnabled);
+                .put(WEAPON_LEVEL, level)
+                .put(Character.CHARACTER_ID, characterID.toString())
+                .put(WEAPON_IS_ENABLED, isEnabled);
     }
 
-    public UUID getCharacterUUID() {
-        return characterUUID;
+    public Long getCharacterID() {
+        return characterID;
     }
 
-    public void setCharacterUUID(UUID characterUUID) {
-        this.characterUUID = characterUUID;
+    public void setCharacterID(Long characterID) {
+        this.characterID = characterID;
     }
 
     public int getLevel() {
@@ -61,11 +64,11 @@ public class ConcreteWeapon extends Weapon {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ConcreteWeapon that = (ConcreteWeapon) o;
-        return level == that.level && isEnabled == that.isEnabled && Objects.equals(characterUUID, that.characterUUID);
+        return level == that.level && isEnabled == that.isEnabled && Objects.equals(characterID, that.characterID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), characterUUID, level, isEnabled);
+        return Objects.hash(super.hashCode(), characterID, level, isEnabled);
     }
 }

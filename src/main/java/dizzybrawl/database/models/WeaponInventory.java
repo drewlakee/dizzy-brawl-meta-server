@@ -3,16 +3,15 @@ package dizzybrawl.database.models;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Embeddable
 class CharactersToWeapons implements Serializable {
 
-    @Column(name = "character_uuid",
+    @Column(name = Character.CHARACTER_ID,
             nullable = false)
-    private UUID characterUUID;
+    private Long characterID;
 
-    @Column(name = "weapon_id",
+    @Column(name = Weapon.WEAPON_ID,
             nullable = false)
     private Long weaponId;
 
@@ -23,12 +22,12 @@ class CharactersToWeapons implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CharactersToWeapons that = (CharactersToWeapons) o;
-        return Objects.equals(characterUUID, that.characterUUID) && Objects.equals(weaponId, that.weaponId);
+        return Objects.equals(characterID, that.characterID) && Objects.equals(weaponId, that.weaponId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(characterUUID, weaponId);
+        return Objects.hash(characterID, weaponId);
     }
 }
 
@@ -40,16 +39,16 @@ public class WeaponInventory {
     private CharactersToWeapons id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @MapsId("characterUUID")
-    @JoinColumn(name = "character_uuid")
+    @MapsId("characterID")
+    @JoinColumn(name = Character.CHARACTER_ID)
     private Character character;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @MapsId("weaponId")
-    @JoinColumn(name = "weapon_id")
+    @JoinColumn(name = Weapon.WEAPON_ID)
     private Weapon weapon;
 
-    @Column(name = "weapon_level",
+    @Column(name = ConcreteWeapon.WEAPON_LEVEL,
             nullable = false)
     private int weaponLevel;
 

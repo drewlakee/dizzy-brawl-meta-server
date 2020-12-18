@@ -3,16 +3,15 @@ package dizzybrawl.database.models;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Embeddable
 class AccountsToArmors implements Serializable {
 
-    @Column(name = "account_uuid",
+    @Column(name = Account.ACCOUNT_ID,
             nullable = false)
-    private UUID accountUUID;
+    private Long accountID;
 
-    @Column(name = "armor_id",
+    @Column(name = Armor.ARMOR_ID,
             nullable = false)
     private int armorId;
 
@@ -24,12 +23,12 @@ class AccountsToArmors implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         AccountsToArmors that = (AccountsToArmors) o;
         return armorId == that.armorId &&
-                Objects.equals(accountUUID, that.accountUUID);
+                Objects.equals(accountID, that.accountID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountUUID, armorId);
+        return Objects.hash(accountID, armorId);
     }
 }
 
@@ -41,16 +40,16 @@ public class ArmorInventory {
     private AccountsToArmors id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @MapsId("accountUUID")
-    @JoinColumn(name = "account_uuid")
+    @MapsId("accountID")
+    @JoinColumn(name = Account.ACCOUNT_ID)
     private Account account;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @MapsId("armorId")
-    @JoinColumn(name = "armor_id")
+    @JoinColumn(name = Armor.ARMOR_ID)
     private Armor armor;
 
-    @Column(name = "armor_level")
+    @Column(name = ConcreteArmor.ARMOR_LEVEL)
     private int armorLevel;
 
     protected ArmorInventory() {}

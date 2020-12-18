@@ -68,7 +68,8 @@ public class PgServerAsyncDao implements ServerAsyncDao {
             batch.add(Tuple.of(
                     server.getServerUUID(),
                     server.getIpV4(),
-                    server.getGameMode().getGameModeId()
+                    server.getGameMode().getGameModeId(),
+                    server.getPlayersInGameServerCount()
             ));
         }
 

@@ -2,9 +2,8 @@ package dizzybrawl.http.api;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import dizzybrawl.database.models.*;
 import dizzybrawl.database.models.Character;
-import dizzybrawl.database.models.ConcreteArmor;
-import dizzybrawl.database.models.ConcreteWeapon;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.CharacterServiceVerticle;
@@ -28,21 +27,25 @@ public class CharacterApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            UUID accountUUID;
-
-            if (requestBodyAsJson.getString("account_uuid") == null || requestBodyAsJson.getString("account_uuid").isEmpty()) {
+            if (requestBodyAsJson.getLong(Account.ACCOUNT_ID) == null) {
                 context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
+            Long accountID;
             try {
-                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
-            } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
+                accountID = requestBodyAsJson.getLong(Account.ACCOUNT_ID);
+            } catch (ClassCastException e) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            vertx.eventBus().<EventBusObjectWrapper<List<Character>>>request(CharacterServiceVerticle.GET_ALL_ADDRESS, EventBusObjectWrapper.of(accountUUID), ar1 -> {
+            if (accountID < 1) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+                return;
+            }
+
+            vertx.eventBus().<EventBusObjectWrapper<List<Character>>>request(CharacterServiceVerticle.GET_ALL_ADDRESS, EventBusObjectWrapper.of(accountID), ar1 -> {
                 if (ar1.succeeded()) {
                     List<Character> characters = ar1.result().body().get();
                     JsonObject jsonObjectResponse = new JsonObject();
@@ -50,7 +53,7 @@ public class CharacterApi {
 
                     for (Character character : characters) {
                         JsonObject jsonCharacter = character.toJson();
-                        jsonCharacter.remove("account_uuid");
+                        jsonCharacter.remove(Account.ACCOUNT_ID);
                         jsonCharactersResponse.add(jsonCharacter);
                     }
 
@@ -68,20 +71,26 @@ public class CharacterApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            UUID accountUUID;
+            Long accountID;
             try {
-                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
-            } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
+                accountID = requestBodyAsJson.getLong(Account.ACCOUNT_ID);
+            } catch (ClassCastException e) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(accountUUID), ar1 -> {
+            if (accountID < 1) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+                return;
+            }
+
+
+            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(accountID), ar1 -> {
                 if (ar1.succeeded()) {
                     JsonArray jsonArmors = new JsonArray();
                     ar1.result().body().get().forEach(armor -> {
                         JsonObject jsonArmor = armor.toJson();
-                        jsonArmor.remove("account_uuid");
+                        jsonArmor.remove(Account.ACCOUNT_ID);
                         jsonArmors.add(jsonArmor);
                     });
                     JsonObject jsonResponse = new JsonObject();
@@ -98,41 +107,47 @@ public class CharacterApi {
         return context -> {
             JsonObject characters = context.getBodyAsJson();
 
-            List<UUID> charactersUUIDs = new ArrayList<>();
+            List<Long> charactersIDs = new ArrayList<>();
             try {
                 characters.getJsonArray("characters").stream()
                         .map(o -> (JsonObject) o)
-                        .map(jo -> UUID.fromString(jo.getString("character_uuid")))
-                        .distinct()
-                        .forEach(charactersUUIDs::add);
+                        .map(jo -> jo.getLong("character_id"))
+                        .forEach(charactersIDs::add);
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            if (charactersUUIDs.isEmpty()) {
+            charactersIDs.forEach(id -> {
+                if (id < 1) {
+                    context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+                    return;
+                }
+            });
+
+            if (charactersIDs.isEmpty()) {
                 context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
-            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteWeapon>>>request(CharacterServiceVerticle.GET_ALL_WEAPONS_ADDRESS, EventBusObjectWrapper.of(charactersUUIDs), ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteWeapon>>>request(CharacterServiceVerticle.GET_ALL_WEAPONS_ADDRESS, EventBusObjectWrapper.of(charactersIDs), ar1 -> {
                if (ar1.succeeded()) {
                    List<ConcreteWeapon> concreteWeapons = ar1.result().body().get();
-                   Multimap<String, ConcreteWeapon> characterToWeapons = ArrayListMultimap.create();
+                   Multimap<Long, ConcreteWeapon> characterToWeapons = ArrayListMultimap.create();
 
                    for (ConcreteWeapon concreteWeapon : concreteWeapons) {
-                       characterToWeapons.put(concreteWeapon.getCharacterUUID().toString(), concreteWeapon);
+                       characterToWeapons.put(concreteWeapon.getCharacterID(), concreteWeapon);
                    }
 
                    JsonArray allRequestedWeapons = new JsonArray();
-                   for (UUID characterUUID : charactersUUIDs) {
-                       Collection<ConcreteWeapon> weaponsOfConcreteCharacter = characterToWeapons.get(characterUUID.toString());
+                   for (Long characterID : charactersIDs) {
+                       Collection<ConcreteWeapon> weaponsOfConcreteCharacter = characterToWeapons.get(characterID);
 
                        JsonArray jsonArrayOfWeaponsForConcreteCharacter = new JsonArray();
                        for (ConcreteWeapon concreteWeapon : weaponsOfConcreteCharacter) {
                            JsonObject jsonWeapon = concreteWeapon.toJson();
-                           jsonWeapon.remove("character_type_id");
-                           jsonWeapon.remove("character_uuid");
+                           jsonWeapon.remove(CharacterType.CHARACTER_TYPE_ID);
+                           jsonWeapon.remove(Character.CHARACTER_ID);
                            jsonArrayOfWeaponsForConcreteCharacter.add(jsonWeapon);
                        }
 

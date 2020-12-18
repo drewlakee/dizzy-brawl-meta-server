@@ -10,11 +10,16 @@ import java.util.Objects;
 @Table(name = "armor_type")
 public class ArmorType {
 
+    public static final String ARMOR_TYPE_ID = "armor_type_id";
+    public static final String ARMOR_TYPE_NAME = "armor_type_name";
+
     @Id
-    @Column(name = "armor_type_id")
+    @Column(name = ARMOR_TYPE_ID,
+            nullable = false)
     private int armorTypeId;
 
-    @Column(nullable = false)
+    @Column(name = ARMOR_TYPE_NAME,
+            nullable = false)
     private String name;
 
     public static ArmorType createEmpty() {

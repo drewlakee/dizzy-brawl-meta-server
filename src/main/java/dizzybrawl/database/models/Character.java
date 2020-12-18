@@ -20,24 +20,28 @@ import java.util.function.Function;
 @Table(name = "character")
 public class Character implements JsonTransformable {
 
+    public static final String CHARACTER_ID = "character_id";
+    public static final String CHARACTER_IS_ENABLED = "is_enabled";
+
     @Id
-    @Column(name = "character_uuid",
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = CHARACTER_ID,
             unique = true,
             nullable = false)
-    private UUID characterUUID;
+    private Long characterID;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "character_type_id",
+    @JoinColumn(name = CharacterType.CHARACTER_TYPE_ID,
                 nullable = false)
     private CharacterType characterType;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "account_uuid",
+    @JoinColumn(name = Account.ACCOUNT_ID,
             nullable = false)
     private Account account;
 
-    @Column(name = "is_enabled",
+    @Column(name = CHARACTER_IS_ENABLED,
             nullable = false)
     private boolean isEnabled;
 
@@ -49,29 +53,27 @@ public class Character implements JsonTransformable {
     public Character(Row sqlRowCharacter) {
         this();
 
-        Function<String, UUID> getElseNullObject = SqlRowUtils.getElse(sqlRowCharacter, null);
-
-        this.characterUUID = getElseNullObject.apply("character_uuid");
-        this.characterType.setId(SqlRowUtils.getElse(sqlRowCharacter, 0).apply("character_type_id"));
-        this.account.setAccountUUID(getElseNullObject.apply("account_uuid"));
-        this.isEnabled = SqlRowUtils.getElse(sqlRowCharacter, false).apply("is_enabled");
+        this.characterID = SqlRowUtils.getElse(sqlRowCharacter, 0L).apply(CHARACTER_ID);
+        this.characterType.setId(SqlRowUtils.getElse(sqlRowCharacter, 0).apply(CharacterType.CHARACTER_TYPE_ID));
+        this.account.setAccountID(SqlRowUtils.getElse(sqlRowCharacter, 0L).apply(Account.ACCOUNT_ID));
+        this.isEnabled = SqlRowUtils.getElse(sqlRowCharacter, false).apply(CHARACTER_IS_ENABLED);
     }
 
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("character_uuid", characterUUID == null ? null : characterUUID.toString())
-                .put("character_type_id", characterType == null ? 0 : characterType.getId())
-                .put("account_uuid", account.getAccountUUID() == null ? null : account.getAccountUUID().toString())
-                .put("is_enabled", isEnabled);
+                .put(CHARACTER_ID, characterID == null ? null : characterID.toString())
+                .put(CharacterType.CHARACTER_TYPE_ID, characterType == null ? 0 : characterType.getId())
+                .put(Account.ACCOUNT_ID, account.getAccountID() == null ? null : account.getAccountID().toString())
+                .put(CHARACTER_IS_ENABLED, isEnabled);
     }
 
-    public UUID getCharacterUUID() {
-        return characterUUID;
+    public Long getCharacterID() {
+        return characterID;
     }
 
-    public void setCharacterUUID(UUID characterUUID) {
-        this.characterUUID = characterUUID;
+    public void setCharacterID(Long characterID) {
+        this.characterID = characterID;
     }
 
     public CharacterType getCharacterType() {
@@ -104,13 +106,13 @@ public class Character implements JsonTransformable {
         if (o == null || getClass() != o.getClass()) return false;
         Character character = (Character) o;
         return isEnabled == character.isEnabled &&
-                Objects.equals(characterUUID, character.characterUUID) &&
+                Objects.equals(characterID, character.characterID) &&
                 Objects.equals(characterType, character.characterType) &&
                 Objects.equals(account, character.account);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(characterUUID, characterType, account, isEnabled);
+        return Objects.hash(characterID, characterType, account, isEnabled);
     }
 }

@@ -12,22 +12,29 @@ import java.util.Objects;
 @Table(name = "weapon")
 public class Weapon implements JsonTransformable {
 
+    public static final String WEAPON_ID = "weapon_id";
+    public static final String WEAPON_NAME = "weapon_name";
+    public static final String WEAPON_COST = "weapon_cost";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "weapon_id",
+    @Column(name = WEAPON_ID,
             unique = true,
             nullable = false)
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "character_type_id",
+    @JoinColumn(name = CharacterType.CHARACTER_TYPE_ID,
             nullable = false)
     private CharacterType characterType;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = WEAPON_NAME,
+            unique = true,
+            nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = WEAPON_COST,
+            nullable = false)
     private int cost;
 
     public Weapon() {
@@ -38,19 +45,19 @@ public class Weapon implements JsonTransformable {
     public Weapon(Row sqlRowWeapon) {
         this();
 
-        this.id = SqlRowUtils.getElse(sqlRowWeapon, 0L).apply("weapon_id");
-        this.characterType.setId(SqlRowUtils.getElse(sqlRowWeapon, 0).apply("character_type_id"));
-        this.name = SqlRowUtils.getElse(sqlRowWeapon, null, String.class).apply("weapon_name");
-        this.cost = SqlRowUtils.getElse(sqlRowWeapon, 0).apply("weapon_cost");
+        this.id = SqlRowUtils.getElse(sqlRowWeapon, 0L).apply(WEAPON_ID);
+        this.characterType.setId(SqlRowUtils.getElse(sqlRowWeapon, 0).apply(CharacterType.CHARACTER_TYPE_ID));
+        this.name = SqlRowUtils.getElse(sqlRowWeapon, null, String.class).apply(WEAPON_NAME);
+        this.cost = SqlRowUtils.getElse(sqlRowWeapon, 0).apply(WEAPON_COST);
     }
 
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("weapon_id", id)
-                .put("character_type_id", characterType.getId())
-                .put("weapon_name", name)
-                .put("weapon_cost", cost);
+                .put(WEAPON_ID, id)
+                .put(CharacterType.CHARACTER_TYPE_ID, characterType.getId())
+                .put(WEAPON_NAME, name)
+                .put(WEAPON_COST, cost);
     }
 
     public Long getId() {

@@ -17,34 +17,41 @@ import java.util.function.Function;
 @Table(name = "task")
 public class Task implements JsonTransformable {
 
+    public static final String TASK_UUID = "task_uuid";
+    public static final String TASK_TYPE_ID = "task_type_id";
+    public static final String CURRENT_STATE = "current_state";
+    public static final String GOAL_STATE = "goal_state";
+    public static final String GENERATED_DATE = "generated_date";
+    public static final String ACTIVE_INTERVAL = "active_interval";
+
     @Id
-    @Column(name = "task_uuid",
+    @Column(name = TASK_UUID,
             unique = true,
             nullable = false)
     private UUID taskUUID;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "account_uuid",
+    @JoinColumn(name = Account.ACCOUNT_ID,
                 nullable = false)
     private Account account;
 
-    @Column(name = "task_type_id",
+    @Column(name = TASK_TYPE_ID,
             nullable = false)
     private int taskTypeId;
 
-    @Column(name = "current_state",
+    @Column(name = CURRENT_STATE,
             nullable = false)
     private int currentState;
 
-    @Column(name = "goal_state",
+    @Column(name = GOAL_STATE,
             nullable = false)
     private int goalState;
 
-    @Column(name = "generated_date",
+    @Column(name = GENERATED_DATE,
             nullable = false)
     private Timestamp generatedDate;
 
-    @Column(name = "active_interval",
+    @Column(name = ACTIVE_INTERVAL,
             nullable = false)
     private int activeInterval;
 
@@ -58,13 +65,13 @@ public class Task implements JsonTransformable {
         Function<String, Integer> getOrElseZero = JsonUtils.getElse(jsonTask, 0);
         Function<String, String> getOrElseNullString = JsonUtils.getElse(jsonTask, null);
 
-        this.taskUUID = getOrElseNullString.apply("task_uuid") == null ? null : UUID.fromString(getOrElseNullString.apply("task_uuid"));
-        this.account.setAccountUUID(getOrElseNullString.apply("account_uuid") == null ? null : UUID.fromString(getOrElseNullString.apply("account_uuid")));
-        this.taskTypeId = getOrElseZero.apply("task_type_id");
-        this.currentState = getOrElseZero.apply("current_state");
-        this.goalState = getOrElseZero.apply("goal_state");
-        this.generatedDate = JsonUtils.getElse(jsonTask, null, Timestamp.class).apply("generated_date");
-        this.activeInterval = getOrElseZero.apply("active_interval");
+        this.taskUUID = getOrElseNullString.apply(TASK_UUID) == null ? null : UUID.fromString(getOrElseNullString.apply(TASK_UUID));
+        this.account.setAccountID(Long.valueOf(JsonUtils.getElse(jsonTask, 0).apply(Account.ACCOUNT_ID)));
+        this.taskTypeId = getOrElseZero.apply(TASK_TYPE_ID);
+        this.currentState = getOrElseZero.apply(CURRENT_STATE);
+        this.goalState = getOrElseZero.apply(GOAL_STATE);
+        this.generatedDate = JsonUtils.getElse(jsonTask, null, Timestamp.class).apply(GENERATED_DATE);
+        this.activeInterval = getOrElseZero.apply(ACTIVE_INTERVAL);
     }
 
     public Task(Row sqlRowTask) {
@@ -73,25 +80,25 @@ public class Task implements JsonTransformable {
         Function<String, Integer> getOrElseZero = SqlRowUtils.getElse(sqlRowTask, 0);
         Function<String, UUID> getOrElseNullObject = SqlRowUtils.getElse(sqlRowTask, null);
 
-        this.taskUUID = getOrElseNullObject.apply("task_uuid");
-        this.account.setAccountUUID(getOrElseNullObject.apply("account_uuid"));
-        this.taskTypeId = getOrElseZero.apply("task_type_id");
-        this.currentState = getOrElseZero.apply("current_state");
-        this.goalState = getOrElseZero.apply("goal_state");
-        this.generatedDate = Timestamp.valueOf(SqlRowUtils.getElse(sqlRowTask, null, LocalDateTime.class).apply("generated_date"));
-        this.activeInterval = getOrElseZero.apply("active_interval");
+        this.taskUUID = getOrElseNullObject.apply(TASK_UUID);
+        this.account.setAccountID(SqlRowUtils.getElse(sqlRowTask, 0L).apply(Account.ACCOUNT_ID));
+        this.taskTypeId = getOrElseZero.apply(TASK_TYPE_ID);
+        this.currentState = getOrElseZero.apply(CURRENT_STATE);
+        this.goalState = getOrElseZero.apply(GOAL_STATE);
+        this.generatedDate = Timestamp.valueOf(SqlRowUtils.getElse(sqlRowTask, null, LocalDateTime.class).apply(GENERATED_DATE));
+        this.activeInterval = getOrElseZero.apply(ACTIVE_INTERVAL);
     }
 
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("task_uuid", taskUUID == null ? null : taskUUID.toString())
-                .put("account_uuid", (account == null || account.getAccountUUID() == null) ? null : account.getAccountUUID().toString())
-                .put("task_type_id", taskTypeId)
-                .put("current_state", currentState)
-                .put("goal_state", goalState)
-                .put("generated_date", generatedDate == null ? null : generatedDate.toString())
-                .put("active_interval", activeInterval);
+                .put(TASK_UUID, taskUUID == null ? null : taskUUID.toString())
+                .put(Account.ACCOUNT_ID, (account == null || account.getAccountID() == null) ? null : account.getAccountID().toString())
+                .put(TASK_TYPE_ID, taskTypeId)
+                .put(CURRENT_STATE, currentState)
+                .put(GOAL_STATE, goalState)
+                .put(GENERATED_DATE, generatedDate == null ? null : generatedDate.toString())
+                .put(ACTIVE_INTERVAL, activeInterval);
     }
 
     public UUID getTaskUUID() {

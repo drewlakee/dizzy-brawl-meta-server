@@ -23,7 +23,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 @PropertySource("classpath:queries/character-db-queries.properties")
@@ -39,8 +38,8 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
     }
 
     @Override
-    public void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Character>>> resultHandler) {
-        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-characters-by-account-uuid"), Tuple.of(accountUUID));
+    public void getAllByAccountID(Vertx vertx, Long accountID, Handler<AsyncResult<List<Character>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-characters-by-account-id"), Tuple.of(accountID));
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
                 RowSet<Row> queryResult = ar1.result();
@@ -65,8 +64,8 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
     }
 
     @Override
-    public void getAllArmorsByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
-        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-armors-by-account-uuid"), Tuple.of(accountUUID));
+    public void getAllArmorsByAccountID(Vertx vertx, Long accountID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-armors-by-account-id"), Tuple.of(accountID));
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
                 List<ConcreteArmor> armors = new ArrayList<>();
@@ -75,7 +74,7 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
                 while (queryResult != null) {
                     for (Row row : queryResult) {
                         ConcreteArmor concreteArmor = new ConcreteArmor(row);
-                        concreteArmor.setAccountUUID(accountUUID);
+                        concreteArmor.setAccountID(accountID);
                         armors.add(concreteArmor);
                     }
 
@@ -95,13 +94,13 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
     }
 
     @Override
-    public void getAllWeaponsByCharactersUUIDs(Vertx vertx, List<UUID> charactersUUIDs, Handler<AsyncResult<List<ConcreteWeapon>>> resultHandler) {
+    public void getAllWeaponsByCharactersUUIDs(Vertx vertx, List<Long> charactersIDs, Handler<AsyncResult<List<ConcreteWeapon>>> resultHandler) {
         List<Tuple> batch = new ArrayList<>();
-        for (UUID characterUUID : charactersUUIDs) {
-            batch.add(Tuple.of(characterUUID));
+        for (Long characterID : charactersIDs) {
+            batch.add(Tuple.of(characterID));
         }
 
-        BatchAsyncQueryExecutor queryExecutor = new BatchAsyncQueryExecutor(environment.getProperty("select-all-weapons-by-character-uuid"), batch);
+        BatchAsyncQueryExecutor queryExecutor = new BatchAsyncQueryExecutor(environment.getProperty("select-all-weapons-by-character-id"), batch);
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
                 List<ConcreteWeapon> concreteWeapons = new ArrayList<>();
@@ -110,7 +109,7 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
                 for (int characterIndex = 0; characterIndex < batch.size(); characterIndex++) {
                     for (Row row : queryResultRows) {
                         ConcreteWeapon concreteWeapon = new ConcreteWeapon(row);
-                        concreteWeapon.setCharacterUUID(charactersUUIDs.get(characterIndex));
+                        concreteWeapon.setCharacterID(charactersIDs.get(characterIndex));
                         concreteWeapons.add(concreteWeapon);
                     }
                     queryResultRows = queryResultRows.next();

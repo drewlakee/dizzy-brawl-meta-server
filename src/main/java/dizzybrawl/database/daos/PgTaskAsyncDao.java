@@ -39,8 +39,8 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
     }
 
     @Override
-    public void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler) {
-        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-tasks-by-account-uuid"), Tuple.of(accountUUID));
+    public void getAllByAccountUUID(Vertx vertx, Long accountID, Handler<AsyncResult<List<Task>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-tasks-by-account-id"), Tuple.of(accountID));
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
                 RowSet<Row> queryResult = ar1.result();
@@ -99,7 +99,7 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
                     LocalDateTime.now(Clock.systemUTC()),
                     task.getGoalState(),
                     task.getTaskTypeId(),
-                    task.getAccount().getAccountUUID())
+                    task.getAccount().getAccountID())
             );
         }
 

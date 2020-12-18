@@ -30,7 +30,7 @@ public class TaskServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
 
-        vertx.eventBus().<EventBusObjectWrapper<UUID>>consumer(GET_ALL_ADDRESS, handler -> {
+        vertx.eventBus().<EventBusObjectWrapper<Long>>consumer(GET_ALL_ADDRESS, handler -> {
             taskAsyncDao.getAllByAccountUUID(vertx, handler.body().get(), ar1 -> {
                 if (ar1.succeeded()) {
                     handler.reply(EventBusObjectWrapper.of(ar1.result()));

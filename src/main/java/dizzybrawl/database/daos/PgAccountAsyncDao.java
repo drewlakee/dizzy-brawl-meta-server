@@ -58,9 +58,7 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
 
     @Override
     public void register(Vertx vertx, Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
-        UUID generatedUUID = UUID.nameUUIDFromBytes(preRegistrationAccount.getUsername().getBytes());
         Tuple tuple = Tuple.of(
-                generatedUUID,
                 preRegistrationAccount.getUsername(),
                 preRegistrationAccount.getEmail(),
                 preRegistrationAccount.getPassword()
@@ -69,7 +67,7 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
         TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("insert-new-account"), tuple);
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                preRegistrationAccount.setAccountUUID(generatedUUID);
+                preRegistrationAccount.setAccountID(ar1.result().iterator().next().getLong(Account.ACCOUNT_ID));
                 resultHandler.handle(Future.succeededFuture(preRegistrationAccount));
             } else {
                 log.warn("Can't query to database cause " + ar1.cause());

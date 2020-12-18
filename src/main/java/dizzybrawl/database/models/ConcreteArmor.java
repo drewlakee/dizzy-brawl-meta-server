@@ -9,7 +9,10 @@ import java.util.UUID;
 
 public class ConcreteArmor extends Armor {
 
-    private UUID accountUUID;
+    public static final String ARMOR_LEVEL = "armor_level";
+    public static final String ARMOR_IS_ENABLED = "is_enabled";
+
+    private Long accountID;
 
     private int level;
 
@@ -18,25 +21,25 @@ public class ConcreteArmor extends Armor {
     public ConcreteArmor(Row sqlRowArmor) {
         super(sqlRowArmor);
 
-        this.level = SqlRowUtils.getElse(sqlRowArmor, 0).apply("armor_level");
-        this.accountUUID = SqlRowUtils.getElse(sqlRowArmor, null, UUID.class).apply("account_uuid");
-        this.isEnabled = SqlRowUtils.getElse(sqlRowArmor, false).apply("is_enabled");
+        this.level = SqlRowUtils.getElse(sqlRowArmor, 0).apply(ARMOR_LEVEL);
+        this.accountID = SqlRowUtils.getElse(sqlRowArmor, 0L).apply(Account.ACCOUNT_ID);
+        this.isEnabled = SqlRowUtils.getElse(sqlRowArmor, false).apply(ARMOR_IS_ENABLED);
     }
 
     @Override
     public JsonObject toJson() {
         return super.toJson()
-                .put("account_uuid", accountUUID == null ? null : accountUUID.toString())
-                .put("armor_level", level)
-                .put("is_enabled", isEnabled);
+                .put(Account.ACCOUNT_ID, accountID == null ? 0 : accountID)
+                .put(ARMOR_LEVEL, level)
+                .put(ARMOR_IS_ENABLED, isEnabled);
     }
 
-    public UUID getAccountUUID() {
-        return accountUUID;
+    public Long getAccountID() {
+        return accountID;
     }
 
-    public void setAccountUUID(UUID accountUUID) {
-        this.accountUUID = accountUUID;
+    public void setAccountID(Long accountID) {
+        this.accountID = accountID;
     }
 
     public boolean isEnabled() {
@@ -54,11 +57,11 @@ public class ConcreteArmor extends Armor {
         if (!super.equals(o)) return false;
         ConcreteArmor that = (ConcreteArmor) o;
         return isEnabled == that.isEnabled &&
-                Objects.equals(accountUUID, that.accountUUID);
+                Objects.equals(accountID, that.accountID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), accountUUID, isEnabled);
+        return Objects.hash(super.hashCode(), accountID, isEnabled);
     }
 }

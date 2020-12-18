@@ -13,20 +13,26 @@ import java.util.function.Function;
 @Table(name = "armor")
 public class Armor implements JsonTransformable {
 
+    public static final String ARMOR_ID = "armor_id";
+    public static final String ARMOR_NAME = "armor_name";
+    public static final String ARMOR_COST = "armor_cost";
+
     @Id
-    @Column(name = "armor_id",
+    @Column(name = ARMOR_ID,
             unique = true,
             nullable = false)
     private int armorId;
 
-    @Column(nullable = false)
+    @Column(name = ARMOR_NAME,
+            nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = ARMOR_COST,
+            nullable = false)
     private int cost;
 
     @OneToOne
-    @JoinColumn(name = "armor_type_id",
+    @JoinColumn(name = ArmorType.ARMOR_TYPE_ID,
                 nullable = false)
     private ArmorType armorType;
 
@@ -39,20 +45,20 @@ public class Armor implements JsonTransformable {
 
         Function<String, Integer> getOrElseZero = SqlRowUtils.getElse(sqlRowArmor, 0);
 
-        this.armorType.setArmorTypeId(getOrElseZero.apply("armor_type_id"));
-        this.armorType.setName(SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply("armor_type_name"));
-        this.armorId = getOrElseZero.apply("armor_id");
-        this.name = SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply("armor_name");
-        this.cost = getOrElseZero.apply("cost");
+        this.armorType.setArmorTypeId(getOrElseZero.apply(ArmorType.ARMOR_TYPE_ID));
+        this.armorType.setName(SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply(ArmorType.ARMOR_TYPE_NAME));
+        this.armorId = getOrElseZero.apply(ARMOR_ID);
+        this.name = SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply(ARMOR_NAME);
+        this.cost = getOrElseZero.apply(ARMOR_COST);
     }
 
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("armor_id", armorId)
-                .put("armor_name", name)
-                .put("armor_type", armorType.getName())
-                .put("cost", cost);
+                .put(ARMOR_ID, armorId)
+                .put(ARMOR_NAME, name)
+                .put(ArmorType.ARMOR_TYPE_NAME, armorType.getName())
+                .put(ARMOR_COST, cost);
     }
 
     public int getArmorId() {

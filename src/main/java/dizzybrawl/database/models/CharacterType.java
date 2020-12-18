@@ -10,16 +10,22 @@ import java.util.Objects;
 @Table(name = "character_type")
 public class CharacterType {
 
+    public static final String CHARACTER_TYPE_ID = "character_type_id";
+    public static final String CHARACTER_NAME = "character_name";
+    public static final String CHARACTER_IS_ENABLED_AT_BEGIN = "is_enabled_at_begin";
+
     @Id
-    @Column(name = "character_type_id",
+    @Column(name = CHARACTER_TYPE_ID,
             unique = true,
             nullable = false)
     private int id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = CHARACTER_NAME,
+            unique = true,
+            nullable = false)
     private String name;
 
-    @Column(name = "is_enabled_at_begin",
+    @Column(name = CHARACTER_IS_ENABLED_AT_BEGIN,
             nullable = false)
     private boolean isEnabledAtBegin;
 
