@@ -60,6 +60,14 @@ public class Weapon implements JsonTransformable {
                 .put(WEAPON_COST, cost);
     }
 
+    public boolean isEmpty() {
+        return
+                (id == null || id == 0L) &&
+                (characterType == null || characterType.getId() == 0) &&
+                name == null &&
+                cost == 0;
+    }
+
     public Long getId() {
         return id;
     }

@@ -18,6 +18,8 @@ public class ConcreteWeapon extends Weapon {
 
     private boolean isEnabled;
 
+    public ConcreteWeapon() {}
+
     public ConcreteWeapon(Row sqlConcreteWeapon) {
         super(sqlConcreteWeapon);
 
@@ -30,8 +32,16 @@ public class ConcreteWeapon extends Weapon {
     public JsonObject toJson() {
         return super.toJson()
                 .put(WEAPON_LEVEL, level)
-                .put(Character.CHARACTER_ID, characterID.toString())
+                .put(Character.CHARACTER_ID, characterID)
                 .put(WEAPON_IS_ENABLED, isEnabled);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() &&
+               (characterID == null || characterID == 0L) &&
+                level == 0 &&
+                !isEnabled;
     }
 
     public Long getCharacterID() {
