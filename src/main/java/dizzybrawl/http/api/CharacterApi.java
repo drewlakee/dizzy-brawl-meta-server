@@ -180,7 +180,7 @@ public class CharacterApi {
                    }
 
                    JsonObject response = new JsonObject();
-                   response.put("characters", allRequestedWeapons);
+                   response.put("weapons", allRequestedWeapons);
 
                    context.response().end(response.encodePrettily());
                } else {
