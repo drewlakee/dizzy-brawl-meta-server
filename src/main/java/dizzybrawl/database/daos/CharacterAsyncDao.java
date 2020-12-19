@@ -16,7 +16,7 @@ public interface CharacterAsyncDao {
 
     void getAllByAccountID(Vertx vertx, Long accountID, Handler<AsyncResult<List<Character>>> resultHandler);
 
-    void getAllArmorsByAccountID(Vertx vertx, Long accountID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler);
+    void getAllArmorsByAccountID(Vertx vertx, List<Long> charactersIDs, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler);
 
     void getAllWeaponsByCharactersUUIDs(Vertx vertx, List<Long> charactersIDs, Handler<AsyncResult<List<ConcreteWeapon>>> resultHandler);
 }

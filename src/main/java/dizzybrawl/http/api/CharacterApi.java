@@ -69,23 +69,32 @@ public class CharacterApi {
 
     public Handler<RoutingContext> onGetAllArmors(Vertx vertx) {
         return context -> {
-            JsonObject requestBodyAsJson = context.getBodyAsJson();
+            JsonObject characters = context.getBodyAsJson();
 
-            Long accountID;
+            List<Long> charactersIDs = new ArrayList<>();
             try {
-                accountID = requestBodyAsJson.getLong(Account.ACCOUNT_ID);
-            } catch (ClassCastException e) {
+                characters.getJsonArray("characters").stream()
+                        .map(o -> (JsonObject) o)
+                        .map(jo -> jo.getLong("character_id"))
+                        .forEach(charactersIDs::add);
+            } catch (Exception e) {
                 context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            if (accountID < 1) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+            charactersIDs.forEach(id -> {
+                if (id < 1) {
+                    context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+                    return;
+                }
+            });
+
+            if (charactersIDs.isEmpty()) {
+                context.response().end(new JsonObject().put("error", JsonErrors.EMPTY_JSON_PARAMETERS).encodePrettily());
                 return;
             }
 
-
-            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(accountID), ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(charactersIDs), ar1 -> {
                 if (ar1.succeeded()) {
                     JsonArray jsonArmors = new JsonArray();
                     ar1.result().body().get().forEach(armor -> {

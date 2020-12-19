@@ -36,7 +36,7 @@ public class CharacterServiceVerticle extends AbstractVerticle {
             });
         });
 
-        vertx.eventBus().<EventBusObjectWrapper<Long>>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
+        vertx.eventBus().<EventBusObjectWrapper<List<Long>>>consumer(GET_ALL_ARMORS_ADDRESS, handler -> {
            characterAsyncDao.getAllArmorsByAccountID(vertx, handler.body().get(), ar1 -> {
                if (ar1.succeeded()) {
                    handler.reply(EventBusObjectWrapper.of(ar1.result()));

@@ -5,14 +5,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class ConcreteArmor extends Armor {
 
     public static final String ARMOR_LEVEL = "armor_level";
     public static final String ARMOR_IS_ENABLED = "is_enabled";
 
-    private Long accountID;
+    private Long characterID;
 
     private int level;
 
@@ -22,24 +21,24 @@ public class ConcreteArmor extends Armor {
         super(sqlRowArmor);
 
         this.level = SqlRowUtils.getElse(sqlRowArmor, 0).apply(ARMOR_LEVEL);
-        this.accountID = SqlRowUtils.getElse(sqlRowArmor, 0L).apply(Account.ACCOUNT_ID);
+        this.characterID = SqlRowUtils.getElse(sqlRowArmor, 0L).apply(Character.CHARACTER_ID);
         this.isEnabled = SqlRowUtils.getElse(sqlRowArmor, false).apply(ARMOR_IS_ENABLED);
     }
 
     @Override
     public JsonObject toJson() {
         return super.toJson()
-                .put(Account.ACCOUNT_ID, accountID == null ? 0 : accountID)
+                .put(Character.CHARACTER_ID, characterID == null ? 0 : characterID)
                 .put(ARMOR_LEVEL, level)
                 .put(ARMOR_IS_ENABLED, isEnabled);
     }
 
-    public Long getAccountID() {
-        return accountID;
+    public Long getCharacterID() {
+        return characterID;
     }
 
-    public void setAccountID(Long accountID) {
-        this.accountID = accountID;
+    public void setCharacterID(Long characterID) {
+        this.characterID = characterID;
     }
 
     public boolean isEnabled() {
@@ -57,11 +56,11 @@ public class ConcreteArmor extends Armor {
         if (!super.equals(o)) return false;
         ConcreteArmor that = (ConcreteArmor) o;
         return isEnabled == that.isEnabled &&
-                Objects.equals(accountID, that.accountID);
+                Objects.equals(characterID, that.characterID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), accountID, isEnabled);
+        return Objects.hash(super.hashCode(), characterID, isEnabled);
     }
 }

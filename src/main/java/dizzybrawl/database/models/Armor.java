@@ -31,13 +31,13 @@ public class Armor implements JsonTransformable {
             nullable = false)
     private int cost;
 
-    @OneToOne
-    @JoinColumn(name = ArmorType.ARMOR_TYPE_ID,
-                nullable = false)
-    private ArmorType armorType;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = CharacterType.CHARACTER_TYPE_ID,
+            nullable = false)
+    private CharacterType characterType;
 
     public Armor() {
-        this.armorType = ArmorType.createEmpty();
+        this.characterType = CharacterType.createEmpty();
     }
 
     public Armor(Row sqlRowArmor) {
@@ -45,8 +45,7 @@ public class Armor implements JsonTransformable {
 
         Function<String, Integer> getOrElseZero = SqlRowUtils.getElse(sqlRowArmor, 0);
 
-        this.armorType.setArmorTypeId(getOrElseZero.apply(ArmorType.ARMOR_TYPE_ID));
-        this.armorType.setName(SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply(ArmorType.ARMOR_TYPE_NAME));
+        this.characterType.setId(getOrElseZero.apply(CharacterType.CHARACTER_TYPE_ID));
         this.armorId = getOrElseZero.apply(ARMOR_ID);
         this.name = SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply(ARMOR_NAME);
         this.cost = getOrElseZero.apply(ARMOR_COST);
@@ -56,8 +55,8 @@ public class Armor implements JsonTransformable {
     public JsonObject toJson() {
         return new JsonObject()
                 .put(ARMOR_ID, armorId)
+                .put(CharacterType.CHARACTER_TYPE_ID, characterType.getId())
                 .put(ARMOR_NAME, name)
-                .put(ArmorType.ARMOR_TYPE_NAME, armorType.getName())
                 .put(ARMOR_COST, cost);
     }
 
@@ -85,14 +84,6 @@ public class Armor implements JsonTransformable {
         this.cost = cost;
     }
 
-    public ArmorType getArmorType() {
-        return armorType;
-    }
-
-    public void setArmorType(ArmorType armorType) {
-        this.armorType = armorType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,12 +91,11 @@ public class Armor implements JsonTransformable {
         Armor armor = (Armor) o;
         return armorId == armor.armorId &&
                 cost == armor.cost &&
-                Objects.equals(name, armor.name) &&
-                Objects.equals(armorType, armor.armorType);
+                Objects.equals(name, armor.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(armorId, name, cost, armorType);
+        return Objects.hash(armorId, name, cost);
     }
 }

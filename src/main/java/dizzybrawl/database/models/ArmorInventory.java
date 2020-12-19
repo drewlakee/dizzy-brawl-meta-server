@@ -7,9 +7,9 @@ import java.util.Objects;
 @Embeddable
 class AccountsToArmors implements Serializable {
 
-    @Column(name = Account.ACCOUNT_ID,
+    @Column(name = Character.CHARACTER_ID,
             nullable = false)
-    private Long accountID;
+    private Long characterID;
 
     @Column(name = Armor.ARMOR_ID,
             nullable = false)
@@ -23,12 +23,12 @@ class AccountsToArmors implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         AccountsToArmors that = (AccountsToArmors) o;
         return armorId == that.armorId &&
-                Objects.equals(accountID, that.accountID);
+                Objects.equals(characterID, that.characterID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountID, armorId);
+        return Objects.hash(characterID, armorId);
     }
 }
 
@@ -40,9 +40,9 @@ public class ArmorInventory {
     private AccountsToArmors id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @MapsId("accountID")
-    @JoinColumn(name = Account.ACCOUNT_ID)
-    private Account account;
+    @MapsId("characterID")
+    @JoinColumn(name = Character.CHARACTER_ID)
+    private Character character;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @MapsId("armorId")
@@ -61,12 +61,12 @@ public class ArmorInventory {
         ArmorInventory that = (ArmorInventory) o;
         return armorLevel == that.armorLevel &&
                 Objects.equals(id, that.id) &&
-                Objects.equals(account, that.account) &&
+                Objects.equals(character, that.character) &&
                 Objects.equals(armor, that.armor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, account, armor, armorLevel);
+        return Objects.hash(id, character, armor, armorLevel);
     }
 }

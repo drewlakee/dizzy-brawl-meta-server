@@ -64,24 +64,28 @@ public class PgCharacterAsyncDao implements CharacterAsyncDao {
     }
 
     @Override
-    public void getAllArmorsByAccountID(Vertx vertx, Long accountID, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
-        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-armors-by-account-id"), Tuple.of(accountID));
+    public void getAllArmorsByAccountID(Vertx vertx, List<Long> charactersIDs, Handler<AsyncResult<List<ConcreteArmor>>> resultHandler) {
+        List<Tuple> batch = new ArrayList<>();
+        for (Long characterID : charactersIDs) {
+            batch.add(Tuple.of(characterID));
+        }
+
+        BatchAsyncQueryExecutor queryExecutor = new BatchAsyncQueryExecutor(environment.getProperty("select-all-armors-by-character-id"), batch);
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                List<ConcreteArmor> armors = new ArrayList<>();
+                List<ConcreteArmor> concreteArmors = new ArrayList<>();
 
-                RowSet<Row> queryResult = ar1.result();
-                while (queryResult != null) {
-                    for (Row row : queryResult) {
+                RowSet<Row> queryResultRows = ar1.result();
+                for (int characterIndex = 0; characterIndex < batch.size(); characterIndex++) {
+                    for (Row row : queryResultRows) {
                         ConcreteArmor concreteArmor = new ConcreteArmor(row);
-                        concreteArmor.setAccountID(accountID);
-                        armors.add(concreteArmor);
+                        concreteArmor.setCharacterID(charactersIDs.get(characterIndex));
+                        concreteArmors.add(concreteArmor);
                     }
-
-                    queryResult = queryResult.next();
+                    queryResultRows = queryResultRows.next();
                 }
 
-                resultHandler.handle(Future.succeededFuture(armors));
+                resultHandler.handle(Future.succeededFuture(concreteArmors));
             } else {
                 log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
