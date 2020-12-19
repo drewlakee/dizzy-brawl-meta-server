@@ -72,7 +72,7 @@ public class AccountApi {
                     if (verifiedAccount.isEmpty()) {
                         response.put("error", DatabaseErrors.ALREADY_EXIST_AT_DATABASE);
                     } else {
-                        response.put("account_uuid", verifiedAccount.getAccountID());
+                        response.put(Account.ACCOUNT_ID, verifiedAccount.getAccountID());
                     }
 
                     context.response().end(response.encodePrettily());
