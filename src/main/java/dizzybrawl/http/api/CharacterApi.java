@@ -96,15 +96,31 @@ public class CharacterApi {
 
             vertx.eventBus().<EventBusObjectWrapper<List<ConcreteArmor>>>request(CharacterServiceVerticle.GET_ALL_ARMORS_ADDRESS, EventBusObjectWrapper.of(charactersIDs), ar1 -> {
                 if (ar1.succeeded()) {
-                    JsonArray jsonArmors = new JsonArray();
-                    ar1.result().body().get().forEach(armor -> {
-                        JsonObject jsonArmor = armor.toJson();
-                        jsonArmor.remove(Account.ACCOUNT_ID);
-                        jsonArmors.add(jsonArmor);
-                    });
-                    JsonObject jsonResponse = new JsonObject();
-                    jsonResponse.put("armors", jsonArmors);
-                    context.response().end(jsonResponse.encodePrettily());
+                    List<ConcreteArmor> concreteArmors = ar1.result().body().get();
+                    Multimap<Long, ConcreteArmor> characterToArmors = ArrayListMultimap.create();
+
+                    for (ConcreteArmor concreteArmor : concreteArmors) {
+                        characterToArmors.put(concreteArmor.getCharacterID(), concreteArmor);
+                    }
+
+                    JsonArray allRequestedWeapons = new JsonArray();
+                    for (Long characterID : charactersIDs) {
+                        Collection<ConcreteArmor> weaponsOfConcreteCharacter = characterToArmors.get(characterID);
+
+                        JsonArray jsonArrayOfWeaponsForConcreteCharacter = new JsonArray();
+                        for (ConcreteArmor concreteArmor : weaponsOfConcreteCharacter) {
+                            JsonObject jsonWeapon = concreteArmor.toJson();
+                            jsonWeapon.remove(Character.CHARACTER_ID);
+                            jsonArrayOfWeaponsForConcreteCharacter.add(jsonWeapon);
+                        }
+
+                        allRequestedWeapons.add(jsonArrayOfWeaponsForConcreteCharacter);
+                    }
+
+                    JsonObject response = new JsonObject();
+                    response.put("characters", allRequestedWeapons);
+
+                    context.response().end(response.encodePrettily());
                 } else {
                     context.fail(ar1.cause());
                 }
