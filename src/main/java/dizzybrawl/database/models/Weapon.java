@@ -17,7 +17,6 @@ public class Weapon implements JsonTransformable {
     public static final String WEAPON_COST = "weapon_cost";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = WEAPON_ID,
             unique = true,
             nullable = false)
