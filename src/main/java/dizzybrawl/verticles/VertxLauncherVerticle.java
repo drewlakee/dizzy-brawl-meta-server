@@ -79,7 +79,7 @@ public class VertxLauncherVerticle extends AbstractVerticle {
             deploy(taskServiceVerticle),
             deploy(serverServiceVerticle),
             deploy(pgDatabaseVerticle)
-        ).onComplete(handler -> {
+        ).onSuccess(handler -> {
             startPromise.complete();
             log.info("Verticles deploy process successfully done.");
         }).onFailure(handler -> {
