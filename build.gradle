@@ -14,6 +14,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_14
 }
 
+
+
+test {
+    failFast = true
+}
+
 ext {
     vertxVersion = '3.9.3'
     junitVersion = '4.12'
@@ -24,6 +30,7 @@ dependencies {
 
     // guava
     compile 'com.google.guava:guava:29.0-jre'
+    testCompile 'com.google.guava:guava:29.0-jre'
 
     // vert.x
     compile "io.vertx:vertx-core:$vertxVersion"

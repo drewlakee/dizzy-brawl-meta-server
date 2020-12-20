@@ -10,19 +10,18 @@ import java.util.Objects;
 @Table(name = "game_mode")
 public class GameMode {
 
+    public static final String GAME_MODE_ID = "game_mode_id";
+    public static final String GAME_MODE_NAME = "game_mode_name";
+
     @Id
-    @Column(name = "game_mode_id",
+    @Column(name = GAME_MODE_ID,
             unique = true,
             nullable = false)
     private int gameModeId;
 
-    @Column(name = "name",
+    @Column(name = GAME_MODE_NAME,
             nullable = false)
     private String name;
-
-    @Column(name = "players_in_game_server_count",
-            nullable = false)
-    private int playersInGameServerCount;
 
     public GameMode() {}
 
@@ -46,26 +45,17 @@ public class GameMode {
         this.name = gameModeType;
     }
 
-    public int getPlayersInGameServerCount() {
-        return playersInGameServerCount;
-    }
-
-    public void setPlayersInGameServerCount(int playersInGameServerCount) {
-        this.playersInGameServerCount = playersInGameServerCount;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GameMode gameMode = (GameMode) o;
         return gameModeId == gameMode.gameModeId &&
-                playersInGameServerCount == gameMode.playersInGameServerCount &&
                 name == gameMode.name;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameModeId, name, playersInGameServerCount);
+        return Objects.hash(gameModeId, name);
     }
 }

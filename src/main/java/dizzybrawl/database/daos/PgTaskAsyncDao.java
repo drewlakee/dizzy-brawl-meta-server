@@ -4,6 +4,7 @@ import dizzybrawl.database.models.Task;
 import dizzybrawl.database.wrappers.query.executors.BatchAtomicAsyncQueryExecutor;
 import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
 import dizzybrawl.verticles.PgDatabaseVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -38,8 +39,8 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
     }
 
     @Override
-    public void getAllByAccountUUID(Vertx vertx, UUID accountUUID, Handler<AsyncResult<List<Task>>> resultHandler) {
-        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-tasks-by-account-uuid"), Tuple.of(accountUUID));
+    public void getAllByAccountUUID(Vertx vertx, Long accountID, Handler<AsyncResult<List<Task>>> resultHandler) {
+        TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("select-all-tasks-by-account-id"), Tuple.of(accountID));
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
                 RowSet<Row> queryResult = ar1.result();
@@ -56,9 +57,11 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
                 log.warn("Can't query to database cause " + ar1.cause());
                 resultHandler.handle(Future.failedFuture(ar1.cause()));
             }
+
+            queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -80,7 +83,7 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -96,7 +99,7 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
                     LocalDateTime.now(Clock.systemUTC()),
                     task.getGoalState(),
                     task.getTaskTypeId(),
-                    task.getAccount().getAccountUUID())
+                    task.getAccount().getAccountID())
             );
         }
 
@@ -126,7 +129,7 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
@@ -165,6 +168,6 @@ public class PgTaskAsyncDao implements TaskAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 }

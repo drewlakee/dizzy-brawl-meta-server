@@ -3,6 +3,7 @@ package dizzybrawl.database.daos;
 import dizzybrawl.database.models.Account;
 import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
 import dizzybrawl.verticles.PgDatabaseVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -52,14 +53,12 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 
     @Override
     public void register(Vertx vertx, Account preRegistrationAccount, Handler<AsyncResult<Account>> resultHandler) {
-        UUID generatedUUID = UUID.nameUUIDFromBytes(preRegistrationAccount.getUsername().getBytes());
         Tuple tuple = Tuple.of(
-                generatedUUID,
                 preRegistrationAccount.getUsername(),
                 preRegistrationAccount.getEmail(),
                 preRegistrationAccount.getPassword()
@@ -68,7 +67,7 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
         TupleAsyncQueryExecutor queryExecutor = new TupleAsyncQueryExecutor(environment.getProperty("insert-new-account"), tuple);
         queryExecutor.setHandler(ar1 -> {
             if (ar1.succeeded()) {
-                preRegistrationAccount.setAccountUUID(generatedUUID);
+                preRegistrationAccount.setAccountID(ar1.result().iterator().next().getLong(Account.ACCOUNT_ID));
                 resultHandler.handle(Future.succeededFuture(preRegistrationAccount));
             } else {
                 log.warn("Can't query to database cause " + ar1.cause());
@@ -78,6 +77,6 @@ public class PgAccountAsyncDao implements AccountAsyncDao {
             queryExecutor.releaseConnection();
         });
 
-        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, queryExecutor);
+        vertx.eventBus().send(PgDatabaseVerticle.QUERY_ADDRESS, EventBusObjectWrapper.of(queryExecutor));
     }
 }

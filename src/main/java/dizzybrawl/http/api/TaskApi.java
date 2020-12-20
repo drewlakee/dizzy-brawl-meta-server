@@ -1,9 +1,11 @@
 package dizzybrawl.http.api;
 
+import dizzybrawl.database.models.Account;
 import dizzybrawl.database.models.Task;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.TaskServiceVerticle;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -29,18 +31,22 @@ public class TaskApi {
         return context -> {
             JsonObject requestBodyAsJson = context.getBodyAsJson();
 
-            UUID accountUUID;
-
+            Long accountID;
             try {
-                accountUUID = UUID.fromString(requestBodyAsJson.getString("account_uuid"));
-            } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
+                accountID = requestBodyAsJson.getLong(Account.ACCOUNT_ID);
+            } catch (ClassCastException e) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.GET_ALL_ADDRESS, accountUUID, ar1 -> {
+            if (accountID < 1) {
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
+                return;
+            }
+
+            vertx.eventBus().<EventBusObjectWrapper<List<Task>>>request(TaskServiceVerticle.GET_ALL_ADDRESS, EventBusObjectWrapper.of(accountID), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasks = ar1.result().body();
+                    List<Task> tasks = ar1.result().body().get();
                     List<Task> tasksToDelete = new ArrayList<>();
                     JsonArray jsonTasksToResponse = new JsonArray();
 
@@ -56,13 +62,13 @@ public class TaskApi {
                             tasksToDelete.add(task);
                         } else {
                             JsonObject jsonTask = task.toJson();
-                            jsonTask.remove("generated_date");
-                            jsonTask.remove("account_uuid");
+                            jsonTask.remove(Task.GENERATED_DATE);
+                            jsonTask.remove(Account.ACCOUNT_ID);
                             jsonTasksToResponse.add(jsonTask);
                         }
                     }
 
-                    vertx.eventBus().request(TaskServiceVerticle.DELETE_ADDRESS, tasksToDelete, ar2 -> {});
+                    vertx.eventBus().request(TaskServiceVerticle.DELETE_ADDRESS, EventBusObjectWrapper.of(tasksToDelete), ar2 -> {});
 
                     JsonObject jsonResponse = new JsonObject();
                     jsonResponse.put("tasks", jsonTasksToResponse);
@@ -90,13 +96,13 @@ public class TaskApi {
                     tasksToAdd.add(new Task(jsonTask));
                 }
             } catch (Exception e) {
-                context.response().end(new JsonObject().put("error", DataErrors.INVALID_UUID).encodePrettily());
+                context.response().end(new JsonObject().put("error", DataErrors.INVALID_ID).encodePrettily());
                 return;
             }
 
-            vertx.eventBus().<List<Task>>request(TaskServiceVerticle.ADD_ADDRESS, tasksToAdd, ar1 -> {
+            vertx.eventBus().<EventBusObjectWrapper<List<Task>>>request(TaskServiceVerticle.ADD_ADDRESS, EventBusObjectWrapper.of(tasksToAdd), ar1 -> {
                 if (ar1.succeeded()) {
-                    List<Task> tasksResult = ar1.result().body();
+                    List<Task> tasksResult = ar1.result().body().get();
                     JsonArray jsonTasksResponse = new JsonArray();
 
                     for (Task task : tasksResult) {
@@ -128,7 +134,7 @@ public class TaskApi {
                     .map(o -> new Task((JsonObject) o))
                     .collect(Collectors.toList());
 
-            vertx.eventBus().request(TaskServiceVerticle.UPDATE_PROGRESS_ADDRESS, tasksToUpdate, ar1 -> {
+            vertx.eventBus().request(TaskServiceVerticle.UPDATE_PROGRESS_ADDRESS, EventBusObjectWrapper.of(tasksToUpdate), ar1 -> {
                 if (ar1.succeeded()) {
                     // All was updated
                     context.response().setStatusCode(HttpResponseStatus.OK.code()).end();

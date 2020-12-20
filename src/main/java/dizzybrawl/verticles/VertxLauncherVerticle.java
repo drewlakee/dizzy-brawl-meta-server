@@ -1,11 +1,7 @@
 package dizzybrawl.verticles;
 
-import dizzybrawl.database.models.*;
-import dizzybrawl.database.models.Character;
-import dizzybrawl.database.wrappers.query.executors.AsyncQueryExecutor;
-import dizzybrawl.database.wrappers.query.executors.BatchAtomicAsyncQueryExecutor;
-import dizzybrawl.database.wrappers.query.executors.TupleAsyncQueryExecutor;
-import dizzybrawl.verticles.eventBus.codecs.*;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
+import dizzybrawl.verticles.eventBus.EventBusObjectWrapperMessageCodec;
 import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -13,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 @Component
 @PropertySource(value = "classpath:http.properties")
@@ -56,16 +49,7 @@ public class VertxLauncherVerticle extends AbstractVerticle {
 
         // register custom codecs for event bus communication
         vertx.eventBus()
-                .registerDefaultCodec(Account.class, new AccountMessageCodec())
-                .registerDefaultCodec(Character.class, new CharacterMessageCodec())
-                .registerDefaultCodec(UUID.class, new UUIDMessageCodec())
-                .registerDefaultCodec(ArrayList.class, new ArrayListMessageCodec())
-                .registerDefaultCodec(Armor.class, new ArmorMessageCodec())
-                .registerDefaultCodec(Task.class, new TaskMessageCodec())
-                .registerDefaultCodec(Server.class, new ServerMessageCodec())
-                .registerDefaultCodec(TupleAsyncQueryExecutor.class, new TupleAsyncQueryExecutorMessageCodec())
-                .registerDefaultCodec(BatchAtomicAsyncQueryExecutor.class, new BatchAtomicAsyncQueryExecutorMessageCodec())
-                .registerDefaultCodec(AsyncQueryExecutor.class, new AsyncQueryExecutorMessageCodec());
+                .registerDefaultCodec(EventBusObjectWrapper.class, new EventBusObjectWrapperMessageCodec());
 
         DeploymentOptions restServerDeploymentOptions = new DeploymentOptions()
                 .setWorker(true)

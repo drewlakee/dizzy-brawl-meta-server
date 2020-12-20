@@ -13,6 +13,7 @@
 2. [Character](#character)
     * [POST /characters/get/all](#post-charactersgetall)
     * [POST /characters/armors/get/all](#post-charactersarmorsgetall)
+    * [POST /characters/weapons/get/all](#post-charactersweaponsgetall)
 3. [Task](#task)
     * [POST /tasks/get/all](#post-tasksgetall)
     * [POST /tasks/add](#post-tasksadd)
@@ -30,26 +31,30 @@
 
 ### POST `/accounts/auth/login`
 
-**JSON Query**
+Authenticate user and get his credentials.
+
+**JSON Body**
 
 name                | data type     | description
 ------------        | ------------- | -------------
-username_or_email   |  string       |  user's username or email
-password            |  string       |  user's password
+username_or_email   |  string       |  username or email
+password            |  string       |  user password
 
-**JSON Response**
+**JSON Body Response**
 
 name                | data type     |description
 ------------        |-------------  |-------------
-account_uuid        | uuid          | account's uuid
-username            | string        | user's in game username
-email               | string        | user's email
+account_id        | long          | unique identifier
+username            | string        | in game username
+email               | string        | user email
 
 [To API Navigation](#apiv1-navigation)
 
 ### POST `/accounts/register`
 
-**JSON Query**
+Register, authenticate user and get his credentials back.
+
+**JSON Body**
 
 name                |   data type   | description
 ------------        | ------------- | -------------
@@ -57,11 +62,11 @@ username            |  string       |  user's username or email
 email               |  string       |  user's email
 password            |  string       |  user's password
 
-**JSON Response**
+**JSON Body Response**
 
 name                | data type     |description
 ------------        |-------------  |-------------
-account_uuid        | uuid          | generated uuid for registered account
+account_id        | long          | unique identifier
 
 [To API Navigation](#apiv1-navigation)
 
@@ -69,52 +74,95 @@ account_uuid        | uuid          | generated uuid for registered account
 
 ### POST `/characters/get/all`
 
-**JSON Query**
+Get all characters on user's account.
+
+**JSON Body Query**
 
 name                |data type      | description
 ------------        | ------------- | -------------
-account_uuid        | string        |  account's uuid
+account_id        | long        |  unique identifier
 
-**JSON Response**
+**JSON Body Response**
 
 name                | data type                    | description
 ------------        |-------------                 |-------------
-characters          | array of characters          | array of characters that must be returned by account uuid
+characters          | json array of characters     | user's characters array
 
 single "character" json object
 
 name                | data type     |description
 ------------        |-------------  |-------------
-character_uuid      | uuid          | character's uuid
-character_type_id   | int           | character's type of pawn
-is_enabled          | Boolean       | available for account
+character_id        | long          | unique identifier
+character_type_id   | int           | unique identifier of character's type in game
+is_enabled          | boolean       | available for user in game or not
 
 [To API Navigation](#apiv1-navigation)
 
 ### POST `/characters/armors/get/all`
 
-**JSON Query**
+Get all armors for concrete characters of user on user's account.
+
+**JSON Body Query**
 
 name                |data type               | description
 ------------        | -------------          | -------------
-account_uuid         | string       |  armors owner account uuid
+characters         | json array       |  characters whose armors you want to request
 
-**JSON Response**
+single json object at array
+
+name                |data type               | description
+------------        | -------------          | -------------
+character_id         | long       |  concrete character unique identifier to request
+
+**JSON Body Response**
 
 name                | data type                                 |description
 ------------        |-------------                              |-------------
-armors          | array of armors                        | contains array of armors data
+armors          | json array of armors                        | character's armors
 
 single "armor" json object
 
 name                | data type         |description
 ------------        |-------------      |-------------
-armor_id            | uuid              | character's in query passed uuid
-armor_name             | string   |     name    
-armor_type          |  string  |        type name
-cost           |  int  |                in game cost
+armor_id            | int              | unique identifier
+armor_name             | string   |     armor game name
+armor_cost           |  int  |                in game cost
 armor_level                |  int  |    in game level
-is_enabled             |  Boolean  |    is available for account
+is_enabled             |  boolean  |    available for user's character in game or not
+
+[To API Navigation](#apiv1-navigation)
+
+### POST `/characters/weapons/get/all`
+
+Get all weapons for concrete characters of user on user's account.
+
+**JSON Body Query**
+
+name                |data type               | description
+------------        | -------------          | -------------
+characters         | json array       |  characters whose weapons you want to request
+
+single json object at array
+
+name                |data type               | description
+------------        | -------------          | -------------
+character_id         | long       |  concrete character unique identifier to request
+
+**JSON Body Response**
+
+name                | data type                                 |description
+------------        |-------------                              |-------------
+weapons          | json array of weapons                        | character's weapons
+
+single "weapon" json object
+
+name                | data type         |description
+------------        |-------------      |-------------
+weapon_id            | int              | unique identifier
+weapon_name             | string   |     weapon game name
+weapon_cost           |  int  |                in game cost
+weapon_level                |  int  |    in game level
+is_enabled             |  boolean  |    available for user's character in game or not
 
 [To API Navigation](#apiv1-navigation)
 
@@ -122,13 +170,15 @@ is_enabled             |  Boolean  |    is available for account
 
 ### POST `/tasks/get/all`
 
-**JSON Query**
+Get all current tasks on account.
+
+**JSON Body Query**
 
 name                |   data type   | description
 ------------        | ------------- | -------------
-account_uuid        | string        |  task's owner account uuid
+account_id        | long        |  unique identifier to request
 
-**JSON Response**
+**JSON Body Response**
 
 if at request moment task spend time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
@@ -137,7 +187,7 @@ if no active task at user's account, response will be empty JSON Array
 
 name                | data type                 | description
 ------------        |-------------              |-------------
-tasks               | array of tasks            | active Tasks on user's account
+tasks               | json array of tasks            | active Tasks on user's account
 
 single "task" json object
 
@@ -153,46 +203,50 @@ active_interval     | int           | time of active status interval in **minute
 
 ### POST `/tasks/add`
 
-**JSON Query**
+Add tasks to account.
+
+**JSON Body Query**
 
 name                | data type         | description
 ------------        | -------------     | -------------
-tasks               |  array of tasks   |  array of tasks that must be added
+tasks               |  json array of tasks   |  array of tasks that must be added
 
 single "task" json object
 
 name                | data type     | description
 ------------        | ------------- | -------------
-account_uuid        |   string      |  task's owner verifiedAccount uuid
+account_id        |   long      |  unique identifier of account to add
 task_type_id        |   int         |  task's type
 current_state       |   int         |  current progress of task
 goal_state          |   int         |  goal value for task complete
 active_interval     |   int         |  time interval in that task will be active. Time in **minutes**
 
-**JSON Response**
+**JSON Body Response**
 
 response has same sequenced as request JSON, so uuids in same place
 as added tasks before
 
 name                | data type                 | description
 ------------        |-------------              |-------------
-tasks               | array of strings          | array contains generated tasks uuids
+tasks               | json array of strings          | array contains generated tasks uuids
 
 single json object
 
 name                    | data type                 | description
 ------------            |-------------              |-------------
-task_uuid               | uuid                      | unique generated task key in database
+task_uuid               | uuid                      | unique identifier
 
 [To API Navigation](#apiv1-navigation)
 
 ### PUT `/tasks/update/progress`
 
-**JSON Query**
+Update task progress of current state.
+
+**JSON Body Query**
 
 name                | data type             | description
 ------------        | -------------         | -------------
-tasks               |   array of tasks      |  array of tasks that must be updated
+tasks               |   json array of tasks      |  array of tasks that must be updated
 
 single "task" json object
 

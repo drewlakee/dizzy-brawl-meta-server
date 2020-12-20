@@ -1,6 +1,6 @@
 package dizzybrawl.database.models;
 
-import dizzybrawl.database.models.utils.JsonTransformable;
+import dizzybrawl.database.models.format.JsonTransformable;
 import dizzybrawl.database.utils.SqlRowUtils;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
@@ -13,25 +13,31 @@ import java.util.function.Function;
 @Table(name = "armor")
 public class Armor implements JsonTransformable {
 
+    public static final String ARMOR_ID = "armor_id";
+    public static final String ARMOR_NAME = "armor_name";
+    public static final String ARMOR_COST = "armor_cost";
+
     @Id
-    @Column(name = "armor_id",
+    @Column(name = ARMOR_ID,
             unique = true,
             nullable = false)
     private int armorId;
 
-    @Column(nullable = false)
+    @Column(name = ARMOR_NAME,
+            nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = ARMOR_COST,
+            nullable = false)
     private int cost;
 
-    @OneToOne
-    @JoinColumn(name = "armor_type_id",
-                nullable = false)
-    private ArmorType armorType;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = CharacterType.CHARACTER_TYPE_ID,
+            nullable = false)
+    private CharacterType characterType;
 
     public Armor() {
-        this.armorType = ArmorType.createEmpty();
+        this.characterType = CharacterType.createEmpty();
     }
 
     public Armor(Row sqlRowArmor) {
@@ -39,20 +45,19 @@ public class Armor implements JsonTransformable {
 
         Function<String, Integer> getOrElseZero = SqlRowUtils.getElse(sqlRowArmor, 0);
 
-        this.armorType.setArmorTypeId(getOrElseZero.apply("armor_type_id"));
-        this.armorType.setName(SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply("armor_type_name"));
-        this.armorId = getOrElseZero.apply("armor_id");
-        this.name = SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply("armor_name");
-        this.cost = getOrElseZero.apply("cost");
+        this.characterType.setId(getOrElseZero.apply(CharacterType.CHARACTER_TYPE_ID));
+        this.armorId = getOrElseZero.apply(ARMOR_ID);
+        this.name = SqlRowUtils.getElse(sqlRowArmor, null, String.class).apply(ARMOR_NAME);
+        this.cost = getOrElseZero.apply(ARMOR_COST);
     }
 
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put("armor_id", armorId)
-                .put("armor_name", name)
-                .put("armor_type", armorType.getName())
-                .put("cost", cost);
+                .put(ARMOR_ID, armorId)
+                .put(CharacterType.CHARACTER_TYPE_ID, characterType.getId())
+                .put(ARMOR_NAME, name)
+                .put(ARMOR_COST, cost);
     }
 
     public int getArmorId() {
@@ -79,14 +84,6 @@ public class Armor implements JsonTransformable {
         this.cost = cost;
     }
 
-    public ArmorType getArmorType() {
-        return armorType;
-    }
-
-    public void setArmorType(ArmorType armorType) {
-        this.armorType = armorType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,12 +91,11 @@ public class Armor implements JsonTransformable {
         Armor armor = (Armor) o;
         return armorId == armor.armorId &&
                 cost == armor.cost &&
-                Objects.equals(name, armor.name) &&
-                Objects.equals(armorType, armor.armorType);
+                Objects.equals(name, armor.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(armorId, name, cost, armorType);
+        return Objects.hash(armorId, name, cost);
     }
 }

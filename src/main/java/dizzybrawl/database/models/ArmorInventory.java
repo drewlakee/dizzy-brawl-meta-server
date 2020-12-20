@@ -3,36 +3,19 @@ package dizzybrawl.database.models;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Embeddable
 class AccountsToArmors implements Serializable {
 
-    @Column(name = "account_uuid",
+    @Column(name = Character.CHARACTER_ID,
             nullable = false)
-    private UUID accountUUID;
+    private Long characterID;
 
-    @Column(name = "armor_id",
+    @Column(name = Armor.ARMOR_ID,
             nullable = false)
     private int armorId;
 
     protected AccountsToArmors() {}
-
-    public UUID getAccountUUID() {
-        return accountUUID;
-    }
-
-    protected void setAccountUUID(UUID characterUUID) {
-        this.accountUUID = characterUUID;
-    }
-
-    public int getArmorId() {
-        return armorId;
-    }
-
-    protected void setArmorId(int characterMeshId) {
-        this.armorId = characterMeshId;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -40,12 +23,12 @@ class AccountsToArmors implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         AccountsToArmors that = (AccountsToArmors) o;
         return armorId == that.armorId &&
-                Objects.equals(accountUUID, that.accountUUID);
+                Objects.equals(characterID, that.characterID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountUUID, armorId);
+        return Objects.hash(characterID, armorId);
     }
 }
 
@@ -57,49 +40,19 @@ public class ArmorInventory {
     private AccountsToArmors id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @MapsId("accountUUID")
-    @JoinColumn(name = "account_uuid")
-    private Account account;
+    @MapsId("characterID")
+    @JoinColumn(name = Character.CHARACTER_ID)
+    private Character character;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @MapsId("armorId")
-    @JoinColumn(name = "armor_id")
+    @JoinColumn(name = Armor.ARMOR_ID)
     private Armor armor;
 
-    @Column(name = "armor_level")
+    @Column(name = ConcreteArmor.ARMOR_LEVEL)
     private int armorLevel;
 
-    public AccountsToArmors getId() {
-        return id;
-    }
-
-    public void setId(AccountsToArmors id) {
-        this.id = id;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public Armor getArmor() {
-        return armor;
-    }
-
-    public void setArmor(Armor armor) {
-        this.armor = armor;
-    }
-
-    public int getArmorLevel() {
-        return armorLevel;
-    }
-
-    public void setArmorLevel(int armorLevel) {
-        this.armorLevel = armorLevel;
-    }
+    protected ArmorInventory() {}
 
     @Override
     public boolean equals(Object o) {
@@ -108,12 +61,12 @@ public class ArmorInventory {
         ArmorInventory that = (ArmorInventory) o;
         return armorLevel == that.armorLevel &&
                 Objects.equals(id, that.id) &&
-                Objects.equals(account, that.account) &&
+                Objects.equals(character, that.character) &&
                 Objects.equals(armor, that.armor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, account, armor, armorLevel);
+        return Objects.hash(id, character, armor, armorLevel);
     }
 }

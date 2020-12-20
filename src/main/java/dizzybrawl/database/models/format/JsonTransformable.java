@@ -1,4 +1,4 @@
-package dizzybrawl.database.models.utils;
+package dizzybrawl.database.models.format;
 
 import io.vertx.core.json.JsonObject;
 
