@@ -118,7 +118,7 @@ public class CharacterApi {
                     }
 
                     JsonObject response = new JsonObject();
-                    response.put("characters", allRequestedWeapons);
+                    response.put("armors", allRequestedWeapons);
 
                     context.response().end(response.encodePrettily());
                 } else {
