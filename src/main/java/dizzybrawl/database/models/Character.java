@@ -55,6 +55,7 @@ public class Character implements JsonTransformable {
 
         this.characterID = SqlRowUtils.getElse(sqlRowCharacter, 0L).apply(CHARACTER_ID);
         this.characterType.setId(SqlRowUtils.getElse(sqlRowCharacter, 0).apply(CharacterType.CHARACTER_TYPE_ID));
+        this.characterType.setName(SqlRowUtils.getElse(sqlRowCharacter, null, String.class).apply(CharacterType.CHARACTER_NAME));
         this.account.setAccountID(SqlRowUtils.getElse(sqlRowCharacter, 0L).apply(Account.ACCOUNT_ID));
         this.isEnabled = SqlRowUtils.getElse(sqlRowCharacter, false).apply(CHARACTER_IS_ENABLED);
     }
@@ -64,6 +65,7 @@ public class Character implements JsonTransformable {
         return new JsonObject()
                 .put(CHARACTER_ID, characterID == null ? null : characterID)
                 .put(CharacterType.CHARACTER_TYPE_ID, characterType == null ? 0 : characterType.getId())
+                .put(CharacterType.CHARACTER_NAME, characterType == null ? null : characterType.getName())
                 .put(Account.ACCOUNT_ID, account.getAccountID() == null ? null : account.getAccountID().toString())
                 .put(CHARACTER_IS_ENABLED, isEnabled);
     }

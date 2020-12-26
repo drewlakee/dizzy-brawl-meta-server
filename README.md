@@ -94,6 +94,7 @@ name                | data type     |description
 ------------        |-------------  |-------------
 character_id        | long          | unique identifier
 character_type_id   | int           | unique identifier of character's type in game
+character_name      | string  | character's type name
 is_enabled          | boolean       | available for user in game or not
 
 [To API Navigation](#apiv1-navigation)
