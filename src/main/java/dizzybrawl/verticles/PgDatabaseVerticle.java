@@ -58,7 +58,7 @@ public class PgDatabaseVerticle extends AbstractVerticle {
     public Future<Void> buildSqlTriggers() {
         String triggersScripts;
         try {
-            triggersScripts = Files.readString(Path.of(PgDatabaseVerticle.class.getResource("/pg-triggers.sql").toURI()));
+            triggersScripts = Files.readString(Path.of(PgDatabaseVerticle.class.getResource("/scripts/pg-triggers.sql").toURI()));
         } catch (IOException | URISyntaxException e) {
             log.error("SQL triggers can't to be builder cause ", e.getCause());
             return Future.failedFuture("Can't read SQL triggers from URI");
