@@ -1,6 +1,9 @@
 # IDEA ignore
 .idea
 
+# env variables
+*.env
+
 # log files
 *.log
 
