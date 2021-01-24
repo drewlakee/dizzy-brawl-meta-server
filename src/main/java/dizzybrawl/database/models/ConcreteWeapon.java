@@ -5,7 +5,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class ConcreteWeapon extends Weapon {
 

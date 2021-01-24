@@ -2,8 +2,8 @@ package dizzybrawl.http.api;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import dizzybrawl.database.models.*;
 import dizzybrawl.database.models.Character;
+import dizzybrawl.database.models.*;
 import dizzybrawl.http.validation.errors.DataErrors;
 import dizzybrawl.http.validation.errors.JsonErrors;
 import dizzybrawl.verticles.CharacterServiceVerticle;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class CharacterApi {

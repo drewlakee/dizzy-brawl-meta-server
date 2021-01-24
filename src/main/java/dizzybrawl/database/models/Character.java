@@ -9,8 +9,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
 
 /**
  *  Table contains concrete characters information
