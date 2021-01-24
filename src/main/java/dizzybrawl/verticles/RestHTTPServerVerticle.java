@@ -15,12 +15,10 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource(value = "classpath:http.properties")
 public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
@@ -49,14 +47,15 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServerOptions serverOptions = new HttpServerOptions()
-                .setPort(environment.getProperty("http.server.port", Integer.class, 8080));
+                .setHost(environment.getProperty("server.ip.v4", "localhost"))
+                .setPort(environment.getProperty("server.port", Integer.class, 80));
 
         vertx.createHttpServer(serverOptions).requestHandler(getConfiguredApiRouter()).listen(ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
-                log.info(String.format("%s deployment ID: %s", this.getClass().getSimpleName(), this.deploymentID()));
+                log.info(String.format("HTTP Server launched on %s:%d", serverOptions.getHost(), serverOptions.getPort()));
             } else {
-                log.error("Could not launch http server: " + ar.cause());
+                log.error("Could not launch HTTP server: " + ar.cause());
                 startPromise.fail(ar.cause());
             }
         });
@@ -64,7 +63,7 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private Router getConfiguredApiRouter() {
         Router router = Router.router(vertx);
-        router.mountSubRouter(environment.getProperty("http.server.endpoints.prefix", "/api"), router);
+        router.mountSubRouter(environment.getProperty("server.context.path", "/api"), router);
         router.route().handler(rh -> {
             rh.response()
                     .setChunked(true)
