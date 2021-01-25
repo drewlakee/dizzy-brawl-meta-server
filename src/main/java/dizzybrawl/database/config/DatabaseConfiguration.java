@@ -64,7 +64,7 @@ public class DatabaseConfiguration {
                 .setPassword(environment.getProperty("database.password"));
 
         PoolOptions connectionPoolOptions = new PoolOptions()
-                .setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class));
+                .setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class, 1));
 
         return PgPool.pool(Vertx.vertx(), connectionOptions, connectionPoolOptions);
     }

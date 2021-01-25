@@ -52,7 +52,7 @@ public class VertxLauncherVerticle extends AbstractVerticle {
         DeploymentOptions restServerDeploymentOptions = new DeploymentOptions()
                 .setWorker(true)
                 .setWorkerPoolName("rest-server-worker")
-                .setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class, 0));
+                .setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class, 1));
 
         CompositeFuture.all(
             deploy(restHTTPServerVerticle, restServerDeploymentOptions),
