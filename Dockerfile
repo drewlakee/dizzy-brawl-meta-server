@@ -6,4 +6,6 @@ COPY . /
 
 RUN ./gradlew build --no-daemon
 
-ENTRYPOINT java -jar build/libs/db-server-1.0.jar
+COPY build/libs/app.jar /bin
+
+ENTRYPOINT java -jar /bin/app.jar

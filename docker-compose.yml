@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  dizzy-brawl-postgres:
+    container_name: dizzy-brawl-postgres
+    image: postgres:9.6.20-alpine
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5433 # container's host port : container's port
+    environment:
+      - POSTGRES_DB=dizzy-brawl
+      - POSTGRES_USER=dizzy-brawl
+      - POSTGRES_PASSWORD=dizzy-brawl
+
+  dizzy-brawl-backend:
+    container_name: dizzy-brawl-backend
+    image: dizzy-brawl-backend:v1
+    build: .
+    ports:
+      - 8080:8080 # container's host port : container's port
+    environment:
+      - server.context.path=/api/v1 # context path for endpoints
+      - server.ip.v4=0.0.0.0
+      - server.port=8080
+      - server.workers.pool.count=1 # number of http server's thread-workers
+      - database.host=dizzy-brawl-postgres # container name or remote hostname
+      # - database.port=5433 (at local up it's not mandatory cause containers linked by their names)
+      - database.name=dizzy-brawl
+      - database.username=dizzy
+      - database.password=dizzy
+      - database.connection.pool.count=1 # number of simultaneously possible connections with database
+      - database.jdbc.driverClassName=org.postgresql.Driver
+      - database.url=jdbc:postgresql://dizzy-brawl-postgres/dizzy-brawl # jdbc:<database>://(<hostname>:<port>)|<container_name>]/<database_name>
+      - hibernate.dialect=org.hibernate.dialect.PostgreSQL82Dialect
+      - hibernate.show_sql=true # for debug mode
+      - hibernate.hbm2ddl.auto=create # hibernate entities generation strategy
+    links:
+      - dizzy-brawl-postgres
+    depends_on:
+      - dizzy-brawl-postgres

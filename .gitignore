@@ -7,6 +7,9 @@
 # log files
 *.log
 
+# postgres volume
+postgres-data/
+
 # vertx generated
 src/generated
 **/asciidoc/**
