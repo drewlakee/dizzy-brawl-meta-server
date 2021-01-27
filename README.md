@@ -4,6 +4,7 @@
 
 1. [APIv1 Navigation](#apiv1-navigation)
 2. [APIv1 Documentation](#apiv1-documentation)
+3. [Deployment](#deployment)
 
 ### APIv1 Navigation
 
@@ -331,3 +332,17 @@ code                | description
 404                 | some server not founded in database and other servers in query also was not deleted
 
 [To API Navigation](#apiv1-navigation)
+
+### Deployment
+
+1. Clone project from repository
+
+```
+git clone git@github.com:drewlakee/dizzy-brawl-meta-server.git
+```
+
+2. Run docker-composer
+
+```
+docker-compose up
+```
