@@ -4,7 +4,6 @@ plugins {
 }
 
 group 'org.dizzybrawl'
-version '1.0'
 
 repositories {
     mavenCentral()
@@ -59,5 +58,6 @@ dependencies {
 }
 
 bootJar {
+    baseName("app")
     manifest.attributes("Start-Class" : "dizzybrawl.Application")
 }
