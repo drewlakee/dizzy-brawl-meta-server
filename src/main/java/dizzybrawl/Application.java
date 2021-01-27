@@ -17,10 +17,10 @@ public class Application {
 
     /**
      *  Inject it for correct lifecycle:
-     *  Hibernate Entities Generation -> Custom SQL injections
+     *  Hibernate Entities Generation -> Post Postgres Initialization SQL scripts
      *
-     *  Make possible to execute other SQL things after hibernate mapping
-     *  @see PgDatabaseVerticle#buildSqlTriggers()
+     *  Make possible to execute other SQL things after hibernate generation
+     *  @see PgDatabaseVerticle#postPostgresInitialization()
      */
     private final SessionFactory sessionFactory;
 

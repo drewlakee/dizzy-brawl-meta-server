@@ -58,10 +58,14 @@ public class DatabaseConfiguration {
     public PgPool getReactiveVertxPgPool() {
         PgConnectOptions connectionOptions = new PgConnectOptions()
                 .setHost(environment.getProperty("database.host"))
-                .setPort(environment.getProperty("database.port", Integer.class))
                 .setDatabase(environment.getProperty("database.name"))
                 .setUser(environment.getProperty("database.username"))
                 .setPassword(environment.getProperty("database.password"));
+
+        // maybe build at docker then port is not mandatory
+        if (environment.containsProperty("database.port")) {
+            connectionOptions.setPort(environment.getProperty("database.port", Integer.class));
+        }
 
         PoolOptions connectionPoolOptions = new PoolOptions()
                 .setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class, 1));

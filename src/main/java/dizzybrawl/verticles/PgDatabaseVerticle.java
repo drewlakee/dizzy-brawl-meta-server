@@ -12,11 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 @Component
 public class PgDatabaseVerticle extends AbstractVerticle {
@@ -50,22 +50,23 @@ public class PgDatabaseVerticle extends AbstractVerticle {
             });
         });
 
-        buildSqlTriggers()
+
+        postPostgresInitialization()
                 .onComplete(handler -> startPromise.complete())
                 .onFailure(startPromise::fail);
     }
 
-    public Future<Void> buildSqlTriggers() {
-        String triggersScripts;
-        try {
-            triggersScripts = Files.readString(Path.of(PgDatabaseVerticle.class.getResource("/scripts/pg-triggers.sql").toURI()));
-        } catch (IOException | URISyntaxException e) {
-            log.error("SQL triggers can't to be builder cause ", e.getCause());
-            return Future.failedFuture("Can't read SQL triggers from URI");
+    public Future<Void> postPostgresInitialization() {
+        String scripts;
+        try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("pg-post-init.sql")) {
+            scripts = StreamUtils.copyToString(in, Charset.defaultCharset());
+        } catch (IOException e) {
+            log.error("Post Postgres Initialization error cause ", e.getCause());
+            return Future.failedFuture("Post Postgres Initialization error");
         }
 
-        if (triggersScripts.isBlank()) {
-            return Future.failedFuture("SQL triggers file is empty");
+        if (scripts.isBlank()) {
+            return Future.failedFuture("Post Postgres Initialization file is empty");
         }
 
         pgClient.getConnection(ar1 -> {
@@ -73,12 +74,12 @@ public class PgDatabaseVerticle extends AbstractVerticle {
                 SqlConnection connection = ar1.result();
 
                 Transaction transaction = connection.begin();
-                transaction.query(triggersScripts).execute(ar2 -> {
+                transaction.query(scripts).execute(ar2 -> {
                     if (ar2.succeeded()) {
-                        log.info("SQL triggers was successfully built.");
+                        log.info("Post Postgres Initialization was successfully done");
                         transaction.commit();
                     } else {
-                        log.error("Can't execute SQL triggers cause ", ar2.cause());
+                        log.error("Post Postgres Initialization transaction error cause ", ar2.cause());
                         transaction.rollback();
                     }
 
