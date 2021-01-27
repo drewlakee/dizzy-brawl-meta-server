@@ -47,15 +47,15 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServerOptions serverOptions = new HttpServerOptions()
-                .setHost(environment.getProperty("server.ip.v4", "localhost"))
-                .setPort(environment.getProperty("server.port", Integer.class, 80));
+                .setHost(environment.getProperty("server.ip.v4"))
+                .setPort(environment.getProperty("server.port", Integer.class));
 
         vertx.createHttpServer(serverOptions).requestHandler(getConfiguredApiRouter()).listen(ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
                 log.info(String.format("HTTP Server launched on %s:%d", serverOptions.getHost(), serverOptions.getPort()));
             } else {
-                log.error("Could not launch HTTP server: " + ar.cause());
+                log.error("Could not launch HTTP server cause " + ar.cause());
                 startPromise.fail(ar.cause());
             }
         });
@@ -63,7 +63,12 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private Router getConfiguredApiRouter() {
         Router router = Router.router(vertx);
-        router.mountSubRouter(environment.getProperty("server.context.path", "/api"), router);
+        router.mountSubRouter(environment.getProperty("server.context.path", "/"), router);
+
+        if (environment.containsProperty("server.context.path")) {
+            log.info("HTTP endpoints context path " + environment.getProperty("server.context.path", "/"));
+        }
+
         router.route().handler(rh -> {
             rh.response()
                     .setChunked(true)
@@ -74,10 +79,8 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
         router.route().handler(BodyHandler.create());
 
-        // validation handlers
         ValidationHandler jsonObjectValidationHandler = JsonObjectValidationHandler.create();
 
-        // api end points handlers
         router.post("/accounts/auth/login")
                 .handler(jsonObjectValidationHandler)
                 .handler(accountApi.onLogin(vertx));
