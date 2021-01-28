@@ -8,7 +8,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
-      - 5433:5433 # container's host port : container's port
+      - 5433:5433
     environment:
       - POSTGRES_DB=dizzy-brawl
       - POSTGRES_USER=dizzy-brawl
@@ -19,14 +19,14 @@ services:
     image: dizzy-brawl-backend:v1
     build: .
     ports:
-      - 8080:8080 # container's host port : container's port
+      - 8080:8080
     environment:
       - server.context.path=/api/v1 # context path for endpoints
       - server.ip.v4=0.0.0.0
       - server.port=8080
       - server.workers.pool.count=1 # number of http server's thread-workers
       - database.host=dizzy-brawl-postgres # container name or remote hostname
-      - database.port=5433 # (at local up it's not mandatory cause containers linked by their names)
+      - database.port=none # [none]|[some_port] (none - not needed, for example at docker network)
       - database.name=dizzy-brawl
       - database.username=dizzy-brawl
       - database.password=dizzy-brawl

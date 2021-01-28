@@ -7,7 +7,6 @@ import io.vertx.sqlclient.PoolOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -63,12 +62,18 @@ public class DatabaseConfiguration {
                 .setPassword(environment.getProperty("database.password"));
 
         // maybe build at docker then port is not mandatory
-        if (environment.containsProperty("database.port")) {
+        if (environment.containsProperty("database.port") && !environment.getProperty("database.port").equals("none")) {
             connectionOptions.setPort(environment.getProperty("database.port", Integer.class));
         }
 
-        PoolOptions connectionPoolOptions = new PoolOptions()
-                .setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class, 1));
+        PoolOptions connectionPoolOptions = new PoolOptions();
+
+        if (environment.containsProperty("database.connection.pool.count")
+                && environment.getProperty("database.connection.pool.count", Integer.class) > 0) {
+            connectionPoolOptions.setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class));
+        } else {
+            connectionPoolOptions.setMaxSize(1);
+        }
 
         return PgPool.pool(Vertx.vertx(), connectionOptions, connectionPoolOptions);
     }

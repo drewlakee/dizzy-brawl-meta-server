@@ -49,13 +49,19 @@ public class VertxLauncherVerticle extends AbstractVerticle {
         vertx.eventBus()
                 .registerDefaultCodec(EventBusObjectWrapper.class, new EventBusObjectWrapperMessageCodec());
 
-        DeploymentOptions restServerDeploymentOptions = new DeploymentOptions()
+        DeploymentOptions restHTTPServerDeploymentOptions = new DeploymentOptions()
                 .setWorker(true)
-                .setWorkerPoolName("rest-server-worker")
-                .setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class, 1));
+                .setWorkerPoolName("http-server-workers-pool");
+
+        if (environment.containsProperty("server.workers.pool.count")
+                && environment.getProperty("server.workers.pool.count", Integer.class) > 0) {
+            restHTTPServerDeploymentOptions.setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class));
+        } else {
+            restHTTPServerDeploymentOptions.setWorkerPoolSize(1);
+        }
 
         CompositeFuture.all(
-            deploy(restHTTPServerVerticle, restServerDeploymentOptions),
+            deploy(restHTTPServerVerticle, restHTTPServerDeploymentOptions),
             deploy(accountServiceVerticle),
             deploy(characterServiceVerticle),
             deploy(taskServiceVerticle),
