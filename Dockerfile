@@ -4,8 +4,9 @@ LABEL maintainer = "Andrew Aleynikov [drew.lake@yandex.ru]"
 
 COPY . /
 
+RUN chmod 777 gradlew
 RUN ./gradlew build --no-daemon
 
-COPY build/libs/app.jar /bin
+RUN cp /build/libs/app.jar /bin
 
 ENTRYPOINT java -jar /bin/app.jar
