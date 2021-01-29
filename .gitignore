@@ -1,8 +1,14 @@
 # IDEA ignore
 .idea
 
+# env variables
+*.env
+
 # log files
 *.log
+
+# postgres volume
+postgres-data/
 
 # vertx generated
 src/generated

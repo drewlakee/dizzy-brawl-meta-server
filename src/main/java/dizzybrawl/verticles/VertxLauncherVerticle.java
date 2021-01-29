@@ -6,12 +6,10 @@ import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource(value = "classpath:http.properties")
 public class VertxLauncherVerticle extends AbstractVerticle {
 
     private static final Logger log = LoggerFactory.getLogger(VertxLauncherVerticle.class);
@@ -51,13 +49,19 @@ public class VertxLauncherVerticle extends AbstractVerticle {
         vertx.eventBus()
                 .registerDefaultCodec(EventBusObjectWrapper.class, new EventBusObjectWrapperMessageCodec());
 
-        DeploymentOptions restServerDeploymentOptions = new DeploymentOptions()
+        DeploymentOptions restHTTPServerDeploymentOptions = new DeploymentOptions()
                 .setWorker(true)
-                .setWorkerPoolName("rest-server-worker")
-                .setWorkerPoolSize(environment.getProperty("http.rest-workers.pool", Integer.class, 0));
+                .setWorkerPoolName("http-server-workers-pool");
+
+        if (environment.containsProperty("server.workers.pool.count")
+                && environment.getProperty("server.workers.pool.count", Integer.class) > 0) {
+            restHTTPServerDeploymentOptions.setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class));
+        } else {
+            restHTTPServerDeploymentOptions.setWorkerPoolSize(1);
+        }
 
         CompositeFuture.all(
-            deploy(restHTTPServerVerticle, restServerDeploymentOptions),
+            deploy(restHTTPServerVerticle, restHTTPServerDeploymentOptions),
             deploy(accountServiceVerticle),
             deploy(characterServiceVerticle),
             deploy(taskServiceVerticle),

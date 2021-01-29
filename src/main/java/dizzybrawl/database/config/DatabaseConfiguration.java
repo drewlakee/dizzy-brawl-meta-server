@@ -7,7 +7,6 @@ import io.vertx.sqlclient.PoolOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -18,7 +17,6 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@PropertySource(value = "classpath:db.properties")
 public class DatabaseConfiguration {
 
     private final Environment environment;
@@ -39,10 +37,10 @@ public class DatabaseConfiguration {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(environment.getProperty("jdbc.driverClass"));
-        dataSource.setUrl(environment.getProperty("jdbc.url"));
-        dataSource.setUsername(environment.getProperty("db.client.username"));
-        dataSource.setPassword(environment.getProperty("db.client.password"));
+        dataSource.setDriverClassName(environment.getProperty("database.jdbc.driverClassName"));
+        dataSource.setUrl(environment.getProperty("database.url"));
+        dataSource.setUsername(environment.getProperty("database.username"));
+        dataSource.setPassword(environment.getProperty("database.password"));
         return dataSource;
     }
 
@@ -58,14 +56,24 @@ public class DatabaseConfiguration {
     @Bean
     public PgPool getReactiveVertxPgPool() {
         PgConnectOptions connectionOptions = new PgConnectOptions()
-                .setHost(environment.getProperty("db.host"))
-                .setPort(environment.getProperty("db.port", Integer.class))
-                .setDatabase(environment.getProperty("db.name"))
-                .setUser(environment.getProperty("db.client.username"))
-                .setPassword(environment.getProperty("db.client.password"));
+                .setHost(environment.getProperty("database.host"))
+                .setDatabase(environment.getProperty("database.name"))
+                .setUser(environment.getProperty("database.username"))
+                .setPassword(environment.getProperty("database.password"));
 
-        PoolOptions connectionPoolOptions = new PoolOptions()
-                .setMaxSize(environment.getProperty("db.pool.size", Integer.class));
+        // maybe build at docker then port is not mandatory
+        if (environment.containsProperty("database.port") && !environment.getProperty("database.port").equals("none")) {
+            connectionOptions.setPort(environment.getProperty("database.port", Integer.class));
+        }
+
+        PoolOptions connectionPoolOptions = new PoolOptions();
+
+        if (environment.containsProperty("database.connection.pool.count")
+                && environment.getProperty("database.connection.pool.count", Integer.class) > 0) {
+            connectionPoolOptions.setMaxSize(environment.getProperty("database.connection.pool.count", Integer.class));
+        } else {
+            connectionPoolOptions.setMaxSize(1);
+        }
 
         return PgPool.pool(Vertx.vertx(), connectionOptions, connectionPoolOptions);
     }

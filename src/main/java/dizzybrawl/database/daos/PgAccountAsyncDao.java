@@ -18,8 +18,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
-
 @Repository
 @PropertySource("classpath:queries/account-db-queries.properties")
 public class PgAccountAsyncDao implements AccountAsyncDao {

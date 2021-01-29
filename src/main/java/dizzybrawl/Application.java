@@ -7,23 +7,20 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 public class Application {
 
-    public static ConfigurableApplicationContext configurableApplicationContext;
-
     private final VertxLauncherVerticle launcherVerticle;
 
     /**
      *  Inject it for correct lifecycle:
-     *  Hibernate Entities Generation -> Custom SQL injections
+     *  Hibernate Entities Generation -> Post Postgres Initialization SQL scripts
      *
-     *  Make possible to execute other SQL things after hibernate mapping
-     *  @see PgDatabaseVerticle#buildSqlTriggers()
+     *  Make possible to execute other SQL things after hibernate generation
+     *  @see PgDatabaseVerticle#postPostgresInitialization()
      */
     private final SessionFactory sessionFactory;
 
@@ -37,15 +34,10 @@ public class Application {
     @PostConstruct
     private void launchVertx() {
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(launcherVerticle, ar1 -> {
-            if (ar1.failed()) {
-                SpringApplication.exit(configurableApplicationContext, () -> 0);
-                System.exit(0);
-            }
-        });
+        vertx.deployVerticle(launcherVerticle);
     }
 
     public static void main(String[] args) {
-        Application.configurableApplicationContext = SpringApplication.run(Application.class, args);
+        SpringApplication.run(Application.class, args);
     }
 }

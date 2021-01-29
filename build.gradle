@@ -1,9 +1,9 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '2.4.2'
 }
 
 group 'org.dizzybrawl'
-version '1.0'
 
 repositories {
     mavenCentral()
@@ -13,8 +13,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_14
     targetCompatibility = JavaVersion.VERSION_14
 }
-
-
 
 test {
     failFast = true
@@ -27,7 +25,6 @@ ext {
 }
 
 dependencies {
-
     // guava
     compile 'com.google.guava:guava:29.0-jre'
     testCompile 'com.google.guava:guava:29.0-jre'
@@ -58,4 +55,9 @@ dependencies {
 
     // junit tests
     testCompile "junit:junit:$junitVersion"
+}
+
+bootJar {
+    baseName("app")
+    manifest.attributes("Start-Class" : "dizzybrawl.Application")
 }
