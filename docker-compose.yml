@@ -2,41 +2,73 @@ version: "3"
 
 services:
 
-  dizzy-brawl-postgres:
-    container_name: dizzy-brawl-postgres
+  postgres:
+    container_name: postgres
     image: postgres:9.6.20-alpine
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
       - 5433:5432
     environment:
+      # database name and credentials
       - POSTGRES_DB=dizzy-brawl
       - POSTGRES_USER=dizzy-brawl
       - POSTGRES_PASSWORD=dizzy-brawl
 
-  dizzy-brawl-backend:
-    container_name: dizzy-brawl-backend
-    image: dizzy-brawl-backend:v1
+  web-server:
+    container_name: web-server
+    image: dizzy-brawl-backend:v1.0.0
     build: .
     ports:
-      - 8080:8080
-    environment:
-      - server.context.path=/api/v1 # context path for endpoints
-      - server.ip.v4=0.0.0.0
-      - server.port=8080
-      - server.workers.pool.count=1 # number of http server's thread-workers
-      - database.host=dizzy-brawl-postgres # container name or remote hostname
-      - database.port=none # [none]|[some_port] (none - not needed, for example at docker network)
-      - database.name=dizzy-brawl
-      - database.username=dizzy-brawl
-      - database.password=dizzy-brawl
-      - database.connection.pool.count=1 # number of simultaneously possible connections with database
-      - database.jdbc.driverClassName=org.postgresql.Driver
-      - database.url=jdbc:postgresql://dizzy-brawl-postgres/dizzy-brawl # jdbc:<database>://(<hostname>:<port>)|<container_name>]/<database_name>
-      - hibernate.dialect=org.hibernate.dialect.PostgreSQL82Dialect
-      - hibernate.show_sql=true # for debug mode
-      - hibernate.hbm2ddl.auto=create # hibernate entities generation strategy
+      - 8080:8081
+      # environment:                                        # all commented env variables is OPTIONAL
+      #
+      #
+      #- server.context.path=<prefix>                       # default: '/api/v1'
+      #- vertx.server.ip.v4=<ip_v4>                         # default: '0.0.0.0'
+      #- vertx.server.port=<port>                           # default: '8081'
+      #- server.workers.pool.count=<number>                 # default: '1'
+      #- database.host=<ip_or_container_name>               # default: 'postgres' - container name by default
+      #- database.port=<port>                               # default: 'none' - cause docker network used
+      #- database.name=<db_name>                            # default: 'dizzy-brawl'
+      #- database.username=<db_username>                    # default: 'dizzy-brawl'
+      #- database.password=<db_password>                    # default: 'dizzy-brawl'
+      #- database.connection.pool.count=<number>            # default: '1'
+      #- database.jdbc.driverClassName=<driver_class_name>  # default: 'org.postgresql.Driver'
+      #- database.url=<jdbc_url>                            # default: 'jdbc:postgresql://postgres/dizzy-brawl'
+      #- hibernate.dialect=<dialect>                        # default: 'org.hibernate.dialect.PostgreSQL82Dialect'
+      #- hibernate.show_sql=<boolean>                       # default: 'false'
+      #- hibernate.hbm2ddl.auto=<strategy>                  # default: 'create'
     links:
-      - dizzy-brawl-postgres
+      - postgres
     depends_on:
-      - dizzy-brawl-postgres
+      - postgres
+
+  prometheus:
+    image: prom/prometheus:v2.24.1
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - 9090:9090
+    links:
+      - web-server
+    depends_on:
+      - web-server
+
+  grafana:
+    image: grafana/grafana:7.4.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    links:
+      - prometheus
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus

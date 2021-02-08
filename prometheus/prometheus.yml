@@ -1,0 +1,16 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  - job_name: 'prometheus'
+    static_configs:
+      # self-scraping metrics
+      - targets: ['localhost:9090']
+
+  - job_name: 'web-server'
+    static_configs:
+      # scrape web-server metrics
+      # port and container name specified at docker-compose.yml
+      - targets: ['web-server:8082']
