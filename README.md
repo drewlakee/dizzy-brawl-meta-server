@@ -1,4 +1,6 @@
-# Dizzy Brawl Meta-Server
+# Dizzy Brawl Game Meta-Web-Server + Prometheus + Grafana
+
+![dizzy_head](https://sun9-28.userapi.com/impf/hA6E0YonDbEE3gviC95XEQpY5yuLNWmzCDZqxQ/u8LzTYPXQ0E.jpg?size=795x200&quality=95&crop=0,87,1647,414&sign=9a4a0fc889f3ed9f899efecbbd0d4ef4&type=cover_group)
 
 ### Content
 
