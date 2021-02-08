@@ -16,7 +16,7 @@ public class VertxLauncherVerticle extends AbstractVerticle {
 
     public final Environment environment;
 
-    private final RestHTTPServerVerticle restHTTPServerVerticle;
+    private final WebServerVerticle webServerVerticle;
     private final AccountServiceVerticle accountServiceVerticle;
     private final CharacterServiceVerticle characterServiceVerticle;
     private final TaskServiceVerticle taskServiceVerticle;
@@ -24,14 +24,14 @@ public class VertxLauncherVerticle extends AbstractVerticle {
     private final PgDatabaseVerticle pgDatabaseVerticle;
 
     @Autowired
-    public VertxLauncherVerticle(RestHTTPServerVerticle restHTTPServerVerticle,
+    public VertxLauncherVerticle(WebServerVerticle webServerVerticle,
                                  PgDatabaseVerticle pgDatabaseVerticle,
                                  AccountServiceVerticle accountServiceVerticle,
                                  CharacterServiceVerticle characterServiceVerticle,
                                  TaskServiceVerticle taskServiceVerticle,
                                  ServerServiceVerticle serverServiceVerticle,
                                  Environment environment) {
-        this.restHTTPServerVerticle = restHTTPServerVerticle;
+        this.webServerVerticle = webServerVerticle;
         this.pgDatabaseVerticle = pgDatabaseVerticle;
         this.accountServiceVerticle = accountServiceVerticle;
         this.characterServiceVerticle = characterServiceVerticle;
@@ -49,19 +49,17 @@ public class VertxLauncherVerticle extends AbstractVerticle {
         vertx.eventBus()
                 .registerDefaultCodec(EventBusObjectWrapper.class, new EventBusObjectWrapperMessageCodec());
 
-        DeploymentOptions restHTTPServerDeploymentOptions = new DeploymentOptions()
+        DeploymentOptions webServerDeployment = new DeploymentOptions()
                 .setWorker(true)
                 .setWorkerPoolName("http-server-workers-pool");
 
-        if (environment.containsProperty("server.workers.pool.count")
-                && environment.getProperty("server.workers.pool.count", Integer.class) > 0) {
-            restHTTPServerDeploymentOptions.setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class));
-        } else {
-            restHTTPServerDeploymentOptions.setWorkerPoolSize(1);
+        if (environment.containsProperty("server.workers.pool.count")) {
+            webServerDeployment.setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class, 1));
+            log.info("Web-server workers pool [{0}] size: {1} threads", webServerDeployment.getWorkerPoolName(), webServerDeployment.getWorkerPoolSize());
         }
 
         CompositeFuture.all(
-            deploy(restHTTPServerVerticle, restHTTPServerDeploymentOptions),
+            deploy(webServerVerticle, webServerDeployment),
             deploy(accountServiceVerticle),
             deploy(characterServiceVerticle),
             deploy(taskServiceVerticle),
@@ -69,37 +67,33 @@ public class VertxLauncherVerticle extends AbstractVerticle {
             deploy(pgDatabaseVerticle)
         ).onSuccess(handler -> {
             startPromise.complete();
-            log.info("Verticles deploy process successfully done.");
+            log.info("Verticles deploy process successfully done");
         }).onFailure(handler -> {
             handler.printStackTrace();
             startPromise.fail(handler.getCause());
-            log.error("Verticles deploy process failed cause ", handler.getCause());
+            log.error("Verticles deploy process failed cause {0}", handler.getCause());
         });
     }
 
     private Future<Void> deploy(AbstractVerticle verticle, DeploymentOptions deploymentOptions) {
-        return Future.future(handler -> {
-            vertx.deployVerticle(verticle, deploymentOptions, ar1 -> {
-                if (ar1.succeeded()) {
-                    handler.complete();
-                } else {
-                    ar1.cause().printStackTrace();
-                    handler.fail(ar1.cause());
-                }
-            });
-        });
+        return Future.future(handler -> vertx.deployVerticle(verticle, deploymentOptions, ar1 -> {
+            if (ar1.succeeded()) {
+                handler.complete();
+            } else {
+                ar1.cause().printStackTrace();
+                handler.fail(ar1.cause());
+            }
+        }));
     }
 
     private Future<Void> deploy(AbstractVerticle verticle) {
-        return Future.future(handler -> {
-            vertx.deployVerticle(verticle, ar1 -> {
-                if (ar1.succeeded()) {
-                    handler.complete();
-                } else {
-                    ar1.cause().printStackTrace();
-                    handler.fail(ar1.cause());
-                }
-            });
-        });
+        return Future.future(handler -> vertx.deployVerticle(verticle, ar1 -> {
+            if (ar1.succeeded()) {
+                handler.complete();
+            } else {
+                ar1.cause().printStackTrace();
+                handler.fail(ar1.cause());
+            }
+        }));
     }
 }

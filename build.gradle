@@ -20,7 +20,6 @@ test {
 
 ext {
     vertxVersion = '3.9.3'
-    junitVersion = '4.12'
     springVersion = '2.4.0'
 }
 
@@ -36,12 +35,16 @@ dependencies {
     compile "io.vertx:vertx-auth-jwt:$vertxVersion"
 
     // spring
+    compile "org.springframework.boot:spring-boot-starter-web:$springVersion"
     compile "org.springframework.boot:spring-boot-starter:$springVersion"
     compile "org.springframework.boot:spring-boot-starter-jdbc:$springVersion"
+    compile "org.springframework.boot:spring-boot-starter-actuator:$springVersion"
 
     // spring orm for hibernate
     compile 'org.springframework:spring-orm:5.2.11.RELEASE'
 
+    // micrometer for prometheus metrics
+    compile group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: '1.6.3'
 
     // hibernate
     compile 'org.hibernate:hibernate-core:5.4.24.Final'
@@ -49,12 +52,11 @@ dependencies {
     // postgre driver
     compile 'org.postgresql:postgresql:42.2.18'
 
-
     // for db clients (vertx pg poll required)
     compile 'com.ongres.scram:client:2.1'
 
     // junit tests
-    testCompile "junit:junit:$junitVersion"
+    testCompile "junit:junit:4.12"
 }
 
 bootJar {

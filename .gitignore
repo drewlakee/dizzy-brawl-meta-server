@@ -10,6 +10,9 @@
 # postgres volume
 postgres-data/
 
+# grafana volume
+grafana-data/
+
 # vertx generated
 src/generated
 **/asciidoc/**

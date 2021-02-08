@@ -19,9 +19,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RestHTTPServerVerticle extends AbstractVerticle {
+public class WebServerVerticle extends AbstractVerticle {
 
-    private static final Logger log = LoggerFactory.getLogger(RestHTTPServerVerticle.class);
+    private static final Logger log = LoggerFactory.getLogger(WebServerVerticle.class);
 
     private final Environment environment;
 
@@ -31,11 +31,11 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     private final ServerApi serverApi;
 
     @Autowired
-    public RestHTTPServerVerticle(AccountApi accountApi,
-                                  CharacterApi characterApi,
-                                  TaskApi taskApi,
-                                  ServerApi serverApi,
-                                  Environment environment) {
+    public WebServerVerticle(AccountApi accountApi,
+                             CharacterApi characterApi,
+                             TaskApi taskApi,
+                             ServerApi serverApi,
+                             Environment environment) {
         this.accountApi = accountApi;
         this.characterApi = characterApi;
         this.taskApi = taskApi;
@@ -47,15 +47,15 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServerOptions serverOptions = new HttpServerOptions()
-                .setHost(environment.getProperty("server.ip.v4"))
-                .setPort(environment.getProperty("server.port", Integer.class));
+                .setHost(environment.getProperty("vertx.server.ip.v4", "0.0.0.0"))
+                .setPort(environment.getProperty("vertx.server.port", Integer.class, 8081));
 
         vertx.createHttpServer(serverOptions).requestHandler(getConfiguredApiRouter()).listen(ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
-                log.info(String.format("HTTP Server launched on %s:%d", serverOptions.getHost(), serverOptions.getPort()));
+                log.info("Web Server launched on " + serverOptions.getHost() + ":" + serverOptions.getPort());
             } else {
-                log.error("Could not launch HTTP server cause " + ar.cause());
+                log.error("Could not launch HTTP server cause {}", ar.cause());
                 startPromise.fail(ar.cause());
             }
         });
@@ -63,10 +63,10 @@ public class RestHTTPServerVerticle extends AbstractVerticle {
 
     private Router getConfiguredApiRouter() {
         Router router = Router.router(vertx);
-        router.mountSubRouter(environment.getProperty("server.context.path", "/"), router);
+        router.mountSubRouter(environment.getProperty("server.context.path", "/api/v1"), router);
 
         if (environment.containsProperty("server.context.path")) {
-            log.info("HTTP endpoints context path " + environment.getProperty("server.context.path", "/"));
+            log.info("Web Server endpoints context path '" + environment.getProperty("server.context.path", "/api/v1") + "'");
         }
 
         router.route().handler(rh -> {

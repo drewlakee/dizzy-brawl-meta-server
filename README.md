@@ -346,3 +346,29 @@ git clone git@github.com:drewlakee/dizzy-brawl-meta-server.git
 ```
 docker-compose up
 ```
+
+Available applications by default:
+
+- PostgreSQL: available on [localhost:5433](http://localhost:5433/)
+
+   - database:    dizzy-brawl
+
+   - admin:       dizzy-brawl
+   
+   - password:    dizzy-brawl
+
+- Web-server: available on [localhost:8080](http://localhost:8080/)
+
+   - endpoints-prefix: /api/v1
+
+- Prometheus: available on [localhost:9090](http://localhost:9090/)
+
+   - scrape-jobs:
+      - prometheus - every 15s
+      - web-server - every 15s
+
+- Grafana: available on [localhost:3000](http://localhost:3000/)
+
+   - username:    admin
+   
+   - password:    admin
