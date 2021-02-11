@@ -17,16 +17,16 @@ services:
 
   web-server:
     container_name: web-server
-    image: dizzy-brawl-backend:v1.0.0
+    image: dizzy-brawl-vertx-backend:v1.0.0
     build: .
     ports:
-      - 8080:8081
+      - 8080:8080
       # environment:                                        # all commented env variables is OPTIONAL
       #
       #
       #- server.context.path=<prefix>                       # default: '/api/v1'
       #- vertx.server.ip.v4=<ip_v4>                         # default: '0.0.0.0'
-      #- vertx.server.port=<port>                           # default: '8081'
+      #- vertx.server.port=<port>                           # default: '8080'
       #- server.workers.pool.count=<number>                 # default: '1'
       #- database.host=<ip_or_container_name>               # default: 'postgres' - container name by default
       #- database.port=<port>                               # default: 'none' - cause docker network used
@@ -39,6 +39,7 @@ services:
       #- hibernate.dialect=<dialect>                        # default: 'org.hibernate.dialect.PostgreSQL82Dialect'
       #- hibernate.show_sql=<boolean>                       # default: 'false'
       #- hibernate.hbm2ddl.auto=<strategy>                  # default: 'create'
+      #- vertx.prometheus.endpoint.port=<port>              # default: '8081'
     links:
       - postgres
     depends_on:

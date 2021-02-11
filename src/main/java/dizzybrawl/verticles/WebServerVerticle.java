@@ -10,10 +10,10 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -48,14 +48,14 @@ public class WebServerVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         HttpServerOptions serverOptions = new HttpServerOptions()
                 .setHost(environment.getProperty("vertx.server.ip.v4", "0.0.0.0"))
-                .setPort(environment.getProperty("vertx.server.port", Integer.class, 8081));
+                .setPort(environment.getProperty("vertx.server.port", Integer.class, 8080));
 
         vertx.createHttpServer(serverOptions).requestHandler(getConfiguredApiRouter()).listen(ar -> {
             if (ar.succeeded()) {
                 startPromise.complete();
-                log.info("Web Server launched on " + serverOptions.getHost() + ":" + serverOptions.getPort());
+                log.info("Vertx Web-Server launched on {}:{} ", serverOptions.getHost(), serverOptions.getPort());
             } else {
-                log.error("Could not launch HTTP server cause {}", ar.cause());
+                log.error("Could not launch HTTP server cause {}", ar.cause().toString());
                 startPromise.fail(ar.cause());
             }
         });
@@ -66,7 +66,7 @@ public class WebServerVerticle extends AbstractVerticle {
         router.mountSubRouter(environment.getProperty("server.context.path", "/api/v1"), router);
 
         if (environment.containsProperty("server.context.path")) {
-            log.info("Web Server endpoints context path '" + environment.getProperty("server.context.path", "/api/v1") + "'");
+            log.info("Vertx Web-Server endpoints context path '{}'", environment.getProperty("server.context.path", "/api/v1"));
         }
 
         router.route().handler(rh -> {
@@ -78,7 +78,6 @@ public class WebServerVerticle extends AbstractVerticle {
         });
 
         router.route().handler(BodyHandler.create());
-
         ValidationHandler jsonObjectValidationHandler = JsonObjectValidationHandler.create();
 
         router.post("/accounts/auth/login")

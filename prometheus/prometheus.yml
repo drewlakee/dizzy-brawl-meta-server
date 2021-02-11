@@ -13,4 +13,4 @@ scrape_configs:
     static_configs:
       # scrape web-server metrics
       # port and container name specified at docker-compose.yml
-      - targets: ['web-server:8082']
+      - targets: ['web-server:8081']

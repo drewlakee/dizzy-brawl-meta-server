@@ -3,8 +3,8 @@ package dizzybrawl.verticles;
 import dizzybrawl.verticles.eventBus.EventBusObjectWrapper;
 import dizzybrawl.verticles.eventBus.EventBusObjectWrapperMessageCodec;
 import io.vertx.core.*;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,7 @@ public class VertxLauncherVerticle extends AbstractVerticle {
 
         if (environment.containsProperty("server.workers.pool.count")) {
             webServerDeployment.setWorkerPoolSize(environment.getProperty("server.workers.pool.count", Integer.class, 1));
-            log.info("Web-server workers pool [{0}] size: {1} threads", webServerDeployment.getWorkerPoolName(), webServerDeployment.getWorkerPoolSize());
+            log.info("Vertx Web-Server workers pool [{}] size: {} threads", webServerDeployment.getWorkerPoolName(), webServerDeployment.getWorkerPoolSize());
         }
 
         CompositeFuture.all(

@@ -35,7 +35,6 @@ dependencies {
     compile "io.vertx:vertx-auth-jwt:$vertxVersion"
 
     // spring
-    compile "org.springframework.boot:spring-boot-starter-web:$springVersion"
     compile "org.springframework.boot:spring-boot-starter:$springVersion"
     compile "org.springframework.boot:spring-boot-starter-jdbc:$springVersion"
     compile "org.springframework.boot:spring-boot-starter-actuator:$springVersion"
@@ -45,6 +44,7 @@ dependencies {
 
     // micrometer for prometheus metrics
     compile group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: '1.6.3'
+    compile "io.vertx:vertx-micrometer-metrics:$vertxVersion"
 
     // hibernate
     compile 'org.hibernate:hibernate-core:5.4.24.Final'
