@@ -6,6 +6,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +16,8 @@ import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 public class Application {
+
+    private final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final VertxLauncherVerticle launcherVerticle;
     private final MicrometerMetricsOptions configuredMetrics;
@@ -46,6 +50,11 @@ public class Application {
         options.setMetricsOptions(configuredMetrics);
 
         Vertx vertx = Vertx.vertx(options);
-        vertx.deployVerticle(launcherVerticle);
+        vertx.deployVerticle(launcherVerticle, deployResult -> {
+            if (deployResult.failed()) {
+                log.error("Verticles deploy failed. Program process terminating...");
+                System.exit(-1);
+            }
+        });
     }
 }
