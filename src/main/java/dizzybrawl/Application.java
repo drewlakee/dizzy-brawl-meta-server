@@ -11,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 public class Application {
 
-    private final Logger log = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final VertxLauncherVerticle launcherVerticle;
     private final MicrometerMetricsOptions configuredMetrics;
@@ -41,7 +42,12 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        try {
+            SpringApplication.run(Application.class, args);
+        } catch (Exception e) {
+            log.error("Spring Application launch failed. Program process terminating...");
+            System.exit(-1);
+        }
     }
 
     @PostConstruct
