@@ -10,6 +10,7 @@
 
 1. [APIv1 Navigation](#apiv1-navigation)
 2. [APIv1 Documentation](#apiv1-documentation)
+4. [Testing](#testing)
 3. [Deployment](#deployment)
 
 ### APIv1 Navigation
@@ -338,6 +339,45 @@ code                | description
 404                 | some server not founded in database and other servers in query also was not deleted
 
 [To API Navigation](#apiv1-navigation)
+
+### Testing
+
+Project has bash-scripts for endpoints stress testing:
+
+- Request Per Second
+
+- Request Duration
+
+Hot to run themes:
+
+1. By your terminal open directory with scripts
+
+```
+cd src/test/resources/bash/stress
+```
+
+2. Run stress test
+```
+./endpoints_stress_test.sh >> output.txt
+```
+
+3. Wait for the process to finish and check
+
+As example, free api testing:
+```
+cat output.txt
+
+-----------Endpoints Stress Tests-----------
+
+curl options                    Results of test
+
+-X GET https://jsonplaceholder.typicode.com/todos/1      MIN: 10 req/s, MAX: 12 req/s, AVG: 10 req/s
+-X GET https://jsonplaceholder.typicode.com/todos/1      MIN: 32 ms/req, MAX: 72 ms/req, AVG: 43 ms/req
+
+-X GET https://jsonplaceholder.typicode.com/posts        MIN: 3 req/s, MAX: 10 req/s, AVG: 6 req/s
+-X GET https://jsonplaceholder.typicode.com/posts        MIN: 37 ms/req, MAX: 1095 ms/req, AVG: 151 ms/req
+
+```
 
 ### Deployment
 
