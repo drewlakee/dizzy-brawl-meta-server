@@ -344,7 +344,7 @@ code                | description
 
 Project has bash-scripts for endpoints stress testing:
 
-- Request Per Second
+- Requests Per Second
 
 - Request Duration
 
