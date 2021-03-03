@@ -10,5 +10,6 @@
 # Input:
 #   $1 - curl options. For example, specific URL
 
-TIME_IN_SECONDS=$(curl -w %{time_total} -s -o /dev/null $1)
+CURL_RESULT=$(curl -w %{time_total} -s -o /dev/null $1)
+TIME_IN_SECONDS=$(echo "${CURL_RESULT/[,]/.}"   )
 echo $(awk "BEGIN {print int ($TIME_IN_SECONDS * 1000) }")
