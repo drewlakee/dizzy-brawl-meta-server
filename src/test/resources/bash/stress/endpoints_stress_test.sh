@@ -1,14 +1,20 @@
 #!/bin/bash
 
-echo "-----------Endpoints Stress Tests-----------"
-echo
-echo -e "curl options\t\t\tResults of test"
+RPS_LABEL="Requests Per Second: "
+RD_LABEL="Requests Duration: "
+
+HOST="localhost"
+PORT="8080"
+API_VERSION="v1"
+
+REGISTRATION_OPTIONS="@registration.json $HOST:$PORT/api/$API_VERSION/accounts/register"
+echo "Testing... $REGISTRATION_OPTIONS"
+echo -e "$RPS_LABEL\t$(./rps_analyze.sh "'$REGISTRATION_OPTIONS'")"
+echo -e "$RD_LABEL\t$(./rd_analyze.sh "'$REGISTRATION_OPTIONS'")"
+
 echo
 
-./rps_analyze.sh '-X GET https://jsonplaceholder.typicode.com/todos/1'
-./rd_analyze.sh '-X GET https://jsonplaceholder.typicode.com/todos/1'
-
-echo
-
-./rps_analyze.sh '-X GET https://jsonplaceholder.typicode.com/posts'
-./rd_analyze.sh '-X GET https://jsonplaceholder.typicode.com/posts'
+LOGIN_OPTIONS="@login.json $HOST:$PORT/api/$API_VERSION/accounts/auth/login"
+echo "Testing... $LOGIN_OPTIONS"
+echo -e "$RPS_LABEL\t$(./rps_analyze.sh "'$LOGIN_OPTIONS'")"
+echo -e "$RD_LABEL\t$(./rd_analyze.sh "'$LOGIN_OPTIONS'")"

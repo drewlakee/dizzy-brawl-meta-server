@@ -39,4 +39,4 @@ done
 
 AVG=$((SUM / MAX_STEPS))
 
-echo -e "$1 \t MIN: $MIN req/s, MAX: $MAX req/s, AVG: $AVG req/s"
+echo -e "MIN: $MIN req/s, MAX: $MAX req/s, AVG: $AVG req/s"

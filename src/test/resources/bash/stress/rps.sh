@@ -15,7 +15,7 @@ let REQUESTS_COUNT=0
 
 while [ $CURR_TIME != $STOP_TIME ]
 do
-  curl -s -o /dev/null $1
+  curl -s -o /dev/null --data $1
   CURR_TIME=$(date +%s)
   REQUESTS_COUNT=$((REQUESTS_COUNT + 1))
 done
