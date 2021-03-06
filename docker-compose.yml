@@ -17,7 +17,7 @@ services:
 
   web-server:
     container_name: web-server
-    image: dizzy-brawl-vertx-backend:v1.0.0
+    image: dizzy-brawl-meta-server:v1.0.0
     build: .
     ports:
       - 8080:8080
