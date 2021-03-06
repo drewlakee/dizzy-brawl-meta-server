@@ -64,3 +64,7 @@ bootJar {
     baseName("dizzy-brawl-meta-server")
     manifest.attributes("Start-Class" : "dizzybrawl.Application")
 }
+
+clean {
+    delete "grafana-data", "postgres-data"
+}

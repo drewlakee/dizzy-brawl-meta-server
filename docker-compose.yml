@@ -65,11 +65,13 @@ services:
     image: grafana/grafana:7.4.0
     container_name: grafana
     restart: unless-stopped
+    user: "472"
     ports:
       - 3000:3000
     links:
       - prometheus
     volumes:
       - ./grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
     depends_on:
       - prometheus
