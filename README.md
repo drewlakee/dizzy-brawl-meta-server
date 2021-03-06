@@ -353,7 +353,7 @@ How to run themes:
 1. By your terminal open directory with scripts
 
 ```
-cd src/test/resources/bash/stress
+cd bash/test/stress
 ```
 
 2. Run stress test
