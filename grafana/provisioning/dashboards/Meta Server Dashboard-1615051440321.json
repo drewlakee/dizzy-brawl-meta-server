@@ -329,6 +329,7 @@
       },
       "hiddenSeries": false,
       "id": 22,
+      "interval": null,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -344,6 +345,7 @@
       },
       "lines": true,
       "linewidth": 1,
+      "maxDataPoints": null,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -682,7 +684,7 @@
       }
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
