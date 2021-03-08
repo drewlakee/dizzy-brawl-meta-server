@@ -348,12 +348,14 @@ Project has bash-scripts for endpoints stress testing:
 
 - Request Duration
 
-How to run themes:
+How to run it:
+
+Prepare your environment before scripts execution.
 
 1. By your terminal open directory with scripts
 
 ```
-cd src/test/resources/bash/stress
+cd bash/test/stress
 ```
 
 2. Run stress test
@@ -362,22 +364,6 @@ cd src/test/resources/bash/stress
 ```
 
 3. Wait for the process to finish and check
-
-As example, free api testing:
-```
-cat output.txt
-
------------Endpoints Stress Tests-----------
-
-curl options                    Results of test
-
--X GET https://jsonplaceholder.typicode.com/todos/1      MIN: 10 req/s, MAX: 12 req/s, AVG: 10 req/s
--X GET https://jsonplaceholder.typicode.com/todos/1      MIN: 32 ms/req, MAX: 72 ms/req, AVG: 43 ms/req
-
--X GET https://jsonplaceholder.typicode.com/posts        MIN: 3 req/s, MAX: 10 req/s, AVG: 6 req/s
--X GET https://jsonplaceholder.typicode.com/posts        MIN: 37 ms/req, MAX: 1095 ms/req, AVG: 151 ms/req
-
-```
 
 ### Deployment
 
