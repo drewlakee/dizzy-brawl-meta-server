@@ -42,7 +42,7 @@ echo -e "$RD_LABEL\t$(./rd_analyze.sh "$GET_TASKS_OPTIONS")"
 
 echo
 
-GET_SERVERS_OPTIONS="$HOST:$PORT/api/$API_VERSION/servers/get/all"
+GET_SERVERS_OPTIONS="-X POST $HOST:$PORT/api/$API_VERSION/servers/get/all"
 echo "Testing... $GET_SERVERS_OPTIONS"
 echo -e "$RPS_LABEL\t$(./rps_analyze.sh "$GET_SERVERS_OPTIONS")"
 echo -e "$RD_LABEL\t$(./rd_analyze.sh "$GET_SERVERS_OPTIONS")"
