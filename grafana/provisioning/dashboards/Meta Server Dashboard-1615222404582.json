@@ -130,7 +130,16 @@
             "mode": "thresholds"
           },
           "custom": {},
-          "mappings": [],
+          "mappings": [
+            {
+              "from": "",
+              "id": 1,
+              "text": "0",
+              "to": "",
+              "type": 1,
+              "value": "null"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -186,7 +195,16 @@
             "mode": "thresholds"
           },
           "custom": {},
-          "mappings": [],
+          "mappings": [
+            {
+              "from": "",
+              "id": 1,
+              "text": "0",
+              "to": "",
+              "type": 1,
+              "value": "null"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -257,12 +275,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "rgb(255, 255, 255)",
-                "value": null
-              },
-              {
                 "color": "red",
-                "value": 1
+                "value": null
               }
             ]
           }
@@ -692,7 +706,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
