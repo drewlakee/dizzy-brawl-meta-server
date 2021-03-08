@@ -18,23 +18,48 @@ let MAX_STEPS=10
 
 for ((i=0; i < MAX_STEPS; i++))
 do
-     RPC_RESULT=$(./rps.sh "$1")
-     SUM=$((SUM + RPC_RESULT))
+    # create tmp file for rps results
+    touch rps_intermediate_analyze_result.txt
 
-     if [[ $RPC_RESULT -gt $MAX ]]
-     then
-     	MAX=$RPC_RESULT
-     fi
+    # 8 cpu count on my machine
+    # parallel calls in one second
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    ./rps.sh "$1" >> rps_intermediate_analyze_result.txt &
+    wait
 
-     if [[ $RPC_RESULT -lt $MIN ]]
-     then
-     	MIN=$RPC_RESULT
-     fi
+    # sum results from every thread
+    while read line; do
+      RPC_RESULT=$((RPC_RESULT + line))
+    done < rps_intermediate_analyze_result.txt
 
-     if  [[ -n "$2" && $2 = "--show-steps" ]]
-     then
-     	echo "STEP $i: $RPC_RESULT"
-     fi
+    # add one rps call with general sum
+    SUM=$((SUM + RPC_RESULT))
+
+    # delete after intermediate rps call
+    rm rps_intermediate_analyze_result.txt
+
+    if [[ $RPC_RESULT -gt $MAX ]]
+    then
+       MAX=$RPC_RESULT
+    fi
+
+    if [[ $RPC_RESULT -lt $MIN ]]
+    then
+       MIN=$RPC_RESULT
+    fi
+
+    if  [[ -n "$2" && $2 = "--show-steps" ]]
+    then
+       echo "STEP $i: $RPC_RESULT"
+    fi
+
+    RPC_RESULT=0
 done
 
 AVG=$((SUM / MAX_STEPS))

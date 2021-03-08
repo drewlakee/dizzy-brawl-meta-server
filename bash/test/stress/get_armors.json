@@ -1,0 +1,14 @@
+{
+  "characters":
+  [
+    {
+        "character_id": 1
+    },
+     {
+        "character_id": 2
+    },
+     {
+        "character_id": 3
+    }
+  ]
+}

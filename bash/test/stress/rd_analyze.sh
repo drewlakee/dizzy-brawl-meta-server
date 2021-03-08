@@ -9,12 +9,12 @@
 #   $1 - curl options. For example, specific URL
 #   $2 - flag for print steps of calculates
 
-let MAX=0
+let MAX=-1
 let MIN=99999999999
 let AVERAGE=0
 let RD_RESULT=0
 let SUM=0
-let MAX_STEPS=30
+let MAX_STEPS=100
 
 for ((i=0; i < MAX_STEPS; i++))
 do
@@ -23,17 +23,17 @@ do
 
      if [[ $RD_RESULT -gt $MAX ]]
      then
-     	MAX=$RD_RESULT
+     	 MAX=$RD_RESULT
      fi
 
      if [[ $RD_RESULT -lt $MIN ]]
      then
-     	MIN=$RD_RESULT
+     	 MIN=$RD_RESULT
      fi
 
      if  [[ -n "$2" && $2 = "--show-steps" ]]
      then
-     	echo "STEP $i: $RD_RESULT"
+     	 echo "STEP $i: $RD_RESULT"
      fi
 done
 
