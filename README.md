@@ -39,7 +39,7 @@
 
 ### POST `/accounts/auth/login`
 
-Authenticate user and get his credentials.
+Authenticates user and gets his credentials.
 
 **JSON Body**
 
@@ -60,7 +60,7 @@ email               | string        | user email
 
 ### POST `/accounts/register`
 
-Register, authenticate user and get his credentials back.
+Stores, authenticates user and gets his credentials.
 
 **JSON Body**
 
@@ -82,7 +82,7 @@ account_id        | long          | unique identifier
 
 ### POST `/characters/get/all`
 
-Get all characters on user's account.
+Gets all characters on user's account.
 
 **JSON Body Query**
 
@@ -96,7 +96,7 @@ name                | data type                    | description
 ------------        |-------------                 |-------------
 characters          | json array of characters     | user's characters array
 
-single "character" json object
+Single "character" json object
 
 name                | data type     |description
 ------------        |-------------  |-------------
@@ -109,7 +109,7 @@ is_enabled          | boolean       | available for user in game or not
 
 ### POST `/characters/armors/get/all`
 
-Get all armors for concrete characters of user on user's account.
+Gets all armors for user's specified characters.
 
 **JSON Body Query**
 
@@ -117,7 +117,7 @@ name                |data type               | description
 ------------        | -------------          | -------------
 characters         | json array       |  characters whose armors you want to request
 
-single json object at array
+Single json object at array
 
 name                |data type               | description
 ------------        | -------------          | -------------
@@ -129,7 +129,7 @@ name                | data type                                 |description
 ------------        |-------------                              |-------------
 armors          | json array of armors                        | character's armors
 
-single "armor" json object
+Single "armor" json object
 
 name                | data type         |description
 ------------        |-------------      |-------------
@@ -143,7 +143,7 @@ is_enabled             |  boolean  |    available for user's character in game o
 
 ### POST `/characters/weapons/get/all`
 
-Get all weapons for concrete characters of user on user's account.
+Gets all weapons for user's characters.
 
 **JSON Body Query**
 
@@ -151,7 +151,7 @@ name                |data type               | description
 ------------        | -------------          | -------------
 characters         | json array       |  characters whose weapons you want to request
 
-single json object at array
+Single json object at array
 
 name                |data type               | description
 ------------        | -------------          | -------------
@@ -163,7 +163,7 @@ name                | data type                                 |description
 ------------        |-------------                              |-------------
 weapons          | json array of weapons                        | character's weapons
 
-single "weapon" json object
+Single "weapon" json object
 
 name                | data type         |description
 ------------        |-------------      |-------------
@@ -179,7 +179,7 @@ is_enabled             |  boolean  |    available for user's character in game o
 
 ### POST `/tasks/get/all`
 
-Get all current tasks on account.
+Gets all current active user's tasks.
 
 **JSON Body Query**
 
@@ -189,16 +189,16 @@ account_id        | long        |  unique identifier to request
 
 **JSON Body Response**
 
-if at request moment task spend time after generation MORE than "active_interval" parameter 
+If at request moment task already has spent time after generation MORE than "active_interval" parameter 
 task instantly deletes from database
 
-if no active task at user's account, response will be empty JSON Array
+If no active tasks at user's account, response will be empty json Array
 
 name                | data type                 | description
 ------------        |-------------              |-------------
 tasks               | json array of tasks            | active Tasks on user's account
 
-single "task" json object
+Single "task" json object
 
 name                | data type     | description
 ------------        |-------------  |-------------
@@ -212,7 +212,7 @@ active_interval     | int           | time of active status interval in **minute
 
 ### POST `/tasks/add`
 
-Add tasks to account.
+Adds tasks to users.
 
 **JSON Body Query**
 
@@ -232,14 +232,13 @@ active_interval     |   int         |  time interval in that task will be active
 
 **JSON Body Response**
 
-response has same sequenced as request JSON, so uuids in same place
-as added tasks before
+Response has same order as a request json structure, so uuids will be in same order
 
 name                | data type                 | description
 ------------        |-------------              |-------------
 tasks               | json array of strings          | array contains generated tasks uuids
 
-single json object
+Single json object
 
 name                    | data type                 | description
 ------------            |-------------              |-------------
@@ -249,7 +248,7 @@ task_uuid               | uuid                      | unique identifier
 
 ### PUT `/tasks/update/progress`
 
-Update task progress of current state.
+Updates tasks progress.
 
 **JSON Body Query**
 
@@ -257,7 +256,7 @@ name                | data type             | description
 ------------        | -------------         | -------------
 tasks               |   json array of tasks      |  array of tasks that must be updated
 
-single "task" json object
+Single "task" json object
 
 name                | data type     | description
 ------------        | ------------- | -------------
@@ -296,7 +295,7 @@ name                | data type             | description
 ------------        | -------------         | -------------
 servers               |   array of servers      |  array of servers that must be added
 
-single "server" json object
+Single "server" json object
 
 name                | data type             | description
 ------------        | -------------         | -------------
@@ -309,7 +308,7 @@ name                | data type     | description
 ------------        |-------------  |-------------
 servers               | array of strings        | unique servers identifier in database
 
-single json object
+Single json object
 
 name                | data type     | description
 ------------        |-------------  |-------------
@@ -344,26 +343,26 @@ code                | description
 
 Project has bash-scripts for endpoints stress testing:
 
-- Requests Per Second
+- Requests Per Second;
 
-- Request Duration
+- Request Duration.
 
-How to run it:
+How to execute it:
 
-Prepare your environment before scripts execution.
+Prepare your environment before execution.
 
-1. By your terminal open directory with scripts
+1. Open directory with scripts by your terminal (or smth)
 
 ```
 cd bash/test/stress
 ```
 
-2. Run stress test
+2. Execute entry script with output stream
 ```
 ./endpoints_stress_test.sh >> output.txt
 ```
 
-3. Wait for the process to finish and check
+3. After execution will be finished open the file
 
 ### Deployment
 
